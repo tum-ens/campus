@@ -1,11 +1,3 @@
-import os
-import pyomo.environ
-import shutil
-import numpy as np
-import urbs
-from datetime import datetime
-from pyomo.opt.base import SolverFactory
-
 # SCENARIO GENERATORS
 # In this script a variety of scenario generator functions are defined to
 # facilitate scenario definitions.
