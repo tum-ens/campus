@@ -56,7 +56,7 @@ def sort_plot_elements(elements):
     return elements_sorted
 
 
-def plot(prob, com, sit, timesteps=None,
+def plot(prob, stf, com, sit, timesteps=None,
          power_name='Power', energy_name='Energy',
          power_unit='MW', energy_unit='MWh', time_unit='h',
          figure_size=(16, 12)):
@@ -93,7 +93,7 @@ def plot(prob, com, sit, timesteps=None,
         sit = [sit]
 
     (created, consumed, stored, imported, exported,
-     dsm) = get_timeseries(prob, com, sit, timesteps)
+     dsm) = get_timeseries(prob, stf, com, sit, timesteps)
 
     costs, cpro, ctra, csto = get_constants(prob)
 
@@ -326,7 +326,7 @@ def result_figures(prob, figure_basename, plot_title_prefix=None,
         extensions = ['png', 'pdf']
 
     # create timeseries plot for each demand (site, commodity) timeseries
-    for sit, com in plot_tuples:
+    for stf, sit, com in plot_tuples:
         # wrap single site name in 1-element list for consistent behaviour
         if is_string(sit):
             help_sit = [sit]
@@ -341,7 +341,7 @@ def result_figures(prob, figure_basename, plot_title_prefix=None,
 
         for period, timesteps in periods.items():
             # do the plotting
-            fig = plot(prob, com, help_sit, timesteps=timesteps, **kwds)
+            fig = plot(prob, stf, com, help_sit, timesteps=timesteps, **kwds)
 
             # change the figure title
             ax0 = fig.get_axes()[0]
@@ -349,14 +349,14 @@ def result_figures(prob, figure_basename, plot_title_prefix=None,
             if not plot_title_prefix:
                 plot_title_prefix = os.path.basename(figure_basename)
 
-            new_figure_title = '{}: {} in {}'.format(
-                plot_title_prefix, com, plot_sites_name[sit])
+            new_figure_title = '{}: {} in {}, {}'.format(
+                plot_title_prefix, com, plot_sites_name[sit], stf)
             ax0.set_title(new_figure_title)
 
             # save plot to files
             for ext in extensions:
-                fig_filename = '{}-{}-{}-{}.{}'.format(
-                    figure_basename, com, ''.join(
+                fig_filename = '{}-{}-{}-{}-{}.{}'.format(
+                    figure_basename, stf, com, ''.join(
                         plot_sites_name[sit]), period, ext)
                 fig.savefig(fig_filename, bbox_inches='tight')
             plt.close(fig)
