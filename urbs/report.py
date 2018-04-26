@@ -55,7 +55,7 @@ def report(instance, filename, report_tuples=None, report_sites_name=None):
 
             for lv in help_sit:
                 (created, consumed, stored, imported, exported,
-                dsm) = get_timeseries(instance, stf, com, sit)
+                dsm) = get_timeseries(instance, stf, com, lv)
 
                 overprod = pd.DataFrame(
                     columns=['Overproduction'],
@@ -70,6 +70,25 @@ def report(instance, filename, report_tuples=None, report_sites_name=None):
                     keys=['Created', 'Consumed', 'Storage', 'Import from',
                         'Export to', 'Balance', 'DSM'])
                 help_ts[(stf, lv, com)] = tableau.copy()
+
+                # timeseries sums
+                help_sums = pd.concat([created.sum(), consumed.sum(),
+                                       stored.sum().drop('Level'),
+                                       imported.sum(), exported.sum(),
+                                       overprod.sum(), dsm.sum()],
+                                      axis=0,
+                                      keys=['Created', 'Consumed', 'Storage',
+                                            'Import', 'Export', 'Balance',
+                                            'DSM'])
+                try:
+                    timeseries[(stf, report_sites_name[sit], com)] = timeseries[
+                            (stf, report_sites_name[sit], com)].add(
+                            help_ts[(stf, lv, com)], axis=1, fill_value=0)
+                    sums = sums.add(help_sums, fill_value=0)
+                except:
+                    timeseries[(stf, report_sites_name[sit], com)] = help_ts[
+                        (stf, lv, com)]
+                    sums = help_sums
 
             # timeseries sums
             sums = pd.concat([created.sum(), consumed.sum(),
@@ -88,7 +107,7 @@ def report(instance, filename, report_tuples=None, report_sites_name=None):
             energy.to_excel(writer, 'Commodity sums')
 
             # write timeseries to individual sheets
-            for sit, com in report_tuples:
+            for stf, sit, com in report_tuples:
                 if isinstance(sit, list):
                     sit = tuple(sit)
                 # sheet names cannot be longer than 31 characters...

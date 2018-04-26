@@ -20,7 +20,7 @@ if __name__ == '__main__':
     Solver = 'gurobi'
 
     # simulation timesteps
-    (offset, length) = (0, 8759)  # time step selection
+    (offset, length) = (3000, 168)  # time step selection
     timesteps = range(offset, offset+length+1)
 
     # plotting commodities/sites
@@ -28,21 +28,27 @@ if __name__ == '__main__':
         (2015, 'Campus', 'Elec'),
         (2015, 'Campus', 'Heat'),
         (2015, 'Campus', 'Cold'),
+        (2015, 'Campus', 'Heat low'),
         (2020, 'Campus', 'Elec'),
         (2020, 'Campus', 'Heat'),
         (2020, 'Campus', 'Cold'),
+        (2020, 'Campus', 'Heat low'),
         (2025, 'Campus', 'Elec'),
         (2025, 'Campus', 'Heat'),
         (2025, 'Campus', 'Cold'),
+        (2025, 'Campus', 'Heat low'),
         (2030, 'Campus', 'Elec'),
         (2030, 'Campus', 'Heat'),
         (2030, 'Campus', 'Cold'),
+        (2030, 'Campus', 'Heat low'),
         (2035, 'Campus', 'Elec'),
         (2035, 'Campus', 'Heat'),
         (2035, 'Campus', 'Cold'),
+        (2035, 'Campus', 'Heat low'),
         (2040, 'Campus', 'Elec'),
         (2040, 'Campus', 'Heat'),
-        (2040, 'Campus', 'Cold')
+        (2040, 'Campus', 'Cold'),
+        (2040, 'Campus', 'Heat low')
         ]
 
     # optional: define names for sites in plot_tuples
@@ -53,26 +59,33 @@ if __name__ == '__main__':
         (2015, 'Campus', 'Elec'),
         (2015, 'Campus', 'Heat'),
         (2015, 'Campus', 'Cold'),
+        (2015, 'Campus', 'Heat low'),
+        (2015, 'Campus', 'CO2'),
         (2020, 'Campus', 'Elec'),
         (2020, 'Campus', 'Heat'),
         (2020, 'Campus', 'Cold'),
         (2020, 'Campus', 'CO2'),
+        (2020, 'Campus', 'Heat low'),
         (2025, 'Campus', 'Elec'),
         (2025, 'Campus', 'Heat'),
         (2025, 'Campus', 'Cold'),
+        (2025, 'Campus', 'Heat low'),
         (2025, 'Campus', 'CO2'),
         (2030, 'Campus', 'Elec'),
         (2030, 'Campus', 'Heat'),
         (2030, 'Campus', 'Cold'),
+        (2030, 'Campus', 'Heat low'),
         (2030, 'Campus', 'CO2'),
         (2035, 'Campus', 'Elec'),
         (2035, 'Campus', 'Heat'),
         (2035, 'Campus', 'Cold'),
+        (2035, 'Campus', 'Heat low'),
         (2035, 'Campus', 'CO2'),
         (2040, 'Campus', 'Elec'),
         (2040, 'Campus', 'Heat'),
         (2040, 'Campus', 'Cold'),
-        (2040, 'Campus', 'Cold'),
+        (2040, 'Campus', 'Heat low'),
+        (2040, 'Campus', 'CO2'),
         ]
 
     # optional: define names for sites in report_tuples
@@ -80,10 +93,10 @@ if __name__ == '__main__':
 
     # plotting timesteps
     plot_periods = {
-        'spr': range(1000, 1000+24*7),
-        'sum': range(3000, 3000+24*7),
-        'aut': range(5000, 5000+24*7),
-        'win': range(7000, 7000+24*7)
+        # 'win': range(1000, 1000+24*7),
+        'spr': range(3000, 3000+24*7),
+        # 'sum': range(5000, 5000+24*7),
+        # 'win': range(7000, 7000+24*7)
     }
 
     # add or change plot colors

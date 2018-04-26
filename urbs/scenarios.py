@@ -12,11 +12,11 @@ def scenario_base(data):
 
 # Global quantities
 
-def sc_CO2limit(value):
+def sc_CO2limit(stf, value):
     # Used to set global CO2 limit
 
     def scenario(data):
-        data['global_prop'].loc['CO2 limit', 'value'] = value
+        data['global_prop'].loc[(stf, 'CO2 limit'), 'value'] = value
         return data
 
     scenario.__name__ = 'scenario_CO2-limit-' + '{:04}'.format(value)
@@ -38,77 +38,77 @@ def sc_wacc(value):
 
 # Commodity
 
-def sc_1comprop(site, com, type, property, value):
+def sc_1comprop(stf, site, com, type, property, value):
     # variation of 1 property of 1 given commodity
 
     def scenario(data):
-        data['commodity'].loc[(site, com, type), property] = value
+        data['commodity'].loc[(stf, site, com, type), property] = value
         return data
 
-    scenario.__name__ = ('scenario_' + site + com + property +
+    scenario.__name__ = ('scenario_' + str(stf) + site + com + property +
                          '{:04}'.format(value)
                          )
     return scenario
 
 
-def sc_2comprop(site1, site2, com1, com2, type1, type2, property1, property2,
-                value1, value2):
+def sc_2comprop(stf1, stf2, site1, site2, com1, com2, type1, type2, property1,
+                property2, value1, value2):
     # variation of 2 properties of 2 given process
 
     def scenario(data):
-        data['commodity'].loc[(site1, com1, type1), property1] = value1
-        data['commodity'].loc[(site2, com2, type2), property2] = value2
+        data['commodity'].loc[(stf1, site1, com1, type1), property1] = value1
+        data['commodity'].loc[(stf2, site2, com2, type2), property2] = value2
         return data
 
-    scenario.__name__ = ('scenario_' + site1 + com1 + property1 +
-                         '{:04}'.format(value1) + site2 + com2 + property2 +
-                         '{:04}'.format(value2)
+    scenario.__name__ = ('scenario_' + str(stf1) + str(stf2) + site1 + com1 +
+                         property1 + '{:04}'.format(value1) + site2 + com2 +
+                         property2 + '{:04}'.format(value2)
                          )
     return scenario
 
 
 # Process
 
-def sc_1proprop(site, process, property, value):
+def sc_1proprop(stf, site, process, property, value):
     # variation of 1 property of 1 given process
 
     def scenario(data):
-        data['process'].loc[(site, process), property] = value
+        data['process'].loc[(stf, site, process), property] = value
         return data
 
-    scenario.__name__ = ('scenario_' + site + process + property +
+    scenario.__name__ = ('scenario_' + str(stf) + site + process + property +
                          '{:04}'.format(value)
                          )
     return scenario
 
 
-def sc_2proprop(site1, site2, process1, process2, property1, property2,
-                value1, value2):
+def sc_2proprop(stf1, stf2, site1, site2, process1, process2, property1,
+                property2, value1, value2):
     # variation of 2 properties of 2 given process
 
     def scenario(data):
-        data['process'].loc[(site1, process1), property1] = value1
-        data['process'].loc[(site2, process2), property2] = value2
+        data['process'].loc[(stf1, site1, process1), property1] = value1
+        data['process'].loc[(stf2, site2, process2), property2] = value2
         return data
 
-    scenario.__name__ = ('scenario_' + site1 + process1 + property1 +
-                         '{:04}'.format(value1) + site2 + process2 +
-                         property2 + '{:04}'.format(value2)
+    scenario.__name__ = ('scenario_' + str(stf1) + site1 + process1 +
+                         property1 + '{:04}'.format(value1) + str(stf2) +
+                         site2 + process2 + property2 + '{:04}'.format(value2)
                          )
     return scenario
 
 
 # Process commodities
 
-def sc_1procomprop(process, com, dir, property, value):
+def sc_1procomprop(stf, process, com, dir, property, value):
     # variation of 1 property of 1 given process-commodity
 
     def scenario(data):
-        data['process-commodity'].loc[(process, com, dir), property] = value
+        data['process-commodity'].loc[(stf, process, com, dir), property] = value
         return data
 
-    scenario.__name__ = ('scenario_' + process + com + dir + property +
-                         '{:04}'.format(value)
+    scenario.__name__ = ('scenario_' + str(stf) + process + com + dir +
+                         property + '{:04}'.format(value)
                          )
     return scenario
 
