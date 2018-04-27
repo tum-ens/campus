@@ -1253,25 +1253,41 @@ def def_costs_rule(m, cost_type):
 
     elif cost_type == 'Revenue':
         sell_tuples = commodity_subset(m.com_tuples, m.com_sell)
-
-        return m.costs[cost_type] == -sum(
-            m.e_co_sell[(tm,) + c] *
-            m.buy_sell_price_dict[c[2]][(c[0], tm)] * m.weight * m.dt *
-            m.commodity_dict['price'][c] *
-            m.commodity_dict['cost_factor'][c]
-            for tm in m.tm
-            for c in sell_tuples)
+        try:
+            return m.costs[cost_type] == -sum(
+                m.e_co_sell[(tm,) + c] *
+                m.buy_sell_price_dict[c[2]][(c[0], tm)] * m.weight * m.dt *
+                m.commodity_dict['price'][c] *
+                m.commodity_dict['cost_factor'][c]
+                for tm in m.tm
+                for c in sell_tuples)
+        except KeyError:
+            return m.costs[cost_type] == -sum(
+                m.e_co_sell[(tm,) + c] *
+                m.buy_sell_price_dict[c[2], ][(c[0], tm)] * m.weight * m.dt *
+                m.commodity_dict['price'][c] *
+                m.commodity_dict['cost_factor'][c]
+                for tm in m.tm
+                for c in sell_tuples)
 
     elif cost_type == 'Purchase':
         buy_tuples = commodity_subset(m.com_tuples, m.com_buy)
-
-        return m.costs[cost_type] == sum(
-            m.e_co_buy[(tm,) + c] *
-            m.buy_sell_price_dict[c[2]][(c[0], tm)] * m.weight * m.dt *
-            m.commodity_dict['price'][c] *
-            m.commodity_dict['cost_factor'][c]
-            for tm in m.tm
-            for c in buy_tuples)
+        try:
+            return m.costs[cost_type] == sum(
+                m.e_co_buy[(tm,) + c] *
+                m.buy_sell_price_dict[c[2]][(c[0], tm)] * m.weight * m.dt *
+                m.commodity_dict['price'][c] *
+                m.commodity_dict['cost_factor'][c]
+                for tm in m.tm
+                for c in buy_tuples)
+        except KeyError:
+            return m.costs[cost_type] == sum(
+                m.e_co_buy[(tm,) + c] *
+                m.buy_sell_price_dict[c[2], ][(c[0], tm)] * m.weight * m.dt *
+                m.commodity_dict['price'][c] *
+                m.commodity_dict['cost_factor'][c]
+                for tm in m.tm
+                for c in buy_tuples)
 
     elif cost_type == 'Environmental':
         return m.costs[cost_type] == sum(
