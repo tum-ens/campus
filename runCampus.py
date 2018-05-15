@@ -14,13 +14,13 @@ if __name__ == '__main__':
     # copy input file to result directory
     # shutil.copyfile(input_file, os.path.join(result_dir, input_file))
     # copy runme.py to result directory
-    shutil.copyfile(__file__, os.path.join(result_dir, __file__))
+    # shutil.copyfile(__file__, os.path.join(result_dir, __file__))
 
     # Choose Solver (cplex, glpk, gurobi, ...)
     Solver = 'gurobi'
 
     # simulation timesteps
-    (offset, length) = (3000, 168)  # time step selection
+    (offset, length) = (0, 8759)  # time step selection
     timesteps = range(offset, offset+length+1)
 
     # plotting commodities/sites
@@ -93,9 +93,9 @@ if __name__ == '__main__':
 
     # plotting timesteps
     plot_periods = {
-        # 'win': range(1000, 1000+24*7),
-        'spr': range(3000, 3000+24*7),
-        # 'sum': range(5000, 5000+24*7),
+        'win': range(1000, 1000+24*7),
+        # 'spr': range(3000, 3000+24*7),
+        'sum': range(5000, 5000+24*7),
         # 'win': range(7000, 7000+24*7)
     }
 
