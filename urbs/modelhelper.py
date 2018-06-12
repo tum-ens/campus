@@ -91,8 +91,9 @@ def commodity_balance(m, tm, stf, sit, com):
 
     For a given commodity co and timestep tm, calculate the balance of
     consumed (to process/storage/transmission, counts positive) and provided
-    (from process/storage/transmission, counts negative) power. Used as helper
-    function in create_model for constraints on demand and stock commodities.
+    (from process/storage/transmission, counts negative) commodity flow. Used
+    as helper function in create_model for constraints on demand and stock
+    commodities.
 
     Args:
         m: the model object
@@ -342,8 +343,12 @@ def dsm_down_time_tuples(time, sit_com_tuple, m):
 
     for (stf, site, commodity) in sit_com_tuple:
         for step1 in time:
-            for step2 in range(step1 - delay[stf, site, commodity],
-                               step1 + delay[stf, site, commodity] + 1):
+            for step2 in range(step1
+                               - max(int(delay[stf, site, commodity]
+                                     / m.dt.value), 1),
+                               step1
+                               + max(int(delay[stf, site, commodity]
+                                     / m.dt.value), 1) + 1):
                 if lb <= step2 <= ub:
                     time_list.append((step1, step2, stf, site, commodity))
 

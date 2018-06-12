@@ -20,8 +20,9 @@ if __name__ == '__main__':
     Solver = 'gurobi'
 
     # simulation timesteps
-    (offset, length) = (0, 8759)  # time step selection
+    (offset, length) = (1000, 168)  # time step selection
     timesteps = range(offset, offset+length+1)
+    dt=1
 
     # plotting commodities/sites
     plot_tuples = [
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     plot_periods = {
         'win': range(1000, 1000+24*7),
         # 'spr': range(3000, 3000+24*7),
-        'sum': range(5000, 5000+24*7),
+        # 'sum': range(5000, 5000+24*7),
         # 'win': range(7000, 7000+24*7)
     }
 
@@ -116,7 +117,7 @@ if __name__ == '__main__':
 
     for scenario in scenarios:
         prob = urbs.run_scenario(input_files, Solver, timesteps, scenario,
-                            result_dir,
+                            result_dir, dt,
                             plot_tuples=plot_tuples,
                             plot_sites_name=plot_sites_name,
                             plot_periods=plot_periods,
