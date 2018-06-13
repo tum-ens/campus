@@ -68,7 +68,7 @@ def run_scenario(input_files, Solver, timesteps, scenario, result_dir, dt,
 
     # create model
     prob = create_model(data, dt, timesteps)
-    # prob.write('model.lp', io_options={'symbolic_solver_labels':True})
+    #prob.write('model.lp', io_options={'symbolic_solver_labels':True})
 
     # refresh time stamp string and create filename for logfile
     now = prob.created
@@ -80,7 +80,7 @@ def run_scenario(input_files, Solver, timesteps, scenario, result_dir, dt,
     result = optim.solve(prob, tee=True)
 
     # save problem solution (and input data) to HDF5 file
-    # urbs.save(prob, os.path.join(result_dir, '{}.h5'.format(sce)))
+    #urbs.save(prob, os.path.join(result_dir, '{}.h5'.format(sce)))
 
     # write report to spreadsheet
     report(
@@ -93,6 +93,7 @@ def run_scenario(input_files, Solver, timesteps, scenario, result_dir, dt,
     result_figures(
         prob,
         os.path.join(result_dir, '{}'.format(sce)),
+        timesteps,
         plot_title_prefix=sce.replace('_', ' '),
         plot_tuples=plot_tuples,
         plot_sites_name=plot_sites_name,
