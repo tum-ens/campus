@@ -47,9 +47,13 @@ def read_excel(input_files):
     sup = []
     bsp = []
     ds = []
+    ef = []
 
     for filename in input_files:
         with pd.ExcelFile(filename) as xls:
+
+            sheetnames = xls.sheet_names
+
             global_prop = xls.parse('Global').set_index(['Property'])
             support_timeframe = global_prop.loc['Support timeframe']['value']
             global_prop = (
@@ -110,6 +114,15 @@ def read_excel(input_files):
             dsm = pd.concat([dsm], keys=[support_timeframe],
                             names=['support_timeframe'])
             ds.append(dsm)
+            if 'Efficiency-factor-timeseries' in sheetnames:
+                eff_factor = (xls.parse('Efficiency-factor-timeseries')
+                                .set_index(['t']))
+
+                eff_factor.columns = split_columns(eff_factor.columns, '.')
+                eff_factor = pd.concat([eff_factor], axis=1,
+                                       keys=[support_timeframe],
+                                       names=['support_timeframe'])
+                ef.append(eff_factor)
 
         # prepare input data
         # split columns by dots '.', so that 'DE.Elec' becomes the two-level
@@ -129,7 +142,8 @@ def read_excel(input_files):
         'demand': pd.concat(dem),
         'supim': pd.concat(sup),
         'buy_sell_price': pd.concat(bsp),
-        'dsm': pd.concat(ds)
+        'dsm': pd.concat(ds),
+        'eff_factor': pd.concat(ef)
         }
 
     # sort nested indexes to make direct assignments work
@@ -162,6 +176,7 @@ def pyomo_model_prep(data, timesteps):
     m.buy_sell_price = data['buy_sell_price']
     m.timesteps = timesteps
     m.dsm = data['dsm']
+    m.eff_factor = data['eff_factor']
 
     # Create columns of support timeframe values
     m.commodity['support_timeframe'] = (m.commodity.index.
@@ -179,6 +194,7 @@ def pyomo_model_prep(data, timesteps):
     m.supim_dict = m.supim.to_dict()
     m.dsm_dict = m.dsm.to_dict()
     m.buy_sell_price_dict = m.buy_sell_price.to_dict()
+    m.eff_factor_dict = m.eff_factor.to_dict()
 
     # process input/output ratios
     m.r_in = m.process_commodity.xs('In', level='Direction')['ratio']
