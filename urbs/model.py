@@ -1119,7 +1119,7 @@ def def_storage_power_rule(m, stf, sit, sto, com):
                 for stf_built in m.stf
                 if (sit, sto, com, stf_built, stf) in
                     m.operational_sto_tuples) +
-                    m.storage_dict['inst-cap-p'][(stf, sit, sto, com)])
+                    m.storage_dict['inst-cap-p'][(min(m.stf), sit, sto, com)])
     else:
         return (m.cap_sto_p[stf, sit, sto, com] ==
                 sum(m.cap_sto_p_new[stf_built, sit, sto, com]
@@ -1135,7 +1135,7 @@ def def_storage_capacity_rule(m, stf, sit, sto, com):
                 for stf_built in m.stf
                 if (sit, sto, com, stf_built, stf) in
                     m.operational_sto_tuples) +
-                    m.storage_dict['inst-cap-c'][(stf, sit, sto, com)])
+                    m.storage_dict['inst-cap-c'][(min(m.stf), sit, sto, com)])
     else:
         return (m.cap_sto_c[stf, sit, sto, com] ==
                 sum(m.cap_sto_c_new[stf_built, sit, sto, com]
