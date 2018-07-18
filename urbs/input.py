@@ -114,8 +114,8 @@ def read_excel(input_files):
             dsm = pd.concat([dsm], keys=[support_timeframe],
                             names=['support_timeframe'])
             ds.append(dsm)
-            if 'Efficiency-factor-timeseries' in sheetnames:
-                eff_factor = (xls.parse('Efficiency-factor-timeseries')
+            if 'TimeVarEff' in sheetnames:
+                eff_factor = (xls.parse('TimeVarEff')
                                 .set_index(['t']))
 
                 eff_factor.columns = split_columns(eff_factor.columns, '.')
