@@ -114,8 +114,8 @@ def read_excel(input_files):
             dsm = pd.concat([dsm], keys=[support_timeframe],
                             names=['support_timeframe'])
             ds.append(dsm)
-            if 'Efficiency-factor-timeseries' in sheetnames:
-                eff_factor = (xls.parse('Efficiency-factor-timeseries')
+            if 'TimeVarEff' in sheetnames:
+                eff_factor = (xls.parse('TimeVarEff')
                                 .set_index(['t']))
 
                 eff_factor.columns = split_columns(eff_factor.columns, '.')
@@ -231,6 +231,10 @@ def pyomo_model_prep(data, timesteps):
     m.r_out_min_fraction = m.process_commodity.xs('Out', level='Direction')
     m.r_out_min_fraction = m.r_out_min_fraction['ratio-min']
     m.r_out_min_fraction = m.r_out_min_fraction[m.r_out_min_fraction > 0]
+    
+    # storges with fixed initial state
+    m.stor_init_bound = m.storage['init']
+    m.stor_init_bound = m.stor_init_bound[m.stor_init_bound >= 0]
 
     # derive invest factor from WACC, depreciation and discount untility
     m.process['invcost-factor'] = invcost_factor(
