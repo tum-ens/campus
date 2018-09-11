@@ -180,29 +180,6 @@ def create_model(data, dt=1, timesteps=None, dual=False):
             '(and the relevant years following), if built in stf'
             'in stf.')
 
-    # tuples for residual value of technologies
-    m.rv_pro_tuples = pyomo.Set(
-        within=m.sit*m.pro*m.stf,
-        initialize=[(sit, pro, stf)
-                    for (sit, pro, stf)
-                    in rest_val_pro_tuples(m.pro_tuples, m)],
-        doc='Processes built in stf that are operational through the last'
-            'modeled stf')
-    m.rv_tra_tuples = pyomo.Set(
-        within=m.sit*m.sit*m.tra*m.com*m.stf,
-        initialize=[(sit, sit_, tra, com, stf)
-                    for (sit, sit_, tra, com, stf)
-                    in rest_val_tra_tuples(m.tra_tuples, m)],
-        doc='Transmissions built in stf that are operational through the last'
-            'modeled stf')
-    m.rv_sto_tuples = pyomo.Set(
-        within=m.sit*m.sto*m.com*m.stf,
-        initialize=[(sit, sto, com, stf)
-                    for (sit, sto, com, stf)
-                    in rest_val_sto_tuples(m.sto_tuples, m)],
-        doc='Storages built in stf that are operational through the last'
-            'modeled stf')
-
     # tuples for rest lifetime of installed capacities of technologies
     m.inst_pro_tuples = pyomo.Set(
         within=m.sit*m.pro*m.stf,

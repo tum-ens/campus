@@ -108,21 +108,26 @@ def commodity_balance(m, tm, stf, sit, com):
     balance = (sum(m.e_pro_in[(tm, stframe, site, process, com)]
                    # usage as input for process increases balance
                    for stframe, site, process in m.pro_tuples
-                   if site == sit and stframe == stf and (stframe, process, com) in m.r_in_dict)
+                   if site == sit and stframe == stf and
+                   (stframe, process, com) in m.r_in_dict)
                - sum(m.e_pro_out[(tm, stframe, site, process, com)]
                      # output from processes decreases balance
                      for stframe, site, process in m.pro_tuples
-                     if site == sit and stframe == stf and (stframe, process, com) in m.r_out_dict)
-               + sum(m.e_tra_in[(tm, stframe, site_in, site_out, transmission, com)]
+                     if site == sit and stframe == stf and
+                     (stframe, process, com) in m.r_out_dict)
+               + sum(m.e_tra_in[(tm, stframe, site_in, site_out, transmission,
+                                com)]
                      # exports increase balance
                      for stframe, site_in, site_out, transmission, commodity
                      in m.tra_tuples
                      if site_in == sit and stframe == stf and commodity == com)
-               - sum(m.e_tra_out[(tm, stframe, site_in, site_out, transmission, com)]
+               - sum(m.e_tra_out[(tm, stframe, site_in, site_out, transmission,
+                                 com)]
                      # imports decrease balance
                      for stframe, site_in, site_out, transmission, commodity
                      in m.tra_tuples
-                     if site_out == sit and stframe == stf and commodity == com)
+                     if site_out == sit and stframe == stf and
+                     commodity == com)
                + sum(m.e_sto_in[(tm, stframe, site, storage, com)] -
                      m.e_sto_out[(tm, stframe, site, storage, com)]
                      # usage as input for storage increases consumption
@@ -206,48 +211,6 @@ def op_sto_tuples(sto_tuple, m):
                 pass
 
     return op_sto
-
-
-def rest_val_pro_tuples(pro_tuple, m):
-    """ Tuples for rest value determination of units.
-
-        The last entry represents the remaining life time after the end of the
-        modeled time frame.
-    """
-    rv_pro = []
-
-    for (stf, sit, pro) in pro_tuple:
-        if stf + m.process.loc[(stf, sit, pro), 'depreciation'] > max(m.stf):
-            rv_pro.append((sit, pro, stf))
-
-    return rv_pro
-
-
-def rest_val_tra_tuples(tra_tuple, m):
-    """ s.a. rest_val_pro_tuples
-    """
-    rv_tra = []
-
-    for (stf, sit1, sit2, tra, com) in tra_tuple:
-        if (stf +
-            m.transmission.loc[(stf, sit1, sit2, tra, com), 'depreciation'] >
-            max(m.stf)):
-            rv_tra.append((sit1, sit2, tra, com, stf))
-
-    return rv_tra
-
-
-def rest_val_sto_tuples(sto_tuple, m):
-    """ s.a. rest_val_pro_tuples
-    """
-    rv_sto = []
-
-    for (stf, sit, sto, com) in sto_tuple:
-        if (stf + m.storage.loc[(stf, sit, sto, com), 'depreciation'] >
-            max(m.stf)):
-            rv_sto.append((sit, sto, com, stf))
-
-    return rv_sto
 
 
 def inst_pro_tuples(m):
