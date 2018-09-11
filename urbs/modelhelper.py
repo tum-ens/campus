@@ -23,11 +23,11 @@ def invcost_factor(m, n, i, year_built):
                 (j * (1+j) ** n * ((1+i) ** n - 1)))
 
 
-def rv_factor(m, n, i, year_built):
-    """Rest value factor formula.
+def overpay_factor(m, n, i, year_built):
+    """Overpay value factor formula.
 
     Evaluates the factor multiplied to the invest costs
-    for the rest value of a unit after the end of the
+    for all annuity payments of a unit after the end of the
     optimization period.
 
     Args:

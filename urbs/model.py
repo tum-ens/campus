@@ -1249,18 +1249,18 @@ def def_costs_rule(m, cost_type):
                 m.storage_dict['invcost-factor'][s]
                 for s in m.sto_tuples) - \
             sum(m.process_dict['inv-cost'][p] *
-                m.process_dict['rv-factor'][p]
+                m.process_dict['overpay-factor'][p]
                 for p in m.pro_tuples) + \
             sum(m.cap_tra_new[t] *
                 m.transmission_dict['inv-cost'][t] *
-                m.transmission_dict['rv-factor'][t]
+                m.transmission_dict['overpay-factor'][t]
                 for t in m.tra_tuples) + \
             sum(m.cap_sto_p_new[s] *
                 m.storage_dict['inv-cost-p'][s] *
-                m.storage_dict['rv-factor'][s] +
+                m.storage_dict['overpay-factor'][s] +
                 m.cap_sto_c_new[s] *
                 m.storage_dict['inv-cost-c'][s] *
-                m.storage_dict['rv-factor'][s]
+                m.storage_dict['overpay-factor'][s]
                 for s in m.sto_tuples)
 
     elif cost_type == 'Fixed':

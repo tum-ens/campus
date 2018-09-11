@@ -251,29 +251,29 @@ def pyomo_model_prep(data, timesteps):
         m.storage['wacc'], m.storage['support_timeframe'])
 
     # derive rest value factor from WACC, depreciation and discount untility
-    m.process['rv-factor'] = rv_factor(
+    m.process['overpay-factor'] = overpay_factor(
         m,
         m.process['depreciation'],
         m.process['wacc'], m.process['support_timeframe'])
-    m.process.loc[(m.process['rv-factor'] < 0) |
-                  (m.process['rv-factor'].isnull()), 'rv-factor'] = 0
-    m.transmission['rv-factor'] = rv_factor(
+    m.process.loc[(m.process['overpay-factor'] < 0) |
+                  (m.process['overpay-factor'].isnull()), 'overpay-factor'] = 0
+    m.transmission['overpay-factor'] = overpay_factor(
         m,
         m.transmission['depreciation'],
         m.transmission['wacc'], m.transmission['support_timeframe'])
     try:
-        m.transmission.loc[(m.transmission['rv-factor'] < 0) |
-                           (m.transmission['rv-factor'].isnull()),
-                           'rv-factor'] = 0
+        m.transmission.loc[(m.transmission['overpay-factor'] < 0) |
+                           (m.transmission['overpay-factor'].isnull()),
+                           'overpay-factor'] = 0
     except TypeError:
         pass
-    m.storage['rv-factor'] = rv_factor(
+    m.storage['overpay-factor'] = overpay_factor(
         m,
         m.storage['depreciation'],
         m.storage['wacc'], m.storage['support_timeframe'])
     try:
-        m.storage.loc[(m.storage['rv-factor'] < 0) |
-                      (m.storage['rv-factor'].isnull()), 'rv-factor'] = 0
+        m.storage.loc[(m.storage['overpay-factor'] < 0) |
+                      (m.storage['overpay-factor'].isnull()), 'overpay-factor'] = 0
     except TypeError:
         pass
 
