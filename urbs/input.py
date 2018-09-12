@@ -237,44 +237,85 @@ def pyomo_model_prep(data, timesteps):
     m.stor_init_bound = m.stor_init_bound[m.stor_init_bound >= 0]
 
     # derive invest factor from WACC, depreciation and discount untility
-    m.process['invcost-factor'] = invcost_factor(
-        m,
-        m.process['depreciation'],
-        m.process['wacc'], m.process['support_timeframe'])
-    m.transmission['invcost-factor'] = invcost_factor(
-        m,
-        m.transmission['depreciation'],
-        m.transmission['wacc'], m.transmission['support_timeframe'])
-    m.storage['invcost-factor'] = invcost_factor(
-        m,
-        m.storage['depreciation'],
-        m.storage['wacc'], m.storage['support_timeframe'])
+    m.process['discount'] = (m.global_prop.xs('Discount rate', level=1)
+                             .loc[m.global_prop.index.min()[0]]['value'])
+    m.process['stf_min'] = m.global_prop.index.min()[0]
+    m.process['stf_max'] = m.global_prop.index.max()[0]
+    m.transmission['discount'] = (m.global_prop.xs('Discount rate', level=1)
+                                  .loc[m.global_prop.index.min()[0]]['value'])
+    m.transmission['stf_min'] = m.global_prop.index.min()[0]
+    m.transmission['stf_max'] = m.global_prop.index.max()[0]
+    m.storage['discount'] = (m.global_prop.xs('Discount rate', level=1)
+                             .loc[m.global_prop.index.min()[0]]['value'])
+    m.storage['stf_min'] = m.global_prop.index.min()[0]
+    m.storage['stf_max'] = m.global_prop.index.max()[0]
+    
+    m.process['invcost-factor'] = (m.process.apply(lambda x:
+                                   invcost_factor(x['depreciation'],
+                                                  x['wacc'],
+                                                  x['discount'],
+                                                  x['support_timeframe'],
+                                                  x['stf_min']),
+                                   axis=1))
+    try:
+        m.transmission['invcost-factor'] = (m.transmission.apply(lambda x:
+                                            invcost_factor(
+                                            x['depreciation'],
+                                            x['wacc'],
+                                            x['discount'],
+                                            x['support_timeframe'],
+                                            x['stf_min']),
+                                            axis=1))
+    except ValueError:
+        pass
+    m.storage['invcost-factor'] = (m.storage.apply(lambda x:
+                                   invcost_factor(x['depreciation'],
+                                                  x['wacc'],
+                                                  x['discount'],
+                                                  x['support_timeframe'],
+                                                  x['stf_min']),
+                                   axis=1))
 
-    # derive rest value factor from WACC, depreciation and discount untility
-    m.process['overpay-factor'] = overpay_factor(
-        m,
-        m.process['depreciation'],
-        m.process['wacc'], m.process['support_timeframe'])
+    # derive overpay-factor from WACC, depreciation and discount untility
+    m.process['overpay-factor'] = (m.process.apply(lambda x:
+                                   overpay_factor(x['depreciation'],
+                                                  x['wacc'],
+                                                  x['discount'],
+                                                  x['support_timeframe'],
+                                                  x['stf_min'],
+                                                  x['stf_max']),
+                                   axis=1))
     m.process.loc[(m.process['overpay-factor'] < 0) |
                   (m.process['overpay-factor'].isnull()), 'overpay-factor'] = 0
-    m.transmission['overpay-factor'] = overpay_factor(
-        m,
-        m.transmission['depreciation'],
-        m.transmission['wacc'], m.transmission['support_timeframe'])
     try:
+        m.transmission['overpay-factor'] = (m.transmission.apply(lambda x:
+                                            overpay_factor(
+                                            x['depreciation'],
+                                            x['wacc'],
+                                            x['discount'],
+                                            x['support_timeframe'],
+                                            x['stf_min'],
+                                            x['stf_max']),
+                                            axis=1))
         m.transmission.loc[(m.transmission['overpay-factor'] < 0) |
                            (m.transmission['overpay-factor'].isnull()),
                            'overpay-factor'] = 0
-    except TypeError:
+    except ValueError:
         pass
-    m.storage['overpay-factor'] = overpay_factor(
-        m,
-        m.storage['depreciation'],
-        m.storage['wacc'], m.storage['support_timeframe'])
     try:
+        m.storage['overpay-factor'] = (m.storage.apply(lambda x:
+                                       overpay_factor(x['depreciation'],
+                                                      x['wacc'],
+                                                      x['discount'],
+                                                      x['support_timeframe'],
+                                                      x['stf_min'],
+                                                      x['stf_max']),
+                                       axis=1))
+    
         m.storage.loc[(m.storage['overpay-factor'] < 0) |
-                      (m.storage['overpay-factor'].isnull()), 'overpay-factor'] = 0
-    except TypeError:
+                      (m.storage['overpay-factor'].isnull()),
+                      'overpay-factor'] = 0
+    except ValueError:
         pass
 
     # Derive multiplier for all energy based costs
@@ -310,9 +351,9 @@ def pyomo_model_prep(data, timesteps):
     # Converting Data frames to dictionaries
     #
     m.commodity_dict = m.commodity.to_dict()
-    m.process_dict = m.process.to_dict()  # Changed
-    m.transmission_dict = m.transmission.to_dict()  # Changed
-    m.storage_dict = m.storage.to_dict()  # Changed
+    m.process_dict = m.process.to_dict()
+    m.transmission_dict = m.transmission.to_dict()
+    m.storage_dict = m.storage.to_dict()
     return m
 
 

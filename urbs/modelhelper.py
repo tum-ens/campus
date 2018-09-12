@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def invcost_factor(m, n, i, year_built):
+def invcost_factor(n, i, j, year_built, stf_min):
     """Investment cost factor formula.
 
     Evaluates the factor multiplied to the invest costs
@@ -13,17 +13,24 @@ def invcost_factor(m, n, i, year_built):
         year_built: year utility is built
         j: discount rate for intertmeporal planning
     """
-    j = (m.global_prop.xs('Discount rate', level=1)
-         .loc[m.global_prop.index.min()[0]]['value'])
+    # j = (m.global_prop.xs('Discount rate', level=1)
+         # .loc[m.global_prop.index.min()[0]]['value'])
     if j == 0:
-        return n * ((1+i) ** n * i)/((1+i) ** n - 1)
+        if i == 0:
+            return 1
+        else:
+            return n * ((1+i) ** n * i)/((1+i) ** n - 1)
     else:
-        return ((1+j) ** (-(year_built-m.global_prop.index.min()[0])) *
-                (i * (1+i) ** n * ((1+j) ** n - 1)) /
-                (j * (1+j) ** n * ((1+i) ** n - 1)))
+        if i == 0:
+            return ((1+j) ** (1-(year_built-stf_min)) *
+                    ((1+j) ** n - 1) / (n * j * (1+j) ** n))
+        else:
+            return ((1+j) ** (1-(year_built-stf_min)) *
+                    (i * (1+i) ** n * ((1+j) ** n - 1)) /
+                    (j * (1+j) ** n * ((1+i) ** n - 1)))
 
 
-def overpay_factor(m, n, i, year_built):
+def overpay_factor(n, i, j, year_built, stf_min, stf_max):
     """Overpay value factor formula.
 
     Evaluates the factor multiplied to the invest costs
@@ -37,16 +44,22 @@ def overpay_factor(m, n, i, year_built):
         j: discount rate for intertmeporal planning
         k: operational time after simulation horizon
     """
-    j = (m.global_prop.xs('Discount rate', level=1)
-         .loc[m.global_prop.index.min()[0]]['value'])
-    k = (year_built + n) - m.global_prop.index.max()[0] - 1
+
+    k = (year_built + n) - stf_max - 1
 
     if j == 0:
-        return k * ((1+i) ** n * i)/((1+i) ** n - 1)
+        if i == 0:
+            return k / n
+        else:
+            return k * ((1+i) ** n * i)/((1+i) ** n - 1)
     else:
-        return ((1+j) ** (-(year_built-m.global_prop.index.min()[0])) *
-                (i * (1+i)** n * ((1+j) ** k - 1)) /
-                (j * (1+j) ** n * ((1+i) ** n - 1)))
+        if i == 0:
+            return ((1+j) ** (1-(year_built-stf_min)) *
+                    ((1+j) ** k - 1) / (n * j * (1+j) ** n))
+        else:
+            return ((1+j) ** (-(year_built-stf_min)) *
+                    (i * (1+i)** n * ((1+j) ** k - 1)) /
+                    (j * (1+j) ** n * ((1+i) ** n - 1)))
 
 
 # Energy related costs
