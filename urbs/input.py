@@ -240,15 +240,24 @@ def pyomo_model_prep(data, timesteps):
     m.process['discount'] = (m.global_prop.xs('Discount rate', level=1)
                              .loc[m.global_prop.index.min()[0]]['value'])
     m.process['stf_min'] = m.global_prop.index.min()[0]
-    m.process['stf_max'] = m.global_prop.index.max()[0]
+    m.process['stf_end'] = (m.global_prop.index.max()[0] +
+                            m.global_prop.loc[(max(m.commodity.index.
+                            get_level_values('support_timeframe').
+                            unique()), 'Weight')]['value'] - 1)
     m.transmission['discount'] = (m.global_prop.xs('Discount rate', level=1)
                                   .loc[m.global_prop.index.min()[0]]['value'])
     m.transmission['stf_min'] = m.global_prop.index.min()[0]
-    m.transmission['stf_max'] = m.global_prop.index.max()[0]
+    m.transmission['stf_end'] = (m.global_prop.index.max()[0] +
+                                 m.global_prop.loc[(max(m.commodity.index.
+                                 get_level_values('support_timeframe').
+                                 unique()), 'Weight')]['value'] - 1)
     m.storage['discount'] = (m.global_prop.xs('Discount rate', level=1)
                              .loc[m.global_prop.index.min()[0]]['value'])
     m.storage['stf_min'] = m.global_prop.index.min()[0]
-    m.storage['stf_max'] = m.global_prop.index.max()[0]
+    m.storage['stf_end'] = (m.global_prop.index.max()[0] +
+                            m.global_prop.loc[(max(m.commodity.index.
+                            get_level_values('support_timeframe').
+                            unique()), 'Weight')]['value'] - 1)
     
     m.process['invcost-factor'] = (m.process.apply(lambda x:
                                    invcost_factor(x['depreciation'],
@@ -283,7 +292,7 @@ def pyomo_model_prep(data, timesteps):
                                                   x['discount'],
                                                   x['support_timeframe'],
                                                   x['stf_min'],
-                                                  x['stf_max']),
+                                                  x['stf_end']),
                                    axis=1))
     m.process.loc[(m.process['overpay-factor'] < 0) |
                   (m.process['overpay-factor'].isnull()), 'overpay-factor'] = 0
@@ -295,7 +304,7 @@ def pyomo_model_prep(data, timesteps):
                                             x['discount'],
                                             x['support_timeframe'],
                                             x['stf_min'],
-                                            x['stf_max']),
+                                            x['stf_end']),
                                             axis=1))
         m.transmission.loc[(m.transmission['overpay-factor'] < 0) |
                            (m.transmission['overpay-factor'].isnull()),
@@ -309,7 +318,7 @@ def pyomo_model_prep(data, timesteps):
                                                       x['discount'],
                                                       x['support_timeframe'],
                                                       x['stf_min'],
-                                                      x['stf_max']),
+                                                      x['stf_end']),
                                        axis=1))
     
         m.storage.loc[(m.storage['overpay-factor'] < 0) |
@@ -321,32 +330,37 @@ def pyomo_model_prep(data, timesteps):
     # Derive multiplier for all energy based costs
     m.commodity['stf_dist'] = (m.commodity['support_timeframe'].
                                apply(stf_dist, m=m))
-    m.commodity['c_helper'] = (m.commodity['support_timeframe'].
-                               apply(cost_helper, m=m))
-    m.commodity['c_helper2'] = m.commodity['stf_dist'].apply(cost_helper2, m=m)
-    m.commodity['cost_factor'] = (m.commodity['c_helper'] *
-                                  m.commodity['c_helper2'])
+    m.commodity['discount-factor'] = (m.commodity['support_timeframe'].
+                               apply(discount_factor, m=m))
+    m.commodity['eff-distance'] = (m.commodity['stf_dist'].
+                                   apply(effective_distance, m=m))
+    m.commodity['cost_factor'] = (m.commodity['discount-factor'] *
+                                  m.commodity['eff-distance'])
 
     m.process['stf_dist'] = m.process['support_timeframe'].apply(stf_dist, m=m)
-    m.process['c_helper'] = (m.process['support_timeframe'].
-                             apply(cost_helper, m=m))
-    m.process['c_helper2'] = m.process['stf_dist'].apply(cost_helper2, m=m)
-    m.process['cost_factor'] = m.process['c_helper'] * m.process['c_helper2']
+    m.process['discount-factor'] = (m.process['support_timeframe'].
+                             apply(discount_factor, m=m))
+    m.process['eff-distance'] = (m.process['stf_dist'].
+                                 apply(effective_distance, m=m))
+    m.process['cost_factor'] = (m.process['discount-factor'] *
+                                m.process['eff-distance'])
 
     m.transmission['stf_dist'] = (m.transmission['support_timeframe'].
                                   apply(stf_dist, m=m))
-    m.transmission['c_helper'] = (m.transmission['support_timeframe'].
-                                  apply(cost_helper, m=m))
-    m.transmission['c_helper2'] = (m.transmission['stf_dist'].
-                                   apply(cost_helper2, m=m))
-    m.transmission['cost_factor'] = (m.transmission['c_helper'] *
-                                     m.transmission['c_helper2'])
+    m.transmission['discount-factor'] = (m.transmission['support_timeframe'].
+                                  apply(discount_factor, m=m))
+    m.transmission['eff-distance'] = (m.transmission['stf_dist'].
+                                   apply(effective_distance, m=m))
+    m.transmission['cost_factor'] = (m.transmission['discount-factor'] *
+                                     m.transmission['eff-distance'])
 
     m.storage['stf_dist'] = m.storage['support_timeframe'].apply(stf_dist, m=m)
-    m.storage['c_helper'] = (m.storage['support_timeframe']
-                             .apply(cost_helper, m=m))
-    m.storage['c_helper2'] = m.storage['stf_dist'].apply(cost_helper2, m=m)
-    m.storage['cost_factor'] = m.storage['c_helper'] * m.storage['c_helper2']
+    m.storage['discount-factor'] = (m.storage['support_timeframe']
+                             .apply(discount_factor, m=m))
+    m.storage['eff-distance'] = (m.storage['stf_dist'].
+                                 apply(effective_distance, m=m))
+    m.storage['cost_factor'] = (m.storage['discount-factor'] *
+                                m.storage['eff-distance'])
 
     # Converting Data frames to dictionaries
     #
