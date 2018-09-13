@@ -13,8 +13,7 @@ def invcost_factor(n, i, j, year_built, stf_min):
         year_built: year utility is built
         j: discount rate for intertmeporal planning
     """
-    # j = (m.global_prop.xs('Discount rate', level=1)
-         # .loc[m.global_prop.index.min()[0]]['value'])
+
     if j == 0:
         if i == 0:
             return 1
@@ -30,7 +29,7 @@ def invcost_factor(n, i, j, year_built, stf_min):
                     (j * (1+j) ** n * ((1+i) ** n - 1)))
 
 
-def overpay_factor(n, i, j, year_built, stf_min, stf_max):
+def overpay_factor(n, i, j, year_built, stf_min, stf_end):
     """Overpay value factor formula.
 
     Evaluates the factor multiplied to the invest costs
@@ -45,7 +44,7 @@ def overpay_factor(n, i, j, year_built, stf_min, stf_max):
         k: operational time after simulation horizon
     """
 
-    k = (year_built + n) - stf_max - 1
+    k = (year_built + n) - stf_end - 1
 
     if j == 0:
         if i == 0:
@@ -57,8 +56,8 @@ def overpay_factor(n, i, j, year_built, stf_min, stf_max):
             return ((1+j) ** (1-(year_built-stf_min)) *
                     ((1+j) ** k - 1) / (n * j * (1+j) ** n))
         else:
-            return ((1+j) ** (-(year_built-stf_min)) *
-                    (i * (1+i)** n * ((1+j) ** k - 1)) /
+            return ((1+j) ** (1-(year_built-stf_min)) *
+                    (i * (1+i) ** n * ((1+j) ** k - 1)) /
                     (j * (1+j) ** n * ((1+i) ** n - 1)))
 
 
@@ -72,21 +71,23 @@ def stf_dist(stf, m):
 
     for s in sorted_stf:
         if s == max(sorted_stf):
-            dist.append(1)
+            dist.append(m.global_prop.loc[(s, 'Weight')]['value'])
         else:
             dist.append(sorted_stf[sorted_stf.index(s) + 1] - s)
 
     return dist[sorted_stf.index(stf)]
 
 
-def cost_helper(stf, m):
+def discount_factor(stf, m):
+    """Discount for any payment made in the year stf
+    """
     j = (m.global_prop.xs('Discount rate', level=1)
          .loc[m.global_prop.index.min()[0]]['value'])
 
     return (1+j) ** (1-(stf-m.global_prop.index.min()[0]))
 
 
-def cost_helper2(dist, m):
+def effective_distance(dist, m):
     """Factor for variable, fuel, purchase, sell, and fix costs.
     Calculated by repetition of modeled stfs and discount utility.
     """
@@ -122,31 +123,31 @@ def commodity_balance(m, tm, stf, sit, com):
                    # usage as input for process increases balance
                    for stframe, site, process in m.pro_tuples
                    if site == sit and stframe == stf and
-                   (stframe, process, com) in m.r_in_dict)
-               - sum(m.e_pro_out[(tm, stframe, site, process, com)]
-                     # output from processes decreases balance
-                     for stframe, site, process in m.pro_tuples
-                     if site == sit and stframe == stf and
-                     (stframe, process, com) in m.r_out_dict)
-               + sum(m.e_tra_in[(tm, stframe, site_in, site_out, transmission,
-                                com)]
-                     # exports increase balance
-                     for stframe, site_in, site_out, transmission, commodity
-                     in m.tra_tuples
-                     if site_in == sit and stframe == stf and commodity == com)
-               - sum(m.e_tra_out[(tm, stframe, site_in, site_out, transmission,
-                                 com)]
-                     # imports decrease balance
-                     for stframe, site_in, site_out, transmission, commodity
-                     in m.tra_tuples
-                     if site_out == sit and stframe == stf and
-                     commodity == com)
-               + sum(m.e_sto_in[(tm, stframe, site, storage, com)] -
-                     m.e_sto_out[(tm, stframe, site, storage, com)]
-                     # usage as input for storage increases consumption
-                     # output from storage decreases consumption
-                     for stframe, site, storage, commodity in m.sto_tuples
-                     if site == sit and stframe == stf and commodity == com))
+                   (stframe, process, com) in m.r_in_dict) -
+               sum(m.e_pro_out[(tm, stframe, site, process, com)]
+                   # output from processes decreases balance
+                   for stframe, site, process in m.pro_tuples
+                   if site == sit and stframe == stf and
+                   (stframe, process, com) in m.r_out_dict) +
+               sum(m.e_tra_in[(tm, stframe, site_in, site_out, transmission,
+                              com)]
+                   # exports increase balance
+                   for stframe, site_in, site_out, transmission, commodity
+                   in m.tra_tuples
+                   if site_in == sit and stframe == stf and commodity == com) +
+               sum(m.e_tra_out[(tm, stframe, site_in, site_out, transmission,
+                               com)]
+                   # imports decrease balance
+                   for stframe, site_in, site_out, transmission, commodity
+                   in m.tra_tuples
+                   if site_out == sit and stframe == stf and
+                   commodity == com) +
+               sum(m.e_sto_in[(tm, stframe, site, storage, com)] -
+                   m.e_sto_out[(tm, stframe, site, storage, com)]
+                   # usage as input for storage increases consumption
+                   # output from storage decreases consumption
+                   for stframe, site, storage, commodity in m.sto_tuples
+                   if site == sit and stframe == stf and commodity == com))
     return balance
 
 
@@ -319,12 +320,12 @@ def dsm_down_time_tuples(time, sit_com_tuple, m):
 
     for (stf, site, commodity) in sit_com_tuple:
         for step1 in time:
-            for step2 in range(step1
-                               - max(int(delay[stf, site, commodity]
-                                     / m.dt.value), 1),
-                               step1
-                               + max(int(delay[stf, site, commodity]
-                                     / m.dt.value), 1) + 1):
+            for step2 in range(step1 -
+                               max(int(delay[stf, site, commodity] /
+                                   m.dt.value), 1),
+                               step1 +
+                               max(int(delay[stf, site, commodity] /
+                                   m.dt.value), 1) + 1):
                 if lb <= step2 <= ub:
                     time_list.append((step1, step2, stf, site, commodity))
 
