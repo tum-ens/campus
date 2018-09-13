@@ -122,6 +122,8 @@ def read_excel(input_files):
                                        keys=[support_timeframe],
                                        names=['support_timeframe'])
                 ef.append(eff_factor)
+            else:
+                ef.append(pd.DataFrame())
 
         # prepare input data
         # split columns by dots '.', so that 'DE.Elec' becomes the two-level
