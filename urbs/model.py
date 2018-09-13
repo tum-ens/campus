@@ -298,36 +298,6 @@ def create_model(data, dt=1, timesteps=None, dual=False):
         initialize=m.stor_init_bound.index,
         doc='storages with fixed initial state')
 
-    # Derive multiplier for all energy based costs
-    m.commodity['stf_dist'] = (m.commodity['support_timeframe'].
-                               apply(stf_dist, m=m))
-    m.commodity['c_helper'] = (m.commodity['support_timeframe'].
-                               apply(cost_helper, m=m))
-    m.commodity['c_helper2'] = m.commodity['stf_dist'].apply(cost_helper2, m=m)
-    m.commodity['cost_factor'] = (m.commodity['c_helper'] *
-                                  m.commodity['c_helper2'])
-
-    m.process['stf_dist'] = m.process['support_timeframe'].apply(stf_dist, m=m)
-    m.process['c_helper'] = (m.process['support_timeframe'].
-                             apply(cost_helper, m=m))
-    m.process['c_helper2'] = m.process['stf_dist'].apply(cost_helper2, m=m)
-    m.process['cost_factor'] = m.process['c_helper'] * m.process['c_helper2']
-
-    m.transmission['stf_dist'] = (m.transmission['support_timeframe'].
-                                  apply(stf_dist, m=m))
-    m.transmission['c_helper'] = (m.transmission['support_timeframe'].
-                                  apply(cost_helper, m=m))
-    m.transmission['c_helper2'] = (m.transmission['stf_dist'].
-                                   apply(cost_helper2, m=m))
-    m.transmission['cost_factor'] = (m.transmission['c_helper'] *
-                                     m.transmission['c_helper2'])
-
-    m.storage['stf_dist'] = m.storage['support_timeframe'].apply(stf_dist, m=m)
-    m.storage['c_helper'] = (m.storage['support_timeframe']
-                             .apply(cost_helper, m=m))
-    m.storage['c_helper2'] = m.storage['stf_dist'].apply(cost_helper2, m=m)
-    m.storage['cost_factor'] = m.storage['c_helper'] * m.storage['c_helper2']
-
     # Variables
 
     # costs
@@ -733,8 +703,8 @@ def def_dsm_variables_rule(m, tm, stf, sit, com):
 # DSMup <= Cup (threshold capacity of DSMup)
 def res_dsm_upward_rule(m, tm, stf, sit, com):
     return m.dsm_up[tm, stf, sit, com] <= (m.dt *
-                                      m.dsm_dict['cap-max-up']
-                                      [(stf, sit, com)])
+                                           m.dsm_dict['cap-max-up']
+                                           [(stf, sit, com)])
 
 
 # DSMdo <= Cdo (threshold capacity of DSMdo)
@@ -889,15 +859,15 @@ def res_env_total_rule(m, stf, sit, com, com_type):
 def def_process_capacity_rule(m, stf, sit, pro):
     if (sit, pro, stf) in m.inst_pro_tuples:
         return (m.cap_pro[stf, sit, pro] ==
-            sum(m.cap_pro_new[stf_built, sit, pro]
-            for stf_built in m.stf
-            if (sit, pro, stf_built, stf) in m.operational_pro_tuples) + 
-            m.process_dict['inst-cap'][(min(m.stf), sit, pro)])
+                sum(m.cap_pro_new[stf_built, sit, pro]
+                for stf_built in m.stf
+                if (sit, pro, stf_built, stf) in m.operational_pro_tuples) +
+                m.process_dict['inst-cap'][(min(m.stf), sit, pro)])
     else:
         return (m.cap_pro[stf, sit, pro] ==
-            sum(m.cap_pro_new[stf_built, sit, pro]
-            for stf_built in m.stf
-            if (sit, pro, stf_built, stf) in m.operational_pro_tuples))
+                sum(m.cap_pro_new[stf_built, sit, pro]
+                for stf_built in m.stf
+                if (sit, pro, stf_built, stf) in m.operational_pro_tuples))
 
 
 # process input power == process throughput * input ratio
@@ -1114,13 +1084,14 @@ def def_storage_power_rule(m, stf, sit, sto, com):
                 for stf_built in m.stf
                 if (sit, sto, com, stf_built, stf) in
                     m.operational_sto_tuples) +
-                    m.storage_dict['inst-cap-p'][(min(m.stf), sit, sto, com)])
+                m.storage_dict['inst-cap-p'][(min(m.stf), sit, sto, com)])
     else:
         return (m.cap_sto_p[stf, sit, sto, com] ==
                 sum(m.cap_sto_p_new[stf_built, sit, sto, com]
                 for stf_built in m.stf
                 if (sit, sto, com, stf_built, stf) in m.operational_sto_tuples)
                 )
+
 
 # storage capacity == new storage capacity + existing storage capacity
 def def_storage_capacity_rule(m, stf, sit, sto, com):
@@ -1130,25 +1101,25 @@ def def_storage_capacity_rule(m, stf, sit, sto, com):
                 for stf_built in m.stf
                 if (sit, sto, com, stf_built, stf) in
                     m.operational_sto_tuples) +
-                    m.storage_dict['inst-cap-c'][(min(m.stf), sit, sto, com)])
+                m.storage_dict['inst-cap-c'][(min(m.stf), sit, sto, com)])
     else:
         return (m.cap_sto_c[stf, sit, sto, com] ==
                 sum(m.cap_sto_c_new[stf_built, sit, sto, com]
-                for stf_built in m.stf
-                if (sit, sto, com, stf_built, stf) in m.operational_sto_tuples)
-                )
+                    for stf_built in m.stf
+                    if (sit, sto, com, stf_built, stf) in
+                    m.operational_sto_tuples))
 
 
 # storage input <= storage power
 def res_storage_input_by_power_rule(m, t, stf, sit, sto, com):
     return (m.e_sto_in[t, stf, sit, sto, com] <= m.dt *
-           m.cap_sto_p[stf, sit, sto, com])
+            m.cap_sto_p[stf, sit, sto, com])
 
 
 # storage output <= storage power
 def res_storage_output_by_power_rule(m, t, stf, sit, sto, co):
     return (m.e_sto_out[t, stf, sit, sto, co] <= m.dt *
-           m.cap_sto_p[stf, sit, sto, co])
+            m.cap_sto_p[stf, sit, sto, co])
 
 
 # storage content <= storage capacity
