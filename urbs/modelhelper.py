@@ -165,8 +165,9 @@ def op_pro_tuples(pro_tuple, m):
         for stf_later in sorted_stf:
             index_helper = sorted_stf.index(stf_later)
             if stf_later == max(sorted_stf):
-                if stf_later <= stf + m.process.loc[(stf, sit, pro),
-                                                    'depreciation']:
+                if (stf_later +
+                   m.global_prop.loc[(max(sorted_stf), 'Weight'), 'value'] - 1
+                   <= stf + m.process.loc[(stf, sit, pro), 'depreciation']):
                     op_pro.append((sit, pro, stf, stf_later))
             elif (sorted_stf[index_helper+1] <=
                   stf + m.process.loc[(stf, sit, pro), 'depreciation'] and
@@ -188,9 +189,10 @@ def op_tra_tuples(tra_tuple, m):
         for stf_later in sorted_stf:
             index_helper = sorted_stf.index(stf_later)
             if stf_later == max(sorted_stf):
-                if (stf_later <=
-                    stf + m.transmission.loc[(stf, sit1, sit2, tra, com),
-                                             'depreciation']):
+                if (stf_later +
+                   m.global_prop.loc[(max(sorted_stf), 'Weight'), 'value'] - 1
+                   <= stf + m.transmission.loc[(stf, sit1, sit2, tra, com),
+                                               'depreciation']):
                     op_tra.append((sit1, sit2, tra, com, stf, stf_later))
             elif (sorted_stf[index_helper+1] <=
                   stf + m.transmission.loc[(stf, sit1, sit2, tra, com),
@@ -213,8 +215,10 @@ def op_sto_tuples(sto_tuple, m):
         for stf_later in sorted_stf:
             index_helper = sorted_stf.index(stf_later)
             if stf_later == max(sorted_stf):
-                if stf_later <= stf + m.storage.loc[(stf, sit, sto, com),
-                                                    'depreciation']:
+                if (stf_later +
+                   m.global_prop.loc[(max(sorted_stf), 'Weight'), 'value'] - 1
+                   <= stf + m.storage.loc[(stf, sit, sto, com),
+                                          'depreciation']):
                     op_sto.append((sit, sto, com, stf, stf_later))
             elif (sorted_stf[index_helper+1] <=
                   stf +
@@ -241,9 +245,10 @@ def inst_pro_tuples(m):
         for stf_later in sorted_stf:
             index_helper = sorted_stf.index(stf_later)
             if stf_later == max(m.stf):
-                if (stf_later <
-                    min(m.stf) + m.process.loc[(stf, sit, pro),
-                                               'lifetime']):
+                if (stf_later +
+                   m.global_prop.loc[(max(sorted_stf), 'Weight'), 'value'] - 1
+                   < min(m.stf) + m.process.loc[(stf, sit, pro),
+                                                'lifetime']):
                     inst_pro.append((sit, pro, stf_later))
             elif (sorted_stf[index_helper+1] <=
                   min(m.stf) + m.process.loc[(stf, sit, pro),
@@ -263,10 +268,11 @@ def inst_tra_tuples(m):
         for stf_later in sorted_stf:
             index_helper = sorted_stf.index(stf_later)
             if stf_later == max(m.stf):
-                if (stf_later <
-                    min(m.stf) +
-                    m.transmission.loc[(stf, sit1, sit2, tra, com),
-                                       'lifetime']):
+                if (stf_later +
+                   m.global_prop.loc[(max(sorted_stf), 'Weight'), 'value'] - 1
+                   < min(m.stf) +
+                   m.transmission.loc[(stf, sit1, sit2, tra, com),
+                                      'lifetime']):
                     inst_tra.append((sit1, sit2, tra, com, stf_later))
             elif (sorted_stf[index_helper+1] <=
                   min(m.stf) + m.transmission.loc[(stf, sit1, sit2, tra, com),
@@ -286,9 +292,10 @@ def inst_sto_tuples(m):
         for stf_later in sorted_stf:
             index_helper = sorted_stf.index(stf_later)
             if stf_later == max(m.stf):
-                if (stf_later <
-                    min(m.stf) + m.storage.loc[(stf, sit, sto, com),
-                                               'lifetime']):
+                if (stf_later +
+                   m.global_prop.loc[(max(sorted_stf), 'Weight'), 'value'] - 1
+                   < min(m.stf) + m.storage.loc[(stf, sit, sto, com),
+                                                'lifetime']):
                     inst_sto.append((sit, sto, com, stf_later))
             elif (sorted_stf[index_helper+1] <=
                   min(m.stf) + m.storage.loc[(stf, sit, sto, com),
