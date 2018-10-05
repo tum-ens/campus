@@ -1219,7 +1219,8 @@ def def_costs_rule(m, cost_type):
                 m.storage_dict['inv-cost-c'][s] *
                 m.storage_dict['invcost-factor'][s]
                 for s in m.sto_tuples) - \
-            sum(m.process_dict['inv-cost'][p] *
+            sum(m.cap_pro_new[p] *
+                m.process_dict['inv-cost'][p] *
                 m.process_dict['overpay-factor'][p]
                 for p in m.pro_tuples) + \
             sum(m.cap_tra_new[t] *
