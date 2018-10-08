@@ -610,6 +610,10 @@ def create_model(data, dt=1, timesteps=None, dual=False):
         rule=res_global_co2_limit_rule,
         doc='total co2 commodity output <= global.prop CO2 limit')
 
+    m.res_global_co2_budget = pyomo.Constraint(
+        rule=res_global_co2_budget_rule,
+        doc='total co2 commodity output <= global.prop CO2 limit')
+
     # costs
     m.def_costs = pyomo.Constraint(
         m.cost_type,
@@ -1179,6 +1183,30 @@ def res_global_co2_limit_rule(m, stf):
         # scaling to annual output (cf. definition of m.weight)
         co2_output_sum *= m.weight
         return (co2_output_sum <= m.global_prop.loc[stf, 'CO2 limit']['value'])
+    else:
+        return pyomo.Constraint.Skip
+
+
+# CO2 output in entire period <= Global CO2 budget
+def res_global_co2_budget_rule(m):
+    if math.isinf(m.global_prop.loc[m.global_prop.index.min()[0], 'CO2 budget']
+                                   ['value']):
+        return pyomo.Constraint.Skip
+    elif (m.global_prop.loc[m.global_prop.index.min()[0], 'CO2 budget']
+          ['value']) >= 0:
+        co2_output_sum = 0
+        for stf in m.stf:
+            for tm in m.tm:
+                for sit in m.sit:
+                    # minus because negative commodity_balance represents
+                    # creation of that commodity.
+                    co2_output_sum += (- commodity_balance
+                                       (m, tm, stf, sit, 'CO2') *
+                                       m.weight *
+                                       stf_dist(stf,m))
+            
+        return (co2_output_sum <=
+                m.global_prop.loc[stf, 'CO2 budget']['value'])
     else:
         return pyomo.Constraint.Skip
 
