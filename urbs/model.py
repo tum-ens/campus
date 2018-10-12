@@ -287,9 +287,11 @@ def create_model(data, dt=1, timesteps=None, dual=False):
     m.pro_timevar_output_tuples = pyomo.Set(
         within=m.stf*m.sit*m.pro*m.com,
         initialize=[(stf, site, process, commodity)
-                    for (stf, site, process) in m.eff_factor.columns.values
-                    for (s, pro, commodity) in m.r_out.index
-                    if process == pro and s == stf],
+                    for stf in m.eff_factor.index.levels[0]
+                    for (site, process) in m.eff_factor.columns
+                    for (st, pro, commodity) in m.r_out.index
+                    if process == pro and st == stf and commodity not in
+                    m.com_env],
         doc='Outputs of processes with time dependent efficiency')
 
     # storage tuples for storages with fixed initial state
@@ -952,13 +954,9 @@ def def_partial_process_output_rule(m, tm, stf, sit, pro, coo):
 
 
 def def_pro_timevar_output_rule(m, tm, stf, sit, pro, com):
-    if com in m.com_env:
-        return(m.e_pro_out[tm, stf, sit, pro, com] ==
-               m.tau_pro[tm, stf, sit, pro] * m.r_out_dict[(stf, pro, com)])
-    else:
-        return(m.e_pro_out[tm, stf, sit, pro, com] ==
-               m.tau_pro[tm, stf, sit, pro] * m.r_out_dict[(stf, pro, com)] *
-               m.eff_factor_dict[(stf, sit, pro)][tm])
+    return(m.e_pro_out[tm, stf, sit, pro, com] ==
+           m.tau_pro[tm, stf, sit, pro] * m.r_out_dict[(stf, pro, com)] *
+           m.eff_factor_dict[(sit, pro)][stf, tm])
 
 
 def def_pro_partial_timevar_output_rule(m, tm, stf, sit, pro, coo):
@@ -970,15 +968,10 @@ def def_pro_partial_timevar_output_rule(m, tm, stf, sit, pro, coo):
 
     online_factor = min_fraction * (r - R) / (1 - min_fraction)
     throughput_factor = (R - min_fraction * r) / (1 - min_fraction)
-    if coo in m.com_env:
-        return (m.e_pro_out[tm, stf, sit, pro, coo] ==
-                m.dt * m.cap_pro[stf, sit, pro] * online_factor +
-                m.tau_pro[tm, stf, sit, pro] * throughput_factor)
-    else:
-        return (m.e_pro_out[tm, stf, sit, pro, coo] ==
-                (m.dt * m.cap_pro[stf, sit, pro] * online_factor +
-                 m.tau_pro[tm, stf, sit, pro] * throughput_factor) *
-                m.eff_factor_dict[(sit, pro)][tm])
+    return (m.e_pro_out[tm, stf, sit, pro, coo] ==
+            (m.dt * m.cap_pro[stf, sit, pro] * online_factor +
+             m.tau_pro[tm, stf, sit, pro] * throughput_factor) *
+            m.eff_factor_dict[(sit, pro)][(stf, tm)])
 
 
 # lower bound <= process capacity <= upper bound

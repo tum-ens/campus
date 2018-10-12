@@ -116,14 +116,10 @@ def read_excel(input_files):
             ds.append(dsm)
             if 'TimeVarEff' in sheetnames:
                 eff_factor = (xls.parse('TimeVarEff').set_index(['t']))
-
-                eff_factor.columns = split_columns(eff_factor.columns, '.')
-                eff_factor = pd.concat([eff_factor], axis=1,
-                                       keys=[support_timeframe],
+                eff_factor = pd.concat([eff_factor], keys=[support_timeframe],
                                        names=['support_timeframe'])
+                eff_factor.columns = split_columns(eff_factor.columns, '.')
                 ef.append(eff_factor)
-            else:
-                ef.append(pd.DataFrame())
 
         # prepare input data
         # split columns by dots '.', so that 'DE.Elec' becomes the two-level
