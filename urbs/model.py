@@ -1155,9 +1155,9 @@ def res_initial_and_final_storage_state_rule(m, t, stf, sit, sto, com):
         return pyomo.Constraint.Skip
 
 
-def res_initial_and_final_storage_state_var_rule(m, t, sit, sto, com):
-    return (m.e_sto_con[m.t[1], sit, sto, com] <=
-            m.e_sto_con[m.t[len(m.t)], sit, sto, com])
+def res_initial_and_final_storage_state_var_rule(m, t, stf, sit, sto, com):
+    return (m.e_sto_con[m.t[1], stf, sit, sto, com] <=
+            m.e_sto_con[m.t[len(m.t)], stf, sit, sto, com])
 
 
 # total CO2 output <= Global CO2 limit
@@ -1196,8 +1196,8 @@ def res_global_co2_budget_rule(m):
                     co2_output_sum += (- commodity_balance
                                        (m, tm, stf, sit, 'CO2') *
                                        m.weight *
-                                       stf_dist(stf,m))
-            
+                                       stf_dist(stf, m))
+
         return (co2_output_sum <=
                 m.global_prop.loc[stf, 'CO2 budget']['value'])
     else:
