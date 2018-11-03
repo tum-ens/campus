@@ -8,11 +8,13 @@ Created on Wed Oct 31 02:56:46 2018
 import wx
 import wx.grid
 import collections
+import DataConfig as config
+import GridDataTable as gdt
 
 
 class ConnectionDialog ( wx.Dialog ):
     
-    _gridCols = {'ratio': 'Ratio (1)', 'ratioMin': 'Ratio-Min'}
+    _gridCols = config.DataConfig.CONNECTION_PARAMS
     
     def __init__(self, parent):
         wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = "Connection data", size= wx.Size(600, 400))
@@ -20,11 +22,11 @@ class ConnectionDialog ( wx.Dialog ):
         
         mainLayout = wx.StaticBoxSizer( wx.StaticBox(self, wx.ID_ANY, u"" ), wx.VERTICAL )
   
+        self._gridTable = gdt.GridDataTable(self._gridCols)
         self._yearsGrid = wx.grid.Grid(mainLayout.GetStaticBox(), -1)
-        self._yearsGrid.CreateGrid(0, len(self._gridCols))
-        for i, item in enumerate(self._gridCols.items()):
-            self._yearsGrid.SetColSize(i, 200)
-            self._yearsGrid.SetColLabelValue(i, item[1])
+        self._yearsGrid.SetTable(self._gridTable, True)
+        for i in range(0, len(self._gridCols)):
+            self._yearsGrid.SetColSize(i, 200)        
         #self._yearsGrid.AutoSizeColumns(False)
         mainLayout.Add(self._yearsGrid, 1, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
         
@@ -43,18 +45,14 @@ class ConnectionDialog ( wx.Dialog ):
         self.Centre( wx.BOTH )
         
     def PopulateConnectionGrid(self, dataPerYear):       
-        i = self._yearsGrid.GetNumberRows()
-        if i > 0:
-            self._yearsGrid.DeleteRows(0, i)
-            i = 0
-            
-        dataPerYear = collections.OrderedDict(sorted(dataPerYear.items()))
-        for year, data in dataPerYear.items():
-            self._yearsGrid.InsertRows(i, 1)
-            self._yearsGrid.SetRowLabelValue(i, year)
-            for j, key in enumerate(self._gridCols.keys()):
-                self._yearsGrid.SetCellValue(i, j, data[key])
-            i += 1      
-    
-    def __del__( self ):
-        pass
+        new = len(dataPerYear)
+        cur = self._gridTable.GetNumberRows()        
+        msg = None
+        if new > cur:#new rows
+            msg = wx.grid.GridTableMessage(self._gridTable, wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED, new-cur)
+        elif new < cur: #rows removed
+            msg = wx.grid.GridTableMessage(self._gridTable, wx.grid.GRIDTABLE_NOTIFY_ROWS_DELETED, new, cur-new)
+        
+        if msg:
+            self._gridTable.SetTableData(dataPerYear)
+            self._gridTable.GetView().ProcessTableMessage(msg)

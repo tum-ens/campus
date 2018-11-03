@@ -74,5 +74,12 @@ class DataConfig():
                   {PARAM_KEY: 'areaPerCap', 
                    GRID_COL_LABEL: 'Area use per capacity (m^2/MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'}
                 ]
+                
+    CONNECTION_PARAMS = [
+                  {PARAM_KEY: 'ratio', 
+                   GRID_COL_LABEL:'Ratio (1)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 1.00},
+                  {PARAM_KEY: 'ratioMin', 
+                   GRID_COL_LABEL: 'Ratio-Min', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''}
+                ]
                      
     

@@ -44,7 +44,7 @@ class Model():
         return data
     
     def InitializeConnection(self):
-        return {'ratio': '1.00', 'ratioMin': ''}
+        return self.InitializeData(config.DataConfig.CONNECTION_PARAMS)
 
     def AddYear(self, year):
         if not (year in self._years):
