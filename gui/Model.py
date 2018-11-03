@@ -37,9 +37,11 @@ class Model():
         return self.InitializeData(config.DataConfig.COMMODITY_PARAMS)
         
     def InitializeProcess(self):
-        return {'instCap': '0.00', 'lifetime': '0.00', 'capLo': '0.00', 'capUp': '0.00', 'invCost': '0.00', 
-                'fixCost': 'Inf', 'varCost': 'Inf', 'startupCost': 'Inf', 'wacc': '0.05', 'maxGrad': 'Inf', 'minFraction': 'Inf', 
-                'depreciation': '20', 'areaPerCap': 'Inf'}
+        ecoData = self.InitializeData(config.DataConfig.PROCESS_ECO_PARAMS)
+        techData = self.InitializeData(config.DataConfig.PROCESS_TECH_PARAMS)
+        data = ecoData.copy()
+        data.update(techData)
+        return data
     
     def InitializeConnection(self):
         return {'ratio': '1.00', 'ratioMin': ''}
