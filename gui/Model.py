@@ -34,8 +34,7 @@ class Model():
         return self.InitializeData(config.DataConfig.SITE_PARAMS)
         
     def InitializeCommodity(self):
-        data = {'price': '0.00', 'max':  'Inf', 'maxPerHour': 'Inf'}
-        return data
+        return self.InitializeData(config.DataConfig.COMMODITY_PARAMS)
         
     def InitializeProcess(self):
         return {'instCap': '0.00', 'lifetime': '0.00', 'capLo': '0.00', 'capUp': '0.00', 'invCost': '0.00', 
