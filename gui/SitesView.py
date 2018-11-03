@@ -7,14 +7,15 @@ Created on Wed Oct 31 15:43:07 2018
 
 import wx
 import wx.grid
-import collections
+import DataConfig as config
+import GridDataTable as gdt
 
 from Events import EVENTS
 from pubsub import pub
 
 class SitesView():
     
-    _gridCols = ['', 'Site Area']
+    _gridCols = config.DataConfig.SITE_PARAMS
 
     def __init__(self, parent):
         
@@ -50,29 +51,22 @@ class SitesView():
         
         sitesLayout.Add(addSiteLayout, 0, wx.ALL|wx.EXPAND, 5)
         
-        #Grid of 4 cols
+        #Grid and its data table
+        self._gridTable = gdt.GridDataTable(self._gridCols)
         self._sitesGrid = wx.grid.Grid(parent, -1)
-        self._sitesGrid.CreateGrid(0, len(self._gridCols))
-        #col1 as checkbox
-        attr = wx.grid.GridCellAttr()
-        attr.SetEditor(wx.grid.GridCellBoolEditor())
-        attr.SetRenderer(wx.grid.GridCellBoolRenderer())        
+        self._sitesGrid.SetTable(self._gridTable, True)       
         #col2-4
         for i in range(0, len(self._gridCols)):
             self._sitesGrid.SetColSize(i, 120)
-            self._sitesGrid.SetColLabelValue(i, self._gridCols[i])
-        self._sitesGrid.SetColAttr(0, attr)
         self._sitesGrid.SetColSize(0, 20)
-        #self._listOfYrs.Bind( wx.EVT_LIST_ITEM_SELECTED, self.ListOfSitesOnSelectionChange)
-        #self._listOfYrs.Bind( wx.EVT_LIST_ITEM_DESELECTED, self.ListOfSitesOnSelectionChange)
                 
         sitesLayout.Add(self._sitesGrid, 1, wx.ALL|wx.EXPAND, 5)
         
         #bitmap = wx.StaticBitmap( self, wx.ID_ANY, wx.Bitmap( u"Energy.jpeg", wx.BITMAP_TYPE_ANY ))
         #imgLayout.Add(bitmap, 1, wx.EXPAND, 5)          
         
-        pub.subscribe(self.PopulateSitesGrid, EVENTS.SITE_ADDED)
-        pub.subscribe(self.PopulateSitesGrid, EVENTS.SITE_REMOVED)
+        pub.subscribe(self.SiteIsAdded, EVENTS.SITE_ADDED)
+        pub.subscribe(self.SitesAreRemoved, EVENTS.SITE_REMOVED)
         
     def GetLayout(self):
         return self._mainLayout;                        
@@ -102,16 +96,21 @@ class SitesView():
         
         pub.sendMessage(EVENTS.SITE_REMOVING, sites=sitesToRmv)
         
-    def PopulateSitesGrid(self, sites):       
-        i = self._sitesGrid.GetNumberRows()
-        if i > 0:
-            self._sitesGrid.DeleteRows(0, i)
-            i = 0
-            
-        sites = collections.OrderedDict(sorted(sites.items()))
-        for site, data in sites.items():
-            self._sitesGrid.InsertRows(i, 1)
-            self._sitesGrid.SetRowLabelValue(i, site)
-            #self._sitesGrid.SetCellValue(i, 0, bool(data['selected']))
-            self._sitesGrid.SetCellValue(i, 1, data['siteArea'])
-            i += 1
+    def SiteIsAdded(self, sites):
+        # tell the grid we've changed the data
+        self._gridTable.SetTableData(sites)
+        msg = wx.grid.GridTableMessage(self._gridTable,                         # The table
+                                       wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED,  # what we did to it
+                                       1                                        # how many
+        )
+        self._gridTable.GetView().ProcessTableMessage(msg)
+    
+    def SitesAreRemoved(self, sites, removeCount):
+        # tell the grid we've changed the data
+        self._gridTable.SetTableData(sites)
+        msg = wx.grid.GridTableMessage(self._gridTable,                         # The table
+                                       wx.grid.GRIDTABLE_NOTIFY_ROWS_DELETED,   # what we did to it
+                                       len(sites), removeCount                  # how many
+        )
+        self._gridTable.GetView().ProcessTableMessage(msg)
+        

@@ -7,14 +7,15 @@ Created on Wed Oct 31 15:43:07 2018
 
 import wx
 import wx.grid
-import collections
+import DataConfig as config
+import GridDataTable as gdt
 
 from Events import EVENTS
 from pubsub import pub
 
 class YearsView():
     
-    _gridCols = ['', 'Discount rate', 'CO2 limit', 'CO2 budget']
+    _gridCols = config.DataConfig.YEAR_PARAMS
 
     def __init__(self, parent):
         
@@ -52,29 +53,22 @@ class YearsView():
         
         yearsLayout.Add(addYearLayout, 0, wx.ALL|wx.EXPAND, 5)
         
-        #Grid of 4 cols
+        #Grid and its data table
+        self._gridTable = gdt.GridDataTable(self._gridCols)
         self._yearsGrid = wx.grid.Grid(parent, -1)
-        self._yearsGrid.CreateGrid(0, len(self._gridCols))
-        #col1 as checkbox
-        attr = wx.grid.GridCellAttr()
-        attr.SetEditor(wx.grid.GridCellBoolEditor())
-        attr.SetRenderer(wx.grid.GridCellBoolRenderer())        
+        self._yearsGrid.SetTable(self._gridTable, True)
         #col2-4
         for i in range(0, len(self._gridCols)):
             self._yearsGrid.SetColSize(i, 120)
-            self._yearsGrid.SetColLabelValue(i, self._gridCols[i])
-        self._yearsGrid.SetColAttr(0, attr)
         self._yearsGrid.SetColSize(0, 20)
-        #self._listOfYrs.Bind( wx.EVT_LIST_ITEM_SELECTED, self.ListOfYearsOnSelectionChange)
-        #self._listOfYrs.Bind( wx.EVT_LIST_ITEM_DESELECTED, self.ListOfYearsOnSelectionChange)
                 
         yearsLayout.Add(self._yearsGrid, 1, wx.ALL|wx.EXPAND, 5)
         
         #bitmap = wx.StaticBitmap( self, wx.ID_ANY, wx.Bitmap( u"Energy.jpeg", wx.BITMAP_TYPE_ANY ))
         #imgLayout.Add(bitmap, 1, wx.EXPAND, 5)          
         
-        pub.subscribe(self.PopulateYearsGrid, EVENTS.YEAR_ADDED)
-        pub.subscribe(self.PopulateYearsGrid, EVENTS.YEAR_REMOVED)
+        pub.subscribe(self.YearIsAdded, EVENTS.YEAR_ADDED)
+        pub.subscribe(self.YearsAreRemoved, EVENTS.YEAR_REMOVED)
         
     def GetLayout(self):
         return self._mainLayout;
@@ -118,19 +112,21 @@ class YearsView():
                 yrsToRmv.append(self._yearsGrid.GetRowLabelValue(i))
         
         pub.sendMessage(EVENTS.YEAR_REMOVING, years=yrsToRmv)
-        
-    def PopulateYearsGrid(self, years):       
-        i = self._yearsGrid.GetNumberRows()
-        if i > 0:
-            self._yearsGrid.DeleteRows(0, i)
-            i = 0
-            
-        years = collections.OrderedDict(sorted(years.items()))
-        for year, data in years.items():
-            self._yearsGrid.InsertRows(i, 1)
-            self._yearsGrid.SetRowLabelValue(i, year)
-            #self._yearsGrid.SetCellValue(i, 0, bool(data['selected']))
-            self._yearsGrid.SetCellValue(i, 1, data['discountRate'])
-            self._yearsGrid.SetCellValue(i, 2, data['co2Limit'])
-            self._yearsGrid.SetCellValue(i, 3, data['co2Budet'])
-            i += 1
+
+    def YearIsAdded(self, years):
+        # tell the grid we've changed the data
+        self._gridTable.SetTableData(years)
+        msg = wx.grid.GridTableMessage(self._gridTable,                         # The table
+                                       wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED,  # what we did to it
+                                       1                                        # how many
+        )
+        self._gridTable.GetView().ProcessTableMessage(msg)
+    
+    def YearsAreRemoved(self, years, removeCount):
+        # tell the grid we've changed the data
+        self._gridTable.SetTableData(years)
+        msg = wx.grid.GridTableMessage(self._gridTable,                         # The table
+                                       wx.grid.GRIDTABLE_NOTIFY_ROWS_DELETED,   # what we did to it
+                                       len(years), removeCount                  # how many
+        )
+        self._gridTable.GetView().ProcessTableMessage(msg)
