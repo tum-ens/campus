@@ -54,7 +54,7 @@ class YearsView():
         
         #Grid of 4 cols
         self._yearsGrid = wx.grid.Grid(parent, -1)
-        self._yearsGrid.CreateGrid(0, 4)
+        self._yearsGrid.CreateGrid(0, len(self._gridCols))
         #col1 as checkbox
         attr = wx.grid.GridCellAttr()
         attr.SetEditor(wx.grid.GridCellBoolEditor())

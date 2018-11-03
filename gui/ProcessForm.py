@@ -39,9 +39,9 @@ class ProcessDialog ( wx.Dialog ):
         self._yearsGrid1 = wx.grid.Grid(h1, -1)
         self._yearsGrid1.CreateGrid(0, len(self._grid1Cols))
         for i, item in enumerate(self._grid1Cols.items()):
-            self._yearsGrid1.SetColSize(i, 200)
-            self._yearsGrid1.SetColLabelValue(i, item[1])
-        layout1.Add(self._yearsGrid1, 1, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)            
+            self._yearsGrid1.SetColLabelValue(i, item[1])   
+        self._yearsGrid1.AutoSizeColumns(False)
+        layout1.Add(self._yearsGrid1, 1, wx.ALL, 5)            
         
         h2 = wx.StaticBox(self, wx.ID_ANY, u"Technical parameters:" )
         h2.SetForegroundColour('white')
@@ -49,12 +49,12 @@ class ProcessDialog ( wx.Dialog ):
         self._yearsGrid2 = wx.grid.Grid(h2, -1)
         self._yearsGrid2.CreateGrid(0, len(self._grid2Cols))
         for i, item in enumerate(self._grid2Cols.items()):
-            self._yearsGrid2.SetColSize(i, 200)
             self._yearsGrid2.SetColLabelValue(i, item[1])
-        layout2.Add(self._yearsGrid2, 1, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
+        self._yearsGrid2.AutoSizeColumns(False)
+        layout2.Add(self._yearsGrid2, 1, wx.ALL|wx.EXPAND, 5)
 
-        mainLayout.Add(layout1, 1, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
-        mainLayout.Add(layout2, 1, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
+        mainLayout.Add(layout1, 1, wx.ALL, 5)
+        mainLayout.Add(layout2, 1, wx.ALL|wx.EXPAND, 5)
         
         btnsLayout = wx.BoxSizer( wx.HORIZONTAL )
         btnOk = wx.Button(self, label="Ok")

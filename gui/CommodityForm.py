@@ -15,7 +15,7 @@ class CommodityDialog ( wx.Dialog ):
     _gridCols = ['Commodity price (Euro/MWh)', 'Maximum commodity use', 'Maximum commodity use per step']
     
     def __init__(self, parent):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = "Commodity data", size= wx.Size(800, 500))
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = "Commodity data", size= wx.Size(700, 400))
         self.SetBackgroundColour("black")
         
         mainLayout = wx.StaticBoxSizer( wx.StaticBox(self, wx.ID_ANY, u"" ), wx.VERTICAL )
@@ -23,9 +23,8 @@ class CommodityDialog ( wx.Dialog ):
         self._yearsGrid = wx.grid.Grid(mainLayout.GetStaticBox(), -1)
         self._yearsGrid.CreateGrid(0, len(self._gridCols))
         for i in range(0, len(self._gridCols)):
-            self._yearsGrid.SetColSize(i, 200)
             self._yearsGrid.SetColLabelValue(i, self._gridCols[i])
-
+        self._yearsGrid.AutoSizeColumns(False)
         mainLayout.Add(self._yearsGrid, 1, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
         
         btnsLayout = wx.BoxSizer( wx.HORIZONTAL )
