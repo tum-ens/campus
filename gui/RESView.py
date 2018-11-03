@@ -99,8 +99,13 @@ class RESView(wx.Panel):
         
         
         pub.subscribe(self.ShapOnDoubleClick, EVENTS.SHAPE_DOUBLE_CLICK)
+        pub.subscribe(self.ShapeSelect, EVENTS.SHAPE_SELECTED)
+        pub.subscribe(self.ShapeDeselect, EVENTS.SHAPE_DESELECTED)
+        
         pub.subscribe(self.CommodityIsAdded, EVENTS.COMMODITY_ADDED)
-        pub.subscribe(self.ProcessIsAdded, EVENTS.PROCESS_ADDED)
+        pub.subscribe(self.ProcessIsAdded, EVENTS.PROCESS_ADDED)        
+        pub.subscribe(self.ConnectionIsAdded, EVENTS.CONNECTION_ADDED)     
+        
 
     def TxtProcessOnTextChange(self, event):
         txt = event.GetEventObject().GetValue()
@@ -161,7 +166,7 @@ class RESView(wx.Panel):
             )
         
         #print(commId)
-        self._shapes[shape.GetId()] = {'uId': commId, 'shape': shape}
+        self._shapes[shape.GetId()] = {'type': 'commodity', 'uId': commId, 'shape': shape}
         self.RefreshCanvas()
         
     def ProcessIsAdded(self, processId, processName):
@@ -171,17 +176,58 @@ class RESView(wx.Panel):
             bs, 305, 200, None, None, processName
         )
         
-        self._shapes[shape.GetId()] = {'uId': processId, 'shape': shape}
+        self._shapes[shape.GetId()] = {'type': 'process', 'uId': processId, 'shape': shape}
         self.RefreshCanvas()
         
     def ShapOnDoubleClick(self, shapeId):        
-               
-        shape = self._shapes[shapeId]['shape']
-        if isinstance(shape, ogl.BitmapShape):
-            print('Fire PROCESS_EDITING')
+        shapeType = self._shapes[shapeId]['type']
+        if shapeType == 'process':
+            #print('Fire PROCESS_EDITING')
             pub.sendMessage(EVENTS.PROCESS_EDITING, processId=self._shapes[shapeId]['uId'])
-        elif isinstance(shape, ogl.RectangleShape):
-            print('Fire COMMODITY_EDITING')
+        elif shapeType == 'commodity':
+            #print('Fire COMMODITY_EDITING')
             pub.sendMessage(EVENTS.COMMODITY_EDITING, commId=self._shapes[shapeId]['uId'])
+        elif shapeType == 'connection':
+            #print('Fire COMMODITY_EDITING')
+            pub.sendMessage(EVENTS.CONNECTION_EDITING, connId=self._shapes[shapeId]['uId'])
+            
+    def ShapeSelect(self, shapeId):
+        shapeType = self._shapes[shapeId]['type']
+        if shapeType == 'process':
+            pub.sendMessage(EVENTS.PROCESS_SELECTED, processId=self._shapes[shapeId]['uId'])
+        elif shapeType == 'commodity':
+            pub.sendMessage(EVENTS.COMMODITY_SELECTED, commId=self._shapes[shapeId]['uId'])
+    
+    def ShapeDeselect(self, shapeId):
+        shapeType = self._shapes[shapeId]['type']
+        if shapeType == 'process':
+            pub.sendMessage(EVENTS.PROCESS_DESELECTED, processId=self._shapes[shapeId]['uId'])
+        elif shapeType == 'commodity':
+            pub.sendMessage(EVENTS.COMMODITY_DESELECTED, commId=self._shapes[shapeId]['uId'])
+            
+    def GetShapeByUID(self, uId):
+        for data in self._shapes.values():
+            if data['uId'] == uId:
+                return data['shape']
+    
+    def ConnectionIsAdded(self, direction, connId, commId, processId):
+        print("AddConnection: ", direction, connId)
+        fromShape, toShape = None, None
         
+        if direction == "Inbound":
+            fromShape = self.GetShapeByUID(commId)
+            toShape = self.GetShapeByUID(processId)
+        elif direction == "Outbound":
+            fromShape = self.GetShapeByUID(processId)
+            toShape = self.GetShapeByUID(commId)
         
+        #print(fromShape, toShape)
+        canvas = fromShape.GetCanvas()
+        line = ogl.LineShape()
+        line.SetCanvas(canvas)
+        line = self.AddShape(line, 50, 50, wx.BLACK_PEN, wx.BLACK_BRUSH, None)
+        line.AddArrow(ogl.ARROW_ARROW)
+        line.MakeLineControlPoints(3)
+        fromShape.AddLine(line, toShape)
+        
+        self._shapes[line.GetId()] = {'type': 'connection', 'uId': connId, 'shape': line}
