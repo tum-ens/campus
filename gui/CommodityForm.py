@@ -49,5 +49,6 @@ class CommodityDialog ( wx.Dialog ):
         elif new < cur: #rows removed
             msg = wx.grid.GridTableMessage(self._gridTable, wx.grid.GRIDTABLE_NOTIFY_ROWS_DELETED, new, cur-new)
         
-        self._gridTable.SetTableData(dataPerYear)
-        self._gridTable.GetView().ProcessTableMessage(msg)
+        if msg:
+            self._gridTable.SetTableData(dataPerYear)
+            self._gridTable.GetView().ProcessTableMessage(msg)
