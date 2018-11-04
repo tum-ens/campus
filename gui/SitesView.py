@@ -52,7 +52,7 @@ class SitesView():
         sitesLayout.Add(addSiteLayout, 0, wx.ALL|wx.EXPAND, 5)
         
         #Grid and its data table
-        self._gridTable = gdt.GridDataTable(self._gridCols)
+        self._gridTable = gdt.GridDataTable(self._gridCols, autoCommit=True)
         self._sitesGrid = wx.grid.Grid(parent, -1)
         self._sitesGrid.SetTable(self._gridTable, True)       
         #col2-4

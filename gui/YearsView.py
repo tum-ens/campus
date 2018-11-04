@@ -54,7 +54,7 @@ class YearsView():
         yearsLayout.Add(addYearLayout, 0, wx.ALL|wx.EXPAND, 5)
         
         #Grid and its data table
-        self._gridTable = gdt.GridDataTable(self._gridCols)
+        self._gridTable = gdt.GridDataTable(self._gridCols, autoCommit=True)
         self._yearsGrid = wx.grid.Grid(parent, -1)
         self._yearsGrid.SetTable(self._gridTable, True)
         #col2-4

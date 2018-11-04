@@ -6,19 +6,34 @@ Created on Sat Nov  3 15:07:35 2018
 """
 
 import wx.grid
+import copy as cpy
 import DataConfig as config
 
 class GridDataTable(wx.grid.GridTableBase):
     
-    def __init__(self, cols, data = {}):
+    def __init__(self, cols, autoCommit=False):
         wx.grid.GridTableBase.__init__(self)
         
         self._cols = cols
+        self._autoCommit = autoCommit        
+        self._tmpData = {}
         self._data = {}
     
     #--------------------------------------------------
     def SetTableData(self, data):
         self._data = data
+        if self._autoCommit:
+            self._tmpData = self._data
+        else:
+            self._tmpData = cpy.deepcopy(self._data)
+            
+    def Commit(self):
+        #print('Commit')
+        #self._data.update(self._tmpData) #don't use update
+        for year, params in self._tmpData.items():
+            for col in self._cols:
+                colKey = col[config.DataConfig.PARAM_KEY]
+                self._data[year][colKey] = params[colKey]
     
     #--------------------------------------------------
     # required methods for the wxPyGridTableBase interface
@@ -35,7 +50,7 @@ class GridDataTable(wx.grid.GridTableBase):
         rowKey = self.GetRowLabelValue(row)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
         if rowKey and colKey:
-            return not self._data[rowKey][colKey]
+            return not self._tmpData[rowKey][colKey]
 
         return True
     
@@ -48,7 +63,7 @@ class GridDataTable(wx.grid.GridTableBase):
         rowKey = self.GetRowLabelValue(row)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
         if rowKey and colKey:
-            return self._data[rowKey][colKey]
+            return self._tmpData[rowKey][colKey]
 
         return ''
     
@@ -56,7 +71,7 @@ class GridDataTable(wx.grid.GridTableBase):
         #print('SetValue', row, col, value)
         rowKey = self.GetRowLabelValue(row)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
-        self._data[rowKey][colKey] = value
+        self._tmpData[rowKey][colKey] = value
     
     #--------------------------------------------------
     # Some optional methods
