@@ -6,44 +6,13 @@ Created on Wed Oct 31 16:57:58 2018
 """
 import wx
 import wx.lib.ogl as ogl
-import CommodityForm as cf 
 
 from Events import EVENTS
 from pubsub import pub
 
-class ViewModel():
-    _lastSelected = None;
-
-    def SelectShape(self, shape):
-        if self._lastSelected:            
-            self.AddConnector(self._lastSelected, shape)
-            self._lastSelected = None
-        
-        self._lastSelected = shape
-    
-    def DeselectShape(self, shape):
-        self._lastSelected = None
-        
-    def AddConnector(self, fromShape, toShape):
-        print('Draw a connector')
-        canvas = fromShape.GetCanvas()
-        line = ogl.LineShape()
-        line.SetCanvas(canvas)
-        line.SetPen(wx.BLACK_PEN)
-        line.SetBrush(wx.BLACK_BRUSH)
-        line.AddArrow(ogl.ARROW_ARROW)
-        line.MakeLineControlPoints(5)
-        fromShape.AddLine(line, toShape)
-        canvas.GetDiagram().AddShape(line)
-        line.Show(True)
-
-        
-    
-
 class RESEvtHandler(ogl.ShapeEvtHandler):
     
     def __init__(self):
-        #self._viewModel = viewModel
         ogl.ShapeEvtHandler.__init__(self)
 
     def UpdateStatusBar(self, shape):
@@ -67,7 +36,7 @@ class RESEvtHandler(ogl.ShapeEvtHandler):
             shape.Select(False, dc)
             #canvas.Redraw(dc)
             canvas.Refresh(False)
-            #self._viewModel.DeselectShape(shape)
+            pub.sendMessage(EVENTS.SHAPE_DESELECTED, shapeId=shape.GetId())
         else:            
             #print('Select a shape!')
             shapeList = canvas.GetDiagram().GetShapeList()
@@ -81,7 +50,7 @@ class RESEvtHandler(ogl.ShapeEvtHandler):
                     toUnselect.append(s)
 
             shape.Select(True, dc)
-            #self._viewModel.SelectShape(shape)
+            pub.sendMessage(EVENTS.SHAPE_SELECTED, shapeId=shape.GetId())
             
             if toUnselect:
                 for s in toUnselect:
@@ -100,6 +69,6 @@ class RESEvtHandler(ogl.ShapeEvtHandler):
         
 
     def OnSizingEndDragLeft(self, pt, x, y, keys, attch):
-        print('OnSizingEndDragLeft')
+        #print('OnSizingEndDragLeft')
         ogl.ShapeEvtHandler.OnSizingEndDragLeft(self, pt, x, y, keys, attch)
         self.UpdateStatusBar(self.GetShape())
