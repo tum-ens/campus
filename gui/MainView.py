@@ -5,8 +5,8 @@ import RESView as res
 
 class MainView ( wx.Frame ):
     
-    def __init__( self ):
-        wx.Frame.__init__(self, None, title="urbs gui 1.0")
+    def __init__( self, controller):
+        wx.Frame.__init__(self, None, title="urbs gui 1.0")        
 
         # Here we create a panel and a notebook on the panel
         p = wx.Panel(self)
@@ -14,7 +14,7 @@ class MainView ( wx.Frame ):
         
         # create the page windows as children of the notebook
         tabOne = gv.GeneralView(nb)
-        tabTwo = res.RESView(nb)
+        tabTwo = res.RESView(nb, controller)
         
         # add the pages to the notebook with the label to show on the tab
         nb.AddPage(tabOne, "Overview")

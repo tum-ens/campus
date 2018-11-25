@@ -25,6 +25,7 @@ class BasicForm(wx.Dialog):
         btnCancel = wx.Button(self, label="Cancel")
         btnCancel.Bind(wx.EVT_BUTTON, self.OnCancel)
         btnFillAll = wx.Button(self, label="Fill all as first year")
+        btnFillAll.Bind(wx.EVT_BUTTON, self.OnFillAll)
         btnsLayout.Add(btnOk, 0, wx.ALL, 5)
         btnsLayout.Add(btnCancel, 0, wx.ALL, 5)
         btnsLayout.Add(btnFillAll, 0, wx.ALL, 5)        
@@ -42,11 +43,18 @@ class BasicForm(wx.Dialog):
         for gt in self._gridTables:
             gt.Commit()
         super().Close()
+        
+    def OnFillAll(self, event):
+        for gt in self._gridTables:
+            gt.FillAll()
+            msg = wx.grid.GridTableMessage(gt, wx.grid.GRIDTABLE_REQUEST_VIEW_GET_VALUES)
+            gt.GetView().ProcessTableMessage(msg)
     
     def SetContent(self, content, align):
         self._contentLayout.Add(content, 1, wx.ALL|wx.EXPAND|align, 5)
     
     def PopulateGrid(self, gridTable, dataPerYear):
+        self._gridTables.clear()
         self._gridTables.append(gridTable)
         new = len(dataPerYear)
         cur = gridTable.GetNumberRows()        

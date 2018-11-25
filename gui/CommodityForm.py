@@ -10,19 +10,94 @@ import wx.grid
 import DataConfig as config
 import GridDataTable as gdt
 import BasicForm as bf
+import copy as cpy
+
+from pubsub import pub
+from Events import EVENTS
 
 class CommodityDialog ( bf.BasicForm ):
     
     _gridCols = config.DataConfig.COMMODITY_PARAMS
     
     def __init__(self, parent):
-        super().__init__(parent, "Commodity data", wx.Size(700, 400))
+        super().__init__(parent, "Commodity data", wx.Size(750, 500))
+        contentLayout = wx.BoxSizer( wx.VERTICAL )
   
+        layout0 = self.CreateGeneralLayout()
+        layout1 = self.CreateParamsLayout()
+        
+        contentLayout.Add(layout0, 0, wx.ALL|wx.EXPAND, 5)
+        contentLayout.Add(layout1, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5)
+        
+        super().SetContent(contentLayout, wx.ALIGN_CENTER_HORIZONTAL)
+        
+    def CreateParamsLayout(self):
+        h1 = wx.StaticBox(self, wx.ID_ANY, u"Parameters:" )
+        h1.SetForegroundColour('white')
+        layout1 = wx.StaticBoxSizer(h1, wx.VERTICAL )
+        
         self._gridTable = gdt.GridDataTable(self._gridCols)
         self._yearsGrid = wx.grid.Grid(self)
         self._yearsGrid.SetTable(self._gridTable, True)
         self._yearsGrid.AutoSizeColumns(False)
-        super().SetContent(self._yearsGrid, wx.ALIGN_CENTER_HORIZONTAL)
+        attr = wx.grid.GridCellAttr()
+        attr.SetReadOnly(True)
+        attr.SetAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
+        self._yearsGrid.SetColAttr(3, attr)
+        self._yearsGrid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnTimeSerClick)
+        layout1.Add(self._yearsGrid, 1, wx.ALL|wx.EXPAND, 5)
         
-    def PopulateCommodityGrid(self, dataPerYear): 
-        super().PopulateGrid(self._gridTable, dataPerYear)
+        return layout1
+        
+    def OnTimeSerClick(self, event):
+        return
+        
+    def CreateGeneralLayout(self):
+        layout0 = wx.BoxSizer( wx.HORIZONTAL )
+        #Type
+        label = wx.StaticText(self, -1, "Commodity Type:")
+        label.SetForegroundColour(wx.WHITE)
+        layout0.Add(label, 0, wx.ALL, 5)
+        self._lblCommType = wx.StaticText(self, -1, "...")
+        self._lblCommType.SetForegroundColour(wx.WHITE)
+        layout0.Add(self._lblCommType, 0, wx.ALL, 5)        
+        #Name
+        layout1 = wx.BoxSizer( wx.HORIZONTAL )
+        label = wx.StaticText(self, -1, "Commodity name:")
+        label.SetForegroundColour(wx.WHITE)
+        layout1.Add(label, 0, wx.ALL, 5)
+        self._txtCommName = wx.TextCtrl(self, size = wx.Size(200, 25))        
+        layout1.Add(self._txtCommName, 0, wx.ALL, 5)
+        #Color
+        label = wx.StaticText(self, -1, "...........................")
+        layout1.Add(label, 0, wx.ALL, 5)
+        label = wx.StaticText(self, -1, "Color:")
+        label.SetForegroundColour(wx.WHITE)
+        layout1.Add(label, 0, wx.ALL, 5)        
+        self._color = wx.ColourPickerCtrl(self, -1, wx.Colour(0,0,0))
+        layout1.Add(self._color, 0, wx.ALL, 5)
+        
+        layout2 = wx.BoxSizer( wx.VERTICAL )        
+        layout2.Add(layout0, 1, wx.ALL|wx.EXPAND, 5)
+        layout2.Add(layout1, 1, wx.ALL|wx.EXPAND, 5)
+        
+        return layout2
+        
+    def PopulateCommodity(self, comm):
+        self._orgComm = cpy.deepcopy(comm)
+        self._commodity = comm
+        self._lblCommType.SetLabel(comm['Type'])
+        self._txtCommName.SetValue(comm['Name'])
+        self._color.SetColour(comm['Color'])
+        super().PopulateGrid(self._gridTable, comm['Years'])
+    
+    def OnOk(self, event):
+        self._commodity['Type'] = self._lblCommType.GetLabelText()
+        self._commodity['Name'] = self._txtCommName.GetValue()
+        self._commodity['Color'] = self._color.GetColour()
+        self._gridTable.Commit()
+        pub.sendMessage(EVENTS.COMMODITY_SAVE, data=self._commodity)
+
+    def OnCancel(self, event):
+        self._commodity.update(self._orgComm)
+        super().OnCancel(event)

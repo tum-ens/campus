@@ -36,7 +36,7 @@ class RESEvtHandler(ogl.ShapeEvtHandler):
             shape.Select(False, dc)
             #canvas.Redraw(dc)
             canvas.Refresh(False)
-            pub.sendMessage(EVENTS.SHAPE_DESELECTED, shapeId=shape.GetId())
+            #pub.sendMessage(EVENTS.SHAPE_DESELECTED, shapeId=shape.GetId())
         else:            
             #print('Select a shape!')
             shapeList = canvas.GetDiagram().GetShapeList()
@@ -49,7 +49,7 @@ class RESEvtHandler(ogl.ShapeEvtHandler):
                     # shapes too!) and bad things will happen...
                     toUnselect.append(s)
 
-            shape.Select(True, dc)
+            #shape.Select(True, dc)
             pub.sendMessage(EVENTS.SHAPE_SELECTED, shapeId=shape.GetId())
             
             if toUnselect:

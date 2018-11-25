@@ -15,6 +15,13 @@ class DataConfig():
     GRID_COL_LABEL      = 'label'
     GRID_COL_DATATYPE   = 'dataType'
     
+    COMM_SUPLM  = 'SupIm'
+    COMM_BUY    = 'Buy'
+    COMM_STOCK  = 'Stock'
+    COMM_DEMAND = 'Demand'
+    COMM_SELL   = 'Sell'
+    COMM_ENV    = 'Env'
+    
     
     YEAR_PARAMS = [
                   {PARAM_KEY: 'selected', 
@@ -40,10 +47,21 @@ class DataConfig():
                   {PARAM_KEY: 'max', 
                    GRID_COL_LABEL: 'Maximum commodity use', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'},
                   {PARAM_KEY: 'maxPerHour', 
-                   GRID_COL_LABEL: 'Maximum commodity use per step', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'}
+                   GRID_COL_LABEL: 'Maximum commodity use per step', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'},
+                  {PARAM_KEY: 'time', 
+                   GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'}
+                ]
+                
+    COMMODITY_COLS = [
+                  {PARAM_KEY: 'selected', 
+                   GRID_COL_LABEL:'', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''},
+                  {PARAM_KEY: 'Name', 
+                   GRID_COL_LABEL: 'Name', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''},
+                  {PARAM_KEY: 'Action', 
+                   GRID_COL_LABEL: '', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'}
                 ]
 
-    PROCESS_ECO_PARAMS = [
+    PROCESS_PARAMS = [
                   {PARAM_KEY: 'instCap', 
                    GRID_COL_LABEL:'Installed capacity (MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.00},
                   {PARAM_KEY: 'lifetime', 
@@ -61,10 +79,7 @@ class DataConfig():
                   {PARAM_KEY: 'startupCost', 
                    GRID_COL_LABEL: 'Startup cost (Euro)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'},
                   {PARAM_KEY: 'wacc', 
-                   GRID_COL_LABEL: 'Weighted average cost of capital', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.05}                          
-                ]
-                
-    PROCESS_TECH_PARAMS = [
+                   GRID_COL_LABEL: 'Weighted average cost of capital', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.05},
                   {PARAM_KEY: 'maxGrad', 
                    GRID_COL_LABEL:'Maximum power gradient (1/h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'},
                   {PARAM_KEY: 'minFraction', 
