@@ -48,8 +48,10 @@ class DataConfig():
                    GRID_COL_LABEL: 'Maximum commodity use', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'},
                   {PARAM_KEY: 'maxPerHour', 
                    GRID_COL_LABEL: 'Maximum commodity use per step', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'},
-                  {PARAM_KEY: 'time', 
-                   GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'}
+                  {PARAM_KEY: 'Action', 
+                   GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'},
+                  {PARAM_KEY: 'timeSer', 
+                   GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''}
                 ]
                 
     COMMODITY_COLS = [

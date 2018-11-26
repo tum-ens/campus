@@ -11,6 +11,7 @@ import DataConfig as config
 import GridDataTable as gdt
 import BasicForm as bf
 import copy as cpy
+import TimeSeriesForm as ts
 
 from pubsub import pub
 from Events import EVENTS
@@ -40,6 +41,7 @@ class CommodityDialog ( bf.BasicForm ):
         self._yearsGrid = wx.grid.Grid(self)
         self._yearsGrid.SetTable(self._gridTable, True)
         self._yearsGrid.AutoSizeColumns(False)
+        self._yearsGrid.SetColSize(4, 0)
         attr = wx.grid.GridCellAttr()
         attr.SetReadOnly(True)
         attr.SetAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
@@ -50,7 +52,9 @@ class CommodityDialog ( bf.BasicForm ):
         return layout1
         
     def OnTimeSerClick(self, event):
-        return
+        tsf = ts.TimeSeriesForm(self)
+        tsf.PopulateData(self._commodity['Name'], self._gridTable, event.GetRow(), event.GetCol()+1)
+        tsf.ShowModal()        
         
     def CreateGeneralLayout(self):
         layout0 = wx.BoxSizer( wx.HORIZONTAL )
@@ -90,6 +94,9 @@ class CommodityDialog ( bf.BasicForm ):
         self._txtCommName.SetValue(comm['Name'])
         self._color.SetColour(comm['Color'])
         super().PopulateGrid(self._gridTable, comm['Years'])
+        #Hide TS column
+        if comm['Type'] in (config.DataConfig.COMM_STOCK, config.DataConfig.COMM_ENV):
+            self._yearsGrid.SetColSize(3, 0)
     
     def OnOk(self, event):
         self._commodity['Type'] = self._lblCommType.GetLabelText()
