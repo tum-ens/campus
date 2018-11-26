@@ -6,6 +6,7 @@ Created on Sat Nov  3 20:50:45 2018
 """
 
 import wx
+import wx.richtext as rt
 
 class TimeSeriesForm(wx.Dialog):
     
@@ -18,7 +19,7 @@ class TimeSeriesForm(wx.Dialog):
         self._lblCommName.SetForegroundColour(wx.WHITE)
         self._lblYear = wx.StaticText(self, -1, "Year: ")
         self._lblYear.SetForegroundColour(wx.WHITE)
-        self._txtTS = wx.TextCtrl(self, wx.ID_ANY, size=wx.Size(250, 300), style=wx.TE_MULTILINE|wx.TE_RICH)
+        self._txtTS = rt.RichTextCtrl(self, wx.ID_ANY, size=wx.Size(250, 300), style=wx.VSCROLL)
         
         btnsLayout = wx.BoxSizer( wx.HORIZONTAL )
         btnOk = wx.Button(self, label="Ok")

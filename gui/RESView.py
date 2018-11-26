@@ -23,7 +23,7 @@ from Events import EVENTS
 class ProcessShape(ogl.RectangleShape):
     def __init__(self, canvas, x, y, uuid, text):
         self._width = 150
-        self._hight = 30
+        self._hight = 45
         ogl.RectangleShape.__init__(self, self._width, self._hight)
         self.SetDraggable(False, False)
         self.SetCanvas(canvas)
