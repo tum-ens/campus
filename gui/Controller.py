@@ -16,15 +16,14 @@ from Events import EVENTS
 
 class Controller():
     
-    _selectedCommodity = None
-    _selectedProcess   = None
-    
     def __init__(self):
+        
         #Model part
-        self._model = model.Model()
+        self._resModel = model.RESModel()
+        self._model = None
         
         #view part
-        self._view = view.MainView(self)
+        self._view = view.MainView()
         self._view.Maximize()
         self._view.Show()
         
@@ -48,19 +47,35 @@ class Controller():
         #pub.subscribe(self.DeselectProcess, EVENTS.PROCESS_DESELECTED)
         
         pub.subscribe(self.EditConnection, EVENTS.CONNECTION_EDITING)
+        
+        pub.subscribe(self.RESSelected, EVENTS.RES_SELECTED)
+        pub.subscribe(self.OnItemDoubleClick, EVENTS.ITEM_DOUBLE_CLICK)
 
-        
-    def AddYear(self, year):
-        self._model.AddYear(year)
     
-    def RemoveYears(self, years):
-        self._model.RemoveYears(years)
-        
     def AddSite(self, site):
-        self._model.AddSite(site)
+        status = self._resModel.AddSite(site)
+        if status == 1:
+            wx.MessageBox('A Site with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
+        else:
+            self._view.AddRESTab(self, site)
+            
     
     def RemoveSites(self, sites):
-        self._model.RemoveSites(sites)
+        s = wx.MessageBox('Are you sure? All site(s) data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+        if s == wx.OK:
+            self._resModel.RemoveSites(sites)
+            self._view.RemoveRESTab(sites)
+            
+    def RESSelected(self, siteName):    
+        self._model = self._resModel.GetSiteModel(siteName)
+        
+    def AddYear(self, year):
+        self._resModel.AddYear(year)
+    
+    def RemoveYears(self, years):
+        s = wx.MessageBox('Are you sure? All year(s) data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+        if s == wx.OK:
+            self._resModel.RemoveYears(years)
         
     def AddCommodity(self, commType):
         comm = self._model.CreateNewCommodity(commType)        
@@ -115,20 +130,6 @@ class Controller():
         connForm.PopulateConnectionGrid(connection)
         connForm.ShowModal()
         
-    def SelectCommodity(self, commId):
-        self._selectedCommodity = commId
-    
-    def DeselectCommodity(self, commId):
-        #Assert if diff Ids
-        self._selectedCommodity = None
-        
-    def SelectProcess(self, processId):
-        self._selectedProcess = processId
-    
-    def DeselectProcess(self, processId):
-        #Assert if diff Ids
-        self._selectedProcess = None            
-        
     def GetCommodities(self):
         return self._model._commodities
     
@@ -147,4 +148,10 @@ class Controller():
 
                 
         return d
+        
+    def OnItemDoubleClick(self, itemId, itemType):
+        if itemType == 'commodity':
+            self.EditCommodity(itemId)
+        elif itemType == 'process':
+            self.EditProcess(itemId)
         

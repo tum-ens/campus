@@ -47,6 +47,9 @@ class ProcessShape(ogl.RectangleShape):
         
     def GetId(self):
         return self._uuid
+        
+    def GetType(self):
+        return 'process'
     
     def GetAttachX(self, forward=False):
         if forward: 
@@ -85,6 +88,9 @@ class CommodityShape(ogl.LineShape):
         
     def GetId(self):
         return self._uuid
+        
+    def GetType(self):
+        return 'commodity'
     
     def GetGroup(self):
         return self._uuid[0]
@@ -110,9 +116,7 @@ class ConnectionShape(ogl.LineShape):
     def GetId(self):
         return self._uuid   
 
-class RESView(wx.Panel):     
-    
-    _shapes = {}
+class RESView(wx.Panel):
 
     _actions = {1 : {'Name' : 'SupIm', 'ImgPath' : 'Solar_WE_10.png'},
                 2 : {'Name' : 'Buy', 'ImgPath' : 'Buy.png'},
@@ -127,13 +131,35 @@ class RESView(wx.Panel):
                 }
     
 
-    def __init__( self, parent, controller ):
+    def __init__( self, parent, controller, siteName ):
         wx.Frame.__init__ ( self, parent)
         self._controller = controller
+        self._siteName = siteName
+        self._shapes   = {}
         #self.SetBackgroundColour("black")
         
         #manage layout
         mainLayout = wx.BoxSizer( wx.VERTICAL )
+        barLayout = self.BuildToolBar()
+        mainLayout.Add(barLayout, 0, wx.ALL|wx.EXPAND, 2)
+        
+        self.BuildCanvas()
+        mainLayout.Add(self._canvas, 1, wx.ALL|wx.EXPAND, 5)
+        
+        self.SetSizer( mainLayout )
+        self.Layout()        
+        self.Centre( wx.BOTH )
+        
+        pub.subscribe(self.RebuildRES, EVENTS.COMMODITY_ADDED + self._siteName)
+        pub.subscribe(self.RebuildRES, EVENTS.COMMODITY_EDITED + self._siteName)
+        pub.subscribe(self.RebuildRES, EVENTS.PROCESS_ADDED + self._siteName)
+        pub.subscribe(self.RebuildRES, EVENTS.PROCESS_EDITED + self._siteName)
+        #pub.subscribe(self.ConnectionIsAdded, EVENTS.CONNECTION_ADDED)
+    #-------------------------------------------------------------------------#
+    def GetSiteName(self):
+        return self._siteName
+    #-------------------------------------------------------------------------#
+    def BuildToolBar(self):
         barLayout = wx.BoxSizer( wx.HORIZONTAL )
         
         actionsLayout = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Actions:" ), wx.HORIZONTAL )
@@ -151,8 +177,18 @@ class RESView(wx.Panel):
         tb.Realize()
         
         barLayout.Add(actionsLayout, 1, wx.ALL|wx.EXPAND, 2)
-        mainLayout.Add(barLayout, 0, wx.ALL|wx.EXPAND, 2)
         
+        return barLayout
+    #-------------------------------------------------------------------------#    
+    def OnToolClick(self, event):
+       #print("tool %s clicked\n" % event.GetId())
+       if event.GetId() == 10:
+           pub.sendMessage(EVENTS.PROCESS_ADDING)
+       else:
+           commType = self._actions[event.GetId()]['Name']
+           pub.sendMessage(EVENTS.COMMODITY_ADDING, commType=commType)
+    #-------------------------------------------------------------------------#       
+    def BuildCanvas(self):
         ogl.OGLInitialize() 
         self._canvas = ogl.ShapeCanvas(self)
         maxWidth  = 4000
@@ -164,44 +200,11 @@ class RESView(wx.Panel):
         self._diagram.SetCanvas(self._canvas)
         #self._canvas.Bind(wx.EVT_CHAR_HOOK, self.WhenAkeyIsPressed)
         
-        mainLayout.Add(self._canvas, 1, wx.ALL|wx.EXPAND, 5)        
-        
-        self.SetSizer( mainLayout )
-        self.Layout()        
-        self.Centre( wx.BOTH )
-        
-        
-        pub.subscribe(self.ShapOnDoubleClick, EVENTS.SHAPE_DOUBLE_CLICK)
-        #pub.subscribe(self.ShapeSelect, EVENTS.SHAPE_SELECTED)
-        #pub.subscribe(self.ShapeDeselect, EVENTS.SHAPE_DESELECTED)
-        
-        pub.subscribe(self.RebuildRES, EVENTS.COMMODITY_ADDED)
-        pub.subscribe(self.RebuildRES, EVENTS.COMMODITY_EDITED)
-        pub.subscribe(self.RebuildRES, EVENTS.PROCESS_ADDED)        
-        pub.subscribe(self.RebuildRES, EVENTS.PROCESS_EDITED)
-        #pub.subscribe(self.ConnectionIsAdded, EVENTS.CONNECTION_ADDED)
-        
-    def OnToolClick(self, event):
-       #print("tool %s clicked\n" % event.GetId())
-       if event.GetId() == 10:
-           pub.sendMessage(EVENTS.PROCESS_ADDING)
-       else:
-           commType = self._actions[event.GetId()]['Name']
-           pub.sendMessage(EVENTS.COMMODITY_ADDING, commType=commType)
     #-------------------------------------------------------------------------#   
     def RefreshCanvas(self):
        dc = wx.ClientDC(self._canvas)
        self._canvas.PrepareDC(dc)
        self._canvas.Redraw(dc)
-    #-------------------------------------------------------------------------#    
-    def ShapOnDoubleClick(self, shapeId):        
-        shapeType = self._shapes[shapeId]['type']
-        if shapeType == 'process':
-            pub.sendMessage(EVENTS.PROCESS_EDITING, processId=self._shapes[shapeId]['uId'])
-        elif shapeType == 'commodity':
-            pub.sendMessage(EVENTS.COMMODITY_EDITING, commId=self._shapes[shapeId]['uId'])
-        #elif shapeType == 'connection':
-        #    pub.sendMessage(EVENTS.CONNECTION_EDITING, connId=self._shapes[shapeId]['uId'])       
 
     #-------------------------------------------------------------------------#    
     def RebuildRES(self):
@@ -213,7 +216,7 @@ class RESView(wx.Panel):
         processes = self._controller.GetProcesses()
         for k in sorted(processes):
             p = processes[k]
-            procShape = self._shapes[k]['shape']
+            procShape = self._shapes[k]
             conns = self.BuildConnections(p, procShape)
             self.DrawProcConnections(procShape, conns)
                 
@@ -239,13 +242,13 @@ class RESView(wx.Panel):
         lineY = procShape.GetAttachY()
         #Draw in (always from left to right)
         for inComm in p['IN']:
-            commShape = self._shapes[inComm]['shape']
+            commShape = self._shapes[inComm]
             line = ConnectionShape(self._canvas, wx.ID_ANY, commShape.GetColor())
             line.SetEnds(commShape.GetX(), lineY, procShape.GetAttachX(), lineY)
             lines.append(line)
         #Draw out
         for outComm in p['OUT']:
-            commShape = self._shapes[outComm]['shape']
+            commShape = self._shapes[outComm]
             line = ConnectionShape(self._canvas, wx.ID_ANY, commShape.GetColor())
             x1, x2 = 0, 0
             if commShape.GetX() > procShape.GetX():
@@ -276,7 +279,7 @@ class RESView(wx.Panel):
                     x += xOffset
 
             commShape = CommodityShape(self._canvas, x, 10, k, data['Name'], data['Color'])            
-            self._shapes[k] = {'type': 'commodity', 'uId': k, 'shape': commShape}
+            self._shapes[k] = commShape
             processes = self._controller.GetLinkedProcesses(k)
             #print(processes)            
             if len(processes) > 0: 
@@ -285,7 +288,7 @@ class RESView(wx.Panel):
                 y+=10                
                 p = processes[k]
                 procShape = ProcessShape(self._canvas, x, y, p['Id'], p['Name'])
-                self._shapes[procShape.GetId()] = {'type': 'process', 'uId': p['Id'], 'shape': procShape}                    
+                self._shapes[procShape.GetId()] = procShape
                 #move positions to draw next process
                 if procShape._width > xOffset: xOffset = procShape._width                
                 y+= procShape._height                

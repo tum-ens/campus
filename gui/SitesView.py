@@ -59,6 +59,7 @@ class SitesView():
         for i in range(0, len(self._gridCols)):
             self._sitesGrid.SetColSize(i, 120)
         self._sitesGrid.SetColSize(0, 20)
+        self._sitesGrid.SetRowLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTER)
                 
         sitesLayout.Add(self._sitesGrid, 1, wx.ALL|wx.EXPAND, 5)
         

@@ -9,91 +9,114 @@ from pubsub import pub
 from Events import EVENTS
 
 import DataConfig as config
-    
-class Model():
-    _years          = {}
-    _sites          = {}
-    _commodities    = {}
-    _processes      = {}
-    _connections    = {}
 
+class RESModel():
+    
     def __init__(self):
-        return    
+        self._years  = {}
+        self._sites  = {}
+        self._models = {}
+
+    def InitializeSite(self, name):
+        return SiteModel.InitializeData(config.DataConfig.SITE_PARAMS)
+
+    def AddSite(self, siteName):
+        status = 0        
+        if not (siteName in self._sites):
+            self._sites[siteName]  = self.InitializeSite(siteName)
+            self._models[siteName] = SiteModel(siteName, list(self._years.keys()))
+            #notify subscribers that a site is added
+            pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
+        else:
+            status = 1
         
-    def InitializeData(self, cols):
+        return status
+
+    def RemoveSites(self, sites):
+        notify = 0
+        for site in sites:
+            self._sites.pop(site)
+            self._models.pop(site)
+            notify += 1
+            
+        #notify subscribers that a site is removed
+        if notify > 0:
+            pub.sendMessage(EVENTS.SITE_REMOVED, sites=self._sites, removeCount=notify)
+            
+    def InitializeYear(self):
+        return SiteModel.InitializeData(config.DataConfig.YEAR_PARAMS)
+        
+    def AddYear(self, year):
+        if not (year in self._years):
+            self._years[year] = self.InitializeYear()
+            for m in self._models.values():
+                m.AddYear(year)
+            
+            #notify subscribers that a year is added
+            pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
+
+    def RemoveYears(self, years):
+        for year in years:
+            self._years.pop(year)
+            for m in self._models.values():
+                m.RemoveYear(year)
+            
+        #notify subscribers that years are removed
+        pub.sendMessage(EVENTS.YEAR_REMOVED, years=self._years, removeCount=len(years))
+    
+    def GetSiteModel(self, siteName):
+        return self._models[siteName]
+            
+#-----------------------------------------------------------------------------#    
+class SiteModel():
+
+    def __init__(self, name, years):
+        self._name           = name
+        self._years          = years
+        self._commodities    = {}
+        self._processes      = {}
+        self._connections    = {}
+        
+    def InitializeData(cols):
         data = {}
         for col in cols:
             data[col[config.DataConfig.PARAM_KEY]] = col[config.DataConfig.PARAM_DEFVALUE]
 
         return data
         
-    def InitializeYear(self):
-        return self.InitializeData(config.DataConfig.YEAR_PARAMS)
-    
-    def InitializeSite(self):
-        return self.InitializeData(config.DataConfig.SITE_PARAMS)
         
     def InitializeCommodity(self):
-        return self.InitializeData(config.DataConfig.COMMODITY_PARAMS)
+        return SiteModel.InitializeData(config.DataConfig.COMMODITY_PARAMS)
         
     def InitializeProcess(self):
-        return self.InitializeData(config.DataConfig.PROCESS_PARAMS)
+        return SiteModel.InitializeData(config.DataConfig.PROCESS_PARAMS)
     
     def InitializeConnection(self):
-        return self.InitializeData(config.DataConfig.CONNECTION_PARAMS)
-
+        return SiteModel.InitializeData(config.DataConfig.CONNECTION_PARAMS)
+        
     def AddYear(self, year):
-        if not (year in self._years):
-            self._years[year] = self.InitializeYear()
+        self._years.append(year)
+        
+        for data in self._commodities.values():
+            data['Years'][year] = self.InitializeCommodity()
+        
+        for data in self._processes.values():
+            data['Years'][year] = self.InitializeProcess()
             
-            for data in self._commodities.values():
-                data['Years'][year] = self.InitializeCommodity()
-            
-            for data in self._processes.values():
-                data['Years'][year] = self.InitializeProcess()
-                
-            for data in self._connections.values():
-                data['Years'][year] = self.InitializeConnection()
-            
-            #notify subscribers that a year is added
-            pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
+        for data in self._connections.values():
+            data['Years'][year] = self.InitializeConnection()
 
-    def RemoveYears(self, years):
-        notify = 0
-        for year in years:
-            self._years.pop(year)
+    def RemoveYear(self, year):
+        self._years.remove(year)
+        
+        for data in self._commodities.values():
+            data['Years'].pop(year)
             
-            for data in self._commodities.values():
-                data['Years'].pop(year)
-                
-            for data in self._processes.values():
-                data['Years'].pop(year)
-                
-            for data in self._connections.values():
-                data['Years'].pop(year)
-                
-            notify += 1
+        for data in self._processes.values():
+            data['Years'].pop(year)
             
-        #notify subscribers that a year is removed
-        if notify > 0:
-            pub.sendMessage(EVENTS.YEAR_REMOVED, years=self._years, removeCount=notify)
-            
-    
-    def AddSite(self, site):
-        if not (site in self._sites):
-            self._sites[site] = self.InitializeSite()
-            #notify subscribers that a site is added
-            pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
-
-    def RemoveSites(self, sites):
-        notify = 0
-        for site in sites:
-            self._sites.pop(site)
-            notify += 1
-            
-        #notify subscribers that a site is removed
-        if notify > 0:
-            pub.sendMessage(EVENTS.SITE_REMOVED, sites=self._sites, removeCount=notify)
+        for data in self._connections.values():
+            data['Years'].pop(year)
             
     def GetCommodityGroup(self, commType):
         grp = '2-1'
@@ -135,9 +158,9 @@ class Model():
         if success:
             if commId not in self._commodities:
                 self._commodities[commId] = data
-                pub.sendMessage(EVENTS.COMMODITY_ADDED)
+                pub.sendMessage(EVENTS.COMMODITY_ADDED + self._name)
             else:
-                pub.sendMessage(EVENTS.COMMODITY_EDITED)
+                pub.sendMessage(EVENTS.COMMODITY_EDITED + self._name)
         
         #Add further checks for status
         return success
@@ -184,9 +207,9 @@ class Model():
             self.SaveConnections(processId, data['OUT'], 'OUT')
             if processId not in self._processes:
                 self._processes[processId] = data
-                pub.sendMessage(EVENTS.PROCESS_ADDED)
+                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name)
             else:
-                pub.sendMessage(EVENTS.PROCESS_EDITED)
+                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name)
         
         #Add further checks for status
         return status
