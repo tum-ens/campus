@@ -27,5 +27,6 @@ class ConnectionDialog ( bf.BasicForm ):
         #self._yearsGrid.AutoSizeColumns(False)
         super().SetContent(self._yearsGrid, wx.ALIGN_CENTER_HORIZONTAL)
         
-    def PopulateConnectionGrid(self, dataPerYear):
-        super().PopulateGrid(self._gridTable, dataPerYear)
+    def PopulateConnectionGrid(self, connection):
+        self._conn = connection
+        super().PopulateGrid(self._gridTable, connection['Years'])

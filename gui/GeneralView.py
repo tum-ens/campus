@@ -25,9 +25,9 @@ class GeneralView(wx.Panel):
         sitesView = sv.SitesView(self)
         sitesLayout = sitesView.GetLayout()    
         
-        mainLayout = wx.BoxSizer( wx.HORIZONTAL )
-        mainLayout.Add(yearsLayout, 0, wx.ALL|wx.EXPAND, 5)
+        mainLayout = wx.BoxSizer( wx.HORIZONTAL )        
         mainLayout.Add(sitesLayout, 0, wx.ALL|wx.EXPAND, 5)
+        mainLayout.Add(yearsLayout, 0, wx.ALL|wx.EXPAND, 5)
         
         
         self.SetSizer( mainLayout )

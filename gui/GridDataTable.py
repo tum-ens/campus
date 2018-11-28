@@ -29,11 +29,11 @@ class GridDataTable(wx.grid.GridTableBase):
             
     def Commit(self):
         #print('Commit')
-        #self._data.update(self._tmpData) #don't use update
-        for year, params in self._tmpData.items():
-            for col in self._cols:
-                colKey = col[config.DataConfig.PARAM_KEY]
-                self._data[year][colKey] = params[colKey]
+        self._data.update(self._tmpData) #only if data is NOT shared
+#        for year, params in self._tmpData.items():
+#            for col in self._cols:
+#                colKey = col[config.DataConfig.PARAM_KEY]
+#                self._data[year][colKey] = params[colKey]
     
     #--------------------------------------------------
     # required methods for the wxPyGridTableBase interface
@@ -106,4 +106,21 @@ class GridDataTable(wx.grid.GridTableBase):
     
     def CanSetValueAs(self, row, col, typeName):
         return self.CanGetValueAs(row, col, typeName)
+        
+    def GetData(self):
+        return self._tmpData
+    
+    def FillAll(self):
+        data = {}
+        if self._autoCommit:
+            data = self._data
+        else:
+            data = self._tmpData
+            
+        if len(data) == 0: return
+
+        firstKey = sorted(data)[0]
+        for key in data.keys():
+            if key != firstKey:
+                data[key] = data[firstKey]
 #---------------------------------------------------------------------------
