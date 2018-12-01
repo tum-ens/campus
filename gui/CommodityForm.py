@@ -21,7 +21,7 @@ class CommodityDialog ( bf.BasicForm ):
     _gridCols = config.DataConfig.COMMODITY_PARAMS
     
     def __init__(self, parent):
-        super().__init__(parent, "Commodity data", wx.Size(750, 500))
+        super().__init__(parent, "Commodity data", wx.Size(800, 500))
         contentLayout = wx.BoxSizer( wx.VERTICAL )
   
         layout0 = self.CreateGeneralLayout()
@@ -41,11 +41,11 @@ class CommodityDialog ( bf.BasicForm ):
         self._yearsGrid = wx.grid.Grid(self)
         self._yearsGrid.SetTable(self._gridTable, True)
         self._yearsGrid.AutoSizeColumns(False)
-        self._yearsGrid.SetColSize(4, 0)
+        self._yearsGrid.HideCol(0)#time series
         attr = wx.grid.GridCellAttr()
         attr.SetReadOnly(True)
         attr.SetAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        self._yearsGrid.SetColAttr(3, attr)
+        self._yearsGrid.SetColAttr(4, attr)#...
         self._yearsGrid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnTimeSerClick)
         layout1.Add(self._yearsGrid, 1, wx.ALL|wx.EXPAND, 5)
         
@@ -53,8 +53,8 @@ class CommodityDialog ( bf.BasicForm ):
         
     def OnTimeSerClick(self, event):
         tsf = ts.TimeSeriesForm(self)
-        tsf.PopulateData(self._commodity['Name'], self._gridTable, event.GetRow(), event.GetCol()+1)
-        tsf.ShowModal()        
+        tsf.PopulateData(self._commodity['Name'], self._gridTable, event.GetRow(), 0)
+        tsf.ShowModal()
         
     def CreateGeneralLayout(self):
         layout0 = wx.BoxSizer( wx.HORIZONTAL )
@@ -64,7 +64,14 @@ class CommodityDialog ( bf.BasicForm ):
         layout0.Add(label, 0, wx.ALL, 5)
         self._lblCommType = wx.StaticText(self, -1, "...")
         self._lblCommType.SetForegroundColour(wx.WHITE)
-        layout0.Add(self._lblCommType, 0, wx.ALL, 5)        
+        layout0.Add(self._lblCommType, 0, wx.ALL, 5)
+        label = wx.StaticText(self, -1, "....", size=wx.Size(240,5))
+        layout0.Add(label, 0, wx.ALL, 5)
+        self._chkDSM = wx.CheckBox(self, -1, "Demand Side Management (DSM)")
+        self._chkDSM.SetForegroundColour(wx.WHITE)
+        self._chkDSM.Hide()
+        self._chkDSM.Bind(wx.EVT_CHECKBOX, self.OnDSMChange)
+        layout0.Add(self._chkDSM, 0, wx.ALL, 5)
         #Name
         layout1 = wx.BoxSizer( wx.HORIZONTAL )
         label = wx.StaticText(self, -1, "Commodity name:")
@@ -87,21 +94,41 @@ class CommodityDialog ( bf.BasicForm ):
         
         return layout2
         
+    def OnDSMChange(self, event):
+        if self._chkDSM.IsChecked():
+            for i in range(5, self._yearsGrid.GetNumberCols()):
+                self._yearsGrid.ShowCol(i)
+        else:
+            for i in range(5, self._yearsGrid.GetNumberCols()):
+                self._yearsGrid.HideCol(i)
+        
     def PopulateCommodity(self, comm):
         self._orgComm = cpy.deepcopy(comm)
         self._commodity = comm
         self._lblCommType.SetLabel(comm['Type'])
+        self._chkDSM.SetValue(comm['DSM'])
         self._txtCommName.SetValue(comm['Name'])
-        self._color.SetColour(comm['Color'])
+        self._color.SetColour(comm['Color'])        
         super().PopulateGrid(self._gridTable, comm['Years'])
         #Hide TS column
         if comm['Type'] in (config.DataConfig.COMM_STOCK, config.DataConfig.COMM_ENV):
-            self._yearsGrid.SetColSize(3, 0)
+            #no time series
+            self._yearsGrid.HideCol(4)
+        if comm['Type'] in (config.DataConfig.COMM_SUPLM, config.DataConfig.COMM_DEMAND):
+            #only time series
+            self._yearsGrid.HideCol(1)
+            self._yearsGrid.HideCol(2)
+            self._yearsGrid.HideCol(3)
+        if comm['Type'] in (config.DataConfig.COMM_DEMAND):
+            self._chkDSM.Show()
+        
+        self.OnDSMChange(None)
     
     def OnOk(self, event):
         self._commodity['Type'] = self._lblCommType.GetLabelText()
         self._commodity['Name'] = self._txtCommName.GetValue()
         self._commodity['Color'] = self._color.GetColour()
+        self._commodity['DSM'] = self._chkDSM.GetValue()
         self._gridTable.Commit()
         pub.sendMessage(EVENTS.COMMODITY_SAVE, data=self._commodity)
 

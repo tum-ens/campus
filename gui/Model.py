@@ -142,6 +142,7 @@ class SiteModel():
         data['Type'] = commType
         data['Group'] = grp[0]
         data['Color'] = (0,0,0)
+        data['DSM'] = False
         for year in self._years:
             data['Years'][year] = self.InitializeCommodity()
         

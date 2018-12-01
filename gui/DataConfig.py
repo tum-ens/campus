@@ -42,6 +42,8 @@ class DataConfig():
                 ]
                      
     COMMODITY_PARAMS = [
+                  {PARAM_KEY: 'timeSer', 
+                   GRID_COL_LABEL: 'Hidden', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''},
                   {PARAM_KEY: 'price', 
                    GRID_COL_LABEL:'Commodity price (Euro/MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.00},
                   {PARAM_KEY: 'max', 
@@ -49,9 +51,17 @@ class DataConfig():
                   {PARAM_KEY: 'maxPerHour', 
                    GRID_COL_LABEL: 'Maximum commodity use per step', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 'inf'},
                   {PARAM_KEY: 'Action', 
-                   GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'},
-                  {PARAM_KEY: 'timeSer', 
-                   GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''}
+                   GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'},                  
+                  {PARAM_KEY: 'delay', 
+                   GRID_COL_LABEL:'Delay time (h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.00},
+                  {PARAM_KEY: 'eff', 
+                   GRID_COL_LABEL:'Efficiency', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.00},
+                    {PARAM_KEY: 'recov', 
+                   GRID_COL_LABEL:'Recovery time (h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.00},
+                    {PARAM_KEY: 'capMaxDo', 
+                   GRID_COL_LABEL:'Downshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.00},
+                  {PARAM_KEY: 'capMaxUp', 
+                   GRID_COL_LABEL:'Upshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_FLOAT, PARAM_DEFVALUE: 0.00}
                 ]
                 
     COMMODITY_COLS = [
