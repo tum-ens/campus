@@ -9,6 +9,7 @@ import MainView as view
 import CommodityForm as commf
 import ProcessForm as procf
 import ConnectionForm as connf
+import StorageForm as strgf
 import wx
 
 from pubsub import pub
@@ -46,10 +47,15 @@ class Controller():
         #pub.subscribe(self.SelectProcess, EVENTS.PROCESS_SELECTED)
         #pub.subscribe(self.DeselectProcess, EVENTS.PROCESS_DESELECTED)
         
+        pub.subscribe(self.AddStorage, EVENTS.STORAGE_ADDING)
+        pub.subscribe(self.EditStorage, EVENTS.STORAGE_EDITING)
+        pub.subscribe(self.SaveStorage, EVENTS.STORAGE_SAVE)
+        
         pub.subscribe(self.EditConnection, EVENTS.CONNECTION_EDITING)
         
         pub.subscribe(self.RESSelected, EVENTS.RES_SELECTED)
         pub.subscribe(self.OnItemDoubleClick, EVENTS.ITEM_DOUBLE_CLICK)
+        pub.subscribe(self.OnItemMove, EVENTS.ITEM_MOVED)
 
     
     def AddSite(self, site):
@@ -124,6 +130,28 @@ class Controller():
     def RemoveProcesses(self, processes):
         self._model.RemoveProcesses(processes)        
         
+    def AddStorage(self):
+        newStorage = self._model.CreateNewStorage()        
+        self._storageForm = strgf.StorageDialog(self._view)
+        self._storageForm.PopulateStorage(newStorage, self._model.GetCommodityList())
+        self._storageForm.ShowModal()
+    
+    def SaveStorage(self, data):
+        status = self._model.SaveStorage(data)
+        if status == 1:
+            wx.MessageBox('A storage with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
+        elif status == 2:
+            wx.MessageBox('Please select a commodity!', 'Error', wx.OK|wx.ICON_ERROR)
+        else:
+            self._storageForm.Close()            
+            
+        
+    def EditStorage(self, storageId):
+        storage = self._model.GetStorage(storageId)
+        self._storageForm = strgf.StorageDialog(self._view)
+        self._storageForm.PopulateStorage(storage, self._model.GetCommodityList())
+        self._storageForm.ShowModal()
+        
     def EditConnection(self, procId, commId, In_Out):
         connection = self._model.GetConnection(procId, commId, In_Out)
         connForm = connf.ConnectionDialog(self._view)
@@ -150,8 +178,13 @@ class Controller():
         return d
         
     def OnItemDoubleClick(self, itemId, itemType):
-        if itemType == 'commodity':
+        if itemType == 'Commodity':
             self.EditCommodity(itemId)
-        elif itemType == 'process':
+        elif itemType == 'Process':
             self.EditProcess(itemId)
+        elif itemType == 'Storage':
+            self.EditStorage(itemId)
+            
+    def OnItemMove(self, item):
+        pub.sendMessage(EVENTS.ITEM_MOVED + self._model.GetSiteName(), item=item)
         

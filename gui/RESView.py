@@ -14,107 +14,10 @@ Created on Mon Oct 29 19:03:07 2018
 
 import wx
 import wx.lib.ogl as ogl
-import RESEvtHandler as evt
-
+import RESShapes as res
 
 from pubsub import pub
 from Events import EVENTS
-
-class ProcessShape(ogl.RectangleShape):
-    def __init__(self, canvas, x, y, uuid, text):
-        self._width = 150
-        self._hight = 45
-        ogl.RectangleShape.__init__(self, self._width, self._hight)
-        self.SetDraggable(False, False)
-        self.SetCanvas(canvas)
-        self.SetX(x)
-        self.SetY(y)
-        self.SetPen(wx.BLACK_PEN)
-        self.SetBrush(wx.WHITE_BRUSH)
-        if text:
-            self.AddText(text)
-        #shape.SetShadowMode(ogl.SHADOW_RIGHT)
-        self.SetFont(wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        canvas.GetDiagram().AddShape(self)
-        self.Show(True)        
-
-        evthandler = evt.RESEvtHandler()
-        evthandler.SetShape(self)
-        evthandler.SetPreviousHandler(self.GetEventHandler())
-        self.SetEventHandler(evthandler)
-        
-        self._uuid = uuid
-        
-    def GetId(self):
-        return self._uuid
-        
-    def GetType(self):
-        return 'process'
-    
-    def GetAttachX(self, forward=False):
-        if forward: 
-            return self.GetX() + self._width/2
-
-        return self.GetX() - self._width/2
-
-    def GetAttachY(self):
-        return self.GetY() - self._hight/2
-
-class CommodityShape(ogl.LineShape):
-    def __init__(self, canvas, x, y, uuid, text, color):
-        ogl.LineShape.__init__(self)        
-        self.MakeLineControlPoints(2)
-        self.SetEnds(x, y, x, 2000)
-        #self.SetDraggable(True, True)
-        self.SetCanvas(canvas)
-        self._color = color
-        self.SetPen(wx.Pen(color, 0.5, wx.SOLID))
-        #if brush:  shape.SetBrush(brush)
-        if text:
-            #self.AddText(text)
-            self.SetFormatMode(ogl.FORMAT_SIZE_TO_CONTENTS, 1)
-            self.FormatText(wx.ClientDC(canvas), text, 1)## start
-        #shape.SetShadowMode(ogl.SHADOW_RIGHT)
-        self.SetFont(wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        canvas.GetDiagram().AddShape(self)
-        self.Show(True)        
-
-        evthandler = evt.RESEvtHandler()
-        evthandler.SetShape(self)
-        evthandler.SetPreviousHandler(self.GetEventHandler())
-        self.SetEventHandler(evthandler)
-        
-        self._uuid = uuid
-        
-    def GetId(self):
-        return self._uuid
-        
-    def GetType(self):
-        return 'commodity'
-    
-    def GetGroup(self):
-        return self._uuid[0]
-
-    def GetColor(self):
-        return self._color
-        
-class ConnectionShape(ogl.LineShape):
-    def __init__(self, canvas, uuid, color):
-        ogl.LineShape.__init__(self)
-        self.MakeLineControlPoints(2)
-        self.AddArrow(ogl.ARROW_ARROW)
-        #self.SetDraggable(True, True)
-        self.SetCanvas(canvas)
-        self.SetPen(wx.Pen(color, 0.5, wx.SOLID))
-        #if brush:  shape.SetBrush(brush)
-        #shape.SetShadowMode(ogl.SHADOW_RIGHT)
-        canvas.GetDiagram().AddShape(self)
-        self.Show(True)
-        
-        self._uuid = uuid
-        
-    def GetId(self):
-        return self._uuid   
 
 class RESView(wx.Panel):
 
@@ -128,6 +31,7 @@ class RESView(wx.Panel):
                 6 : {'Name' : 'Env', 'ImgPath' : 'Env.png'},
                 #######################################################
                 10 : {'Name' : 'Process', 'ImgPath' : 'Process.png'},
+                11 : {'Name' : 'Storage', 'ImgPath' : 'Storage.png'},
                 }
     
 
@@ -155,6 +59,8 @@ class RESView(wx.Panel):
         pub.subscribe(self.RebuildRES, EVENTS.PROCESS_ADDED + self._siteName)
         pub.subscribe(self.RebuildRES, EVENTS.PROCESS_EDITED + self._siteName)
         #pub.subscribe(self.ConnectionIsAdded, EVENTS.CONNECTION_ADDED)
+        
+        pub.subscribe(self.OnItemMove, EVENTS.ITEM_MOVED + self._siteName)
     #-------------------------------------------------------------------------#
     def GetSiteName(self):
         return self._siteName
@@ -184,6 +90,8 @@ class RESView(wx.Panel):
        #print("tool %s clicked\n" % event.GetId())
        if event.GetId() == 10:
            pub.sendMessage(EVENTS.PROCESS_ADDING)
+       elif event.GetId() == 11:
+           pub.sendMessage(EVENTS.STORAGE_ADDING)
        else:
            commType = self._actions[event.GetId()]['Name']
            pub.sendMessage(EVENTS.COMMODITY_ADDING, commType=commType)
@@ -236,20 +144,23 @@ class RESView(wx.Panel):
         for line in rightLines:
             lineY += procShape._hight / (len(rightLines)+1)
             line.SetEnds(line.GetEnds()[0], lineY, line.GetEnds()[2], lineY)
+            
+        procShape.SetConnections(lines)
     #-------------------------------------------------------------------------#
     def BuildConnections(self, p, procShape):        
         lines = []            
         lineY = procShape.GetAttachY()
         #Draw in (always from left to right)
+        isDblArrow = (p['Type'] == 'Storage')
         for inComm in p['IN']:
             commShape = self._shapes[inComm]
-            line = ConnectionShape(self._canvas, wx.ID_ANY, commShape.GetColor())
+            line = res.ConnectionShape(self._canvas, wx.ID_ANY, commShape.GetColor(), isDblArrow)
             line.SetEnds(commShape.GetX(), lineY, procShape.GetAttachX(), lineY)
             lines.append(line)
         #Draw out
         for outComm in p['OUT']:
             commShape = self._shapes[outComm]
-            line = ConnectionShape(self._canvas, wx.ID_ANY, commShape.GetColor())
+            line = res.ConnectionShape(self._canvas, wx.ID_ANY, commShape.GetColor())
             x1, x2 = 0, 0
             if commShape.GetX() > procShape.GetX():
                 x1 = procShape.GetAttachX(True)
@@ -278,16 +189,19 @@ class RESView(wx.Panel):
                 else:
                     x += xOffset
 
-            commShape = CommodityShape(self._canvas, x, 10, k, data['Name'], data['Color'])            
+            commShape = res.CommodityShape(self._canvas, x, 10, k, data['Name'], data['Color'])            
             self._shapes[k] = commShape
             processes = self._controller.GetLinkedProcesses(k)
             #print(processes)            
             if len(processes) > 0: 
                 x+=100
             for k in sorted(processes):
-                y+=10                
+                if k in self._shapes.keys():
+                    y = self._shapes[k].GetY()
+                else:
+                    y = 60                
                 p = processes[k]
-                procShape = ProcessShape(self._canvas, x, y, p['Id'], p['Name'])
+                procShape = res.ProcessShape(self._canvas, x, y, k, p['Name'], p['Type'])
                 self._shapes[procShape.GetId()] = procShape
                 #move positions to draw next process
                 if procShape._width > xOffset: xOffset = procShape._width                
@@ -310,7 +224,7 @@ class RESView(wx.Panel):
         #if brush:  shape.SetBrush(brush)
         self._diagram.AddShape(line)
         line.Show(True)        
-    
+    #-------------------------------------------------------------------------#
     def RemoveAllShapes(self):
         dc = wx.ClientDC(self._canvas)
         self._canvas.PrepareDC(dc)
@@ -321,4 +235,15 @@ class RESView(wx.Panel):
         self._diagram.RemoveAllShapes()
         self._diagram.Clear(dc)
         self._canvas.Redraw(dc)
-        self._shapes.clear()
+        #self._shapes.clear()
+    #-------------------------------------------------------------------------#
+    def OnItemMove(self, item):
+        dc = wx.ClientDC(self._canvas)
+        self._canvas.PrepareDC(dc)
+        process = item
+        lines = process.GetConnections()
+        self.DrawProcConnections(process, lines)
+            
+        self._diagram.Clear(dc)
+        self._canvas.Redraw(dc)
+        

@@ -137,13 +137,13 @@ class ProcessDialog ( bf.BasicForm ):
     def OnOk(self, event):
         self._process['Name'] = self._txtProcessName.GetValue()
         self._inCommTbl.Commit()
-        self._process['IN'] = self.GetSelectCommodities(self._inCommTbl)
+        self._process['IN'] = self.GetSelectedCommodities(self._inCommTbl)
         self._outCommTbl.Commit()
-        self._process['OUT'] = self.GetSelectCommodities(self._outCommTbl)
+        self._process['OUT'] = self.GetSelectedCommodities(self._outCommTbl)
         self._gridTable1.Commit()
         pub.sendMessage(EVENTS.PROCESS_SAVE, data=self._process)
         
-    def GetSelectCommodities(self, gridTbl):
+    def GetSelectedCommodities(self, gridTbl):
         x = []
         data = gridTbl.GetData()
         for k in sorted(data):

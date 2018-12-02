@@ -82,14 +82,16 @@ class SiteModel():
         for col in cols:
             data[col[config.DataConfig.PARAM_KEY]] = col[config.DataConfig.PARAM_DEFVALUE]
 
-        return data
-        
+        return data        
         
     def InitializeCommodity(self):
         return SiteModel.InitializeData(config.DataConfig.COMMODITY_PARAMS)
         
     def InitializeProcess(self):
         return SiteModel.InitializeData(config.DataConfig.PROCESS_PARAMS)
+        
+    def InitializeStorage(self):
+        return SiteModel.InitializeData(config.DataConfig.STORAGE_PARAMS)
     
     def InitializeConnection(self):
         return SiteModel.InitializeData(config.DataConfig.CONNECTION_PARAMS)
@@ -101,7 +103,10 @@ class SiteModel():
             data['Years'][year] = self.InitializeCommodity()
         
         for data in self._processes.values():
-            data['Years'][year] = self.InitializeProcess()
+            if data['Type'] == 'Storage':
+                data['Years'][year] = self.InitializeStorage()
+            else:
+                data['Years'][year] = self.InitializeProcess()
             
         for data in self._connections.values():
             data['Years'][year] = self.InitializeConnection()
@@ -185,6 +190,7 @@ class SiteModel():
         data['Years'] = {}
         data['Id'] = processId
         data['Name'] = processId
+        data['Type'] = ''
         for year in self._years:
             data['Years'][year] = self.InitializeProcess()   
             
@@ -240,6 +246,7 @@ class SiteModel():
             if v['Proc'] == processId and v['Dir'] == direction:
                 if v['Comm'] not in commList:
                     idsToDel.append(k)
+        
         for k in idsToDel:
             self._connections.pop(k)
         
@@ -251,3 +258,48 @@ class SiteModel():
     def GetConnection(self, procId, commId, In_Out):
         connId = self.AddConnection(procId, commId, In_Out)
         return self._connections[connId]
+
+    def CreateNewStorage(self):
+        storageId = 'NewStorage#' + str(len(self._processes) + 1)
+        data = {}
+        data['IN'] = []
+        data['OUT'] = []
+        data['Years'] = {}
+        data['Id'] = storageId
+        data['Name'] = storageId
+        data['Type'] = 'Storage'
+        for year in self._years:
+            data['Years'][year] = self.InitializeStorage()   
+            
+        return data
+    
+    
+    def SaveStorage(self, data):
+        storageId = data['Id']
+        storageName = data['Name']
+        status = 0
+        for v in self._processes.values():
+            if v['Name'] == storageName and v['Id'] != storageId:
+                status = 1
+                break
+        
+        if len(data['IN']) == 0 and len(data['OUT']) == 0:
+            status = 2
+        
+        if status == 0:
+            self.SaveConnections(storageId, data['IN'], 'IN')
+            self.SaveConnections(storageId, data['OUT'], 'OUT')
+            if storageId not in self._processes:
+                self._processes[storageId] = data
+                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name)
+            else:
+                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name)
+        
+        #Add further checks for status
+        return status
+
+    def GetStorage(self, storageId):
+        return self._processes[storageId]
+
+    def GetSiteName(self):
+        return self._name
