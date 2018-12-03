@@ -164,9 +164,9 @@ class SiteModel():
         if success:
             if commId not in self._commodities:
                 self._commodities[commId] = data
-                pub.sendMessage(EVENTS.COMMODITY_ADDED + self._name)
+                pub.sendMessage(EVENTS.COMMODITY_ADDED + self._name, objId=commId)
             else:
-                pub.sendMessage(EVENTS.COMMODITY_EDITED + self._name)
+                pub.sendMessage(EVENTS.COMMODITY_EDITED + self._name, objId=commId)
         
         #Add further checks for status
         return success
@@ -214,9 +214,9 @@ class SiteModel():
             self.SaveConnections(processId, data['OUT'], 'OUT')
             if processId not in self._processes:
                 self._processes[processId] = data
-                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name)
+                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name, objId=processId)
             else:
-                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name)
+                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name, objId=processId)
         
         #Add further checks for status
         return status
@@ -272,31 +272,6 @@ class SiteModel():
             data['Years'][year] = self.InitializeStorage()   
             
         return data
-    
-    
-    def SaveStorage(self, data):
-        storageId = data['Id']
-        storageName = data['Name']
-        status = 0
-        for v in self._processes.values():
-            if v['Name'] == storageName and v['Id'] != storageId:
-                status = 1
-                break
-        
-        if len(data['IN']) == 0 and len(data['OUT']) == 0:
-            status = 2
-        
-        if status == 0:
-            self.SaveConnections(storageId, data['IN'], 'IN')
-            self.SaveConnections(storageId, data['OUT'], 'OUT')
-            if storageId not in self._processes:
-                self._processes[storageId] = data
-                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name)
-            else:
-                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name)
-        
-        #Add further checks for status
-        return status
 
     def GetStorage(self, storageId):
         return self._processes[storageId]

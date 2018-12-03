@@ -35,6 +35,8 @@ class ProcessShape(ogl.RectangleShape):
         self._uuid = uuid
         self._connections = []
         self._subType = subType
+        self._minX = 0
+        self._maxX = 0
         
     def GetId(self):
         return self._uuid
@@ -56,9 +58,34 @@ class ProcessShape(ogl.RectangleShape):
 
     def SetConnections(self, lines):
         self._connections = lines
+        xs = []
+        xs.append(self.GetAttachX())
+        xs.append(self.GetAttachX(True))
+        for l in lines:
+            x1 = l.GetEnds()[0]
+            x2 = l.GetEnds()[2]
+            xs.append(x1)
+            xs.append(x2)
+        xs = sorted(xs)
+        #print(xs)
+        self._minX = xs[0]
+        self._maxX = xs[-1]
         
     def GetConnections(self):
         return self._connections
+        
+    def IsOverlapping(self, p):
+        #print(self._minX, self._maxX)
+        #print(p._minX, p._maxX)
+        overlap = False
+        if p._minX >= self._minX and p._minX < self._maxX:
+            overlap = True
+        elif p._maxX > self._minX and p._maxX <= self._maxX:
+            overlap = True
+        elif p._minX < self._minX and p._maxX > self._minX:
+            overlap = True
+                
+        return overlap
 
 class CommodityShape(ogl.LineShape):
     def __init__(self, canvas, x, y, uuid, text, color):

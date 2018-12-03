@@ -63,8 +63,7 @@ class Controller():
         if status == 1:
             wx.MessageBox('A Site with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
-            self._view.AddRESTab(self, site)
-            
+            self._view.AddRESTab(self, site)            
     
     def RemoveSites(self, sites):
         s = wx.MessageBox('Are you sure? All site(s) data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
@@ -137,7 +136,7 @@ class Controller():
         self._storageForm.ShowModal()
     
     def SaveStorage(self, data):
-        status = self._model.SaveStorage(data)
+        status = self._model.SaveProcess(data)#storage is a process
         if status == 1:
             wx.MessageBox('A storage with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
         elif status == 2:

@@ -115,39 +115,69 @@ class RESView(wx.Panel):
        self._canvas.Redraw(dc)
 
     #-------------------------------------------------------------------------#    
-    def RebuildRES(self):
+    def RebuildRES(self, objId):
         #print('Inside Rebuild')
         self.RemoveAllShapes()
-        self.DrawCommAndProc()
-        
-        #draw connections
-        processes = self._controller.GetProcesses()
-        for k in sorted(processes):
-            p = processes[k]
-            procShape = self._shapes[k]
-            conns = self.BuildConnections(p, procShape)
-            self.DrawProcConnections(procShape, conns)
-                
+        self.DrawCommodities()
+        self.DrawProcesses(objId)
+
         self.RefreshCanvas()
     #-------------------------------------------------------------------------#
-    def DrawProcConnections(self, procShape, lines):
-        #loop on lines and adjust Y
-        leftLines = [l for l in lines if l.GetX() < procShape.GetX()]
-        rightLines= [l for l in lines if l.GetX() > procShape.GetX()]
-        #print(leftLines, rightLines)
-        lineY = procShape.GetAttachY()
-        for line in leftLines:
-            lineY += procShape._hight / (len(leftLines)+1)
-            line.SetEnds(line.GetEnds()[0], lineY, line.GetEnds()[2], lineY)
-        
-        lineY = procShape.GetAttachY()
-        for line in rightLines:
-            lineY += procShape._hight / (len(rightLines)+1)
-            line.SetEnds(line.GetEnds()[0], lineY, line.GetEnds()[2], lineY)
+    def RemoveAllShapes(self):
+        dc = wx.ClientDC(self._canvas)
+        self._canvas.PrepareDC(dc)
+        for shape in self._diagram.GetShapeList():
+            shape.Show(False)        
+            self._canvas.RemoveShape(shape)
             
-        procShape.SetConnections(lines)
+        self._diagram.RemoveAllShapes()
+        self._diagram.Clear(dc)
+        self._canvas.Redraw(dc)
+        #self._shapes.clear()
     #-------------------------------------------------------------------------#
-    def BuildConnections(self, p, procShape):        
+    def DrawCommodities(self):        
+        x = 50
+        prevGrp = '0'
+        prevCommHasProc = False
+        commDict = self._controller.GetCommodities()
+        for k in sorted(commDict):
+            data = commDict[k]            
+            if prevGrp != data['Group']:
+                if prevCommHasProc: 
+                    x -= 100
+                self.DrawGroupArea(x)
+                prevGrp = data['Group']                
+                x += 100
+
+            commShape = res.CommodityShape(self._canvas, x, 10, k, data['Name'], data['Color'])            
+            self._shapes[k] = commShape
+            processes = self._controller.GetLinkedProcesses(k)
+            if len(processes) > 0: 
+                x += 25+150+25
+                prevCommHasProc = True
+            else:
+                x += 100
+                prevCommHasProc = False
+    #-------------------------------------------------------------------------#
+    def DrawProcesses(self, lastChangedProcess):        
+        commDict = self._controller.GetCommodities()
+        for commId in sorted(commDict):
+            x = self._shapes[commId].GetX() + 100
+            y = 50
+            processes = self._controller.GetLinkedProcesses(commId)
+            for k in sorted(processes):                
+                p = processes[k]
+                if k in self._shapes.keys():
+                    y = self._shapes[k].GetY()                
+                procShape = res.ProcessShape(self._canvas, x, y, k, p['Name'], p['Type'])
+                self._shapes[k] = procShape
+                lines = self.BuildProcConnections(p, procShape)
+                self.DrawProcConnections(procShape, lines)
+                procShape.SetConnections(lines)
+                if k == lastChangedProcess:
+                    self.CheckCollision(procShape)
+    #-------------------------------------------------------------------------#
+    def BuildProcConnections(self, p, procShape):        
         lines = []            
         lineY = procShape.GetAttachY()
         #Draw in (always from left to right)
@@ -169,50 +199,23 @@ class RESView(wx.Panel):
             x2 = commShape.GetX()
             line.SetEnds(x1, lineY, x2, lineY)
             lines.append(line)
-            
+                    
         return lines
     #-------------------------------------------------------------------------#
-    def DrawCommAndProc(self):
-        commDict = self._controller.GetCommodities()
-        x, y = 50, 50
-        prevGrp = '0'
-        prevCommHasProc = False
-        for k in sorted(commDict):
-            xOffset = 100
-            data = commDict[k]            
-            if prevGrp != data['Group']:
-                if prevCommHasProc: x -= 100
-                self.DrawGroupArea(x)
-                prevGrp = data['Group']                
-                if prevCommHasProc: 
-                    x += 100
-                else:
-                    x += xOffset
-
-            commShape = res.CommodityShape(self._canvas, x, 10, k, data['Name'], data['Color'])            
-            self._shapes[k] = commShape
-            processes = self._controller.GetLinkedProcesses(k)
-            #print(processes)            
-            if len(processes) > 0: 
-                x+=100
-            for k in sorted(processes):
-                if k in self._shapes.keys():
-                    y = self._shapes[k].GetY()
-                else:
-                    y = 60                
-                p = processes[k]
-                procShape = res.ProcessShape(self._canvas, x, y, k, p['Name'], p['Type'])
-                self._shapes[procShape.GetId()] = procShape
-                #move positions to draw next process
-                if procShape._width > xOffset: xOffset = procShape._width                
-                y+= procShape._height                
-                        
-            if len(processes) > 0: 
-                x = x + xOffset/2 + 25
-                prevCommHasProc = True
-            else:
-                x += xOffset
-                prevCommHasProc = False
+    def DrawProcConnections(self, procShape, lines):
+        #loop on lines and adjust Y
+        leftLines = [l for l in lines if l.GetX() < procShape.GetX()]
+        rightLines= [l for l in lines if l.GetX() > procShape.GetX()]
+        #print(leftLines, rightLines)
+        lineY = procShape.GetAttachY()
+        for line in leftLines:
+            lineY += procShape._hight / (len(leftLines)+1)
+            line.SetEnds(line.GetEnds()[0], lineY, line.GetEnds()[2], lineY)
+        
+        lineY = procShape.GetAttachY()
+        for line in rightLines:
+            lineY += procShape._hight / (len(rightLines)+1)
+            line.SetEnds(line.GetEnds()[0], lineY, line.GetEnds()[2], lineY)                    
     #-------------------------------------------------------------------------#
     def DrawGroupArea(self, x):
         line = ogl.LineShape()
@@ -223,19 +226,7 @@ class RESView(wx.Panel):
         line.SetPen(wx.Pen(wx.BLACK, 1, wx.DOT_DASH|wx.ALPHA_TRANSPARENT))
         #if brush:  shape.SetBrush(brush)
         self._diagram.AddShape(line)
-        line.Show(True)        
-    #-------------------------------------------------------------------------#
-    def RemoveAllShapes(self):
-        dc = wx.ClientDC(self._canvas)
-        self._canvas.PrepareDC(dc)
-        for shape in self._diagram.GetShapeList():
-            shape.Show(False)        
-            self._canvas.RemoveShape(shape)
-            
-        self._diagram.RemoveAllShapes()
-        self._diagram.Clear(dc)
-        self._canvas.Redraw(dc)
-        #self._shapes.clear()
+        line.Show(True)
     #-------------------------------------------------------------------------#
     def OnItemMove(self, item):
         dc = wx.ClientDC(self._canvas)
@@ -246,4 +237,25 @@ class RESView(wx.Panel):
             
         self._diagram.Clear(dc)
         self._canvas.Redraw(dc)
-        
+    #-------------------------------------------------------------------------#        
+    def CheckCollision(self, procShape):
+        shapes = []
+        for k, v in self._shapes.items():
+            if v.GetType() in ('Process', 'Storage') and k != procShape.GetId():
+                shapes.append(v)
+        y = 50
+        overlap = True
+        while overlap:
+            overlap = False
+            for s in shapes:
+                if y > s.GetAttachY() and y < s.GetAttachY()+s.GetHeight():
+                    #print('Y overlap', y)
+                    if procShape.IsOverlapping(s):
+                        #print('X overlap', y)
+                        overlap = True
+                        break
+            if overlap:
+                y += procShape.GetHeight() + 10
+            #print(y)
+        procShape.SetY(y)
+        self.OnItemMove(procShape)
