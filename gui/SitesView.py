@@ -99,10 +99,11 @@ class SitesView():
         
     def SiteIsAdded(self, sites):
         # tell the grid we've changed the data
+        cur = self._sitesGrid.GetNumberRows()
         self._gridTable.SetTableData(sites)
         msg = wx.grid.GridTableMessage(self._gridTable,                         # The table
                                        wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED,  # what we did to it
-                                       1                                        # how many
+                                       len(sites) - cur                         # how many
         )
         self._gridTable.GetView().ProcessTableMessage(msg)
     

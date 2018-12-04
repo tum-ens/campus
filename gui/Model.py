@@ -12,10 +12,23 @@ import DataConfig as config
 
 class RESModel():
     
-    def __init__(self):
+    def __init__(self, data=None):        
         self._years  = {}
         self._sites  = {}
         self._models = {}
+        if data:            
+            self._sites = data['_sites']
+            pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
+            self._years = data['_years']
+            pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
+            for k, v in data['_models'].items():
+                self._models[k] = SiteModel(k, 
+                                            list(self._years.keys()),
+                                            v['_commodities'],
+                                            v['_processes'],
+                                            v['_connections']                                            
+                                  )
+
 
     def InitializeSite(self, name):
         return SiteModel.InitializeData(config.DataConfig.SITE_PARAMS)
@@ -70,26 +83,28 @@ class RESModel():
 #-----------------------------------------------------------------------------#    
 class SiteModel():
 
-    def __init__(self, name, years):
+    def __init__(self, name, years, commodities={}, processes={}, connections={}):
         self._name           = name
         self._years          = years
-        self._commodities    = {}
-        self._processes      = {}
-        self._connections    = {}
+        self._commodities    = commodities
+        self._processes      = processes
+        self._connections    = connections
         
     def InitializeData(cols):
         data = {}
         for col in cols:
             data[col[config.DataConfig.PARAM_KEY]] = col[config.DataConfig.PARAM_DEFVALUE]
 
-        return data
-        
+        return data        
         
     def InitializeCommodity(self):
         return SiteModel.InitializeData(config.DataConfig.COMMODITY_PARAMS)
         
     def InitializeProcess(self):
         return SiteModel.InitializeData(config.DataConfig.PROCESS_PARAMS)
+        
+    def InitializeStorage(self):
+        return SiteModel.InitializeData(config.DataConfig.STORAGE_PARAMS)
     
     def InitializeConnection(self):
         return SiteModel.InitializeData(config.DataConfig.CONNECTION_PARAMS)
@@ -101,7 +116,10 @@ class SiteModel():
             data['Years'][year] = self.InitializeCommodity()
         
         for data in self._processes.values():
-            data['Years'][year] = self.InitializeProcess()
+            if data['Type'] == 'Storage':
+                data['Years'][year] = self.InitializeStorage()
+            else:
+                data['Years'][year] = self.InitializeProcess()
             
         for data in self._connections.values():
             data['Years'][year] = self.InitializeConnection()
@@ -142,6 +160,7 @@ class SiteModel():
         data['Type'] = commType
         data['Group'] = grp[0]
         data['Color'] = (0,0,0)
+        data['DSM'] = False
         for year in self._years:
             data['Years'][year] = self.InitializeCommodity()
         
@@ -158,9 +177,9 @@ class SiteModel():
         if success:
             if commId not in self._commodities:
                 self._commodities[commId] = data
-                pub.sendMessage(EVENTS.COMMODITY_ADDED + self._name)
+                pub.sendMessage(EVENTS.COMMODITY_ADDED + self._name, objId=commId)
             else:
-                pub.sendMessage(EVENTS.COMMODITY_EDITED + self._name)
+                pub.sendMessage(EVENTS.COMMODITY_EDITED + self._name, objId=commId)
         
         #Add further checks for status
         return success
@@ -184,6 +203,7 @@ class SiteModel():
         data['Years'] = {}
         data['Id'] = processId
         data['Name'] = processId
+        data['Type'] = ''
         for year in self._years:
             data['Years'][year] = self.InitializeProcess()   
             
@@ -207,9 +227,9 @@ class SiteModel():
             self.SaveConnections(processId, data['OUT'], 'OUT')
             if processId not in self._processes:
                 self._processes[processId] = data
-                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name)
+                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name, objId=processId)
             else:
-                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name)
+                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name, objId=processId)
         
         #Add further checks for status
         return status
@@ -239,6 +259,7 @@ class SiteModel():
             if v['Proc'] == processId and v['Dir'] == direction:
                 if v['Comm'] not in commList:
                     idsToDel.append(k)
+        
         for k in idsToDel:
             self._connections.pop(k)
         
@@ -250,3 +271,23 @@ class SiteModel():
     def GetConnection(self, procId, commId, In_Out):
         connId = self.AddConnection(procId, commId, In_Out)
         return self._connections[connId]
+
+    def CreateNewStorage(self):
+        storageId = 'NewStorage#' + str(len(self._processes) + 1)
+        data = {}
+        data['IN'] = []
+        data['OUT'] = []
+        data['Years'] = {}
+        data['Id'] = storageId
+        data['Name'] = storageId
+        data['Type'] = 'Storage'
+        for year in self._years:
+            data['Years'][year] = self.InitializeStorage()   
+            
+        return data
+
+    def GetStorage(self, storageId):
+        return self._processes[storageId]
+
+    def GetSiteName(self):
+        return self._name

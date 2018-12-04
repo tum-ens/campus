@@ -115,10 +115,11 @@ class YearsView():
 
     def YearIsAdded(self, years):
         # tell the grid we've changed the data
+        cur = self._yearsGrid.GetNumberRows()
         self._gridTable.SetTableData(years)
         msg = wx.grid.GridTableMessage(self._gridTable,                         # The table
                                        wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED,  # what we did to it
-                                       1                                        # how many
+                                       len(years) - cur                         # how many
         )
         self._gridTable.GetView().ProcessTableMessage(msg)
     
