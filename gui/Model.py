@@ -12,10 +12,23 @@ import DataConfig as config
 
 class RESModel():
     
-    def __init__(self):
+    def __init__(self, data=None):        
         self._years  = {}
         self._sites  = {}
         self._models = {}
+        if data:            
+            self._sites = data['_sites']
+            pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
+            self._years = data['_years']
+            pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
+            for k, v in data['_models'].items():
+                self._models[k] = SiteModel(k, 
+                                            list(self._years.keys()),
+                                            v['_commodities'],
+                                            v['_processes'],
+                                            v['_connections']                                            
+                                  )
+
 
     def InitializeSite(self, name):
         return SiteModel.InitializeData(config.DataConfig.SITE_PARAMS)
@@ -70,12 +83,12 @@ class RESModel():
 #-----------------------------------------------------------------------------#    
 class SiteModel():
 
-    def __init__(self, name, years):
+    def __init__(self, name, years, commodities={}, processes={}, connections={}):
         self._name           = name
         self._years          = years
-        self._commodities    = {}
-        self._processes      = {}
-        self._connections    = {}
+        self._commodities    = commodities
+        self._processes      = processes
+        self._connections    = connections
         
     def InitializeData(cols):
         data = {}

@@ -10,6 +10,7 @@ import CommodityForm as commf
 import ProcessForm as procf
 import ConnectionForm as connf
 import StorageForm as strgf
+import json
 import wx
 
 from pubsub import pub
@@ -56,6 +57,8 @@ class Controller():
         pub.subscribe(self.RESSelected, EVENTS.RES_SELECTED)
         pub.subscribe(self.OnItemDoubleClick, EVENTS.ITEM_DOUBLE_CLICK)
         pub.subscribe(self.OnItemMove, EVENTS.ITEM_MOVED)
+        pub.subscribe(self.OnSaveConfig, EVENTS.SAVE_CONFIG)
+        pub.subscribe(self.OnLoadConfig, EVENTS.LOAD_CONFIG)
 
     
     def AddSite(self, site):
@@ -63,7 +66,7 @@ class Controller():
         if status == 1:
             wx.MessageBox('A Site with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
-            self._view.AddRESTab(self, site)            
+            self._view.AddRESTab(self, site)
     
     def RemoveSites(self, sites):
         s = wx.MessageBox('Are you sure? All site(s) data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
@@ -186,4 +189,29 @@ class Controller():
             
     def OnItemMove(self, item):
         pub.sendMessage(EVENTS.ITEM_MOVED + self._model.GetSiteName(), item=item)
+
+    def SerializeObj(self, obj):
+        #print(obj)
+        if isinstance(obj, wx.Colour):
+            return obj.GetAsString()
+        
+        return obj.__dict__
+    
+    def OnSaveConfig(self, filename):
+        with open(filename, 'w') as fp:
+            json.dump(self._resModel, fp, default=self.SerializeObj, indent=2)
+    
+    def OnLoadConfig(self, filename):
+        s = wx.MessageBox('Are you sure? All non saved data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+        if s == wx.OK:
+            self._view.RemoveRESTab(self._resModel._sites)
+            with open(filename, 'r') as fp:
+                data = json.load(fp)
+                self._resModel = model.RESModel(data)
+                for site in self._resModel._sites:
+                    resTab = self._view.AddRESTab(self, site)
+                    self._model = self._resModel.GetSiteModel(site)
+                    resTab.RebuildRES(None)
+                    resTab.Refresh()
+        
         

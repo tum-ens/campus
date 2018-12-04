@@ -11,6 +11,19 @@ class MainView ( wx.Frame ):
     def __init__(self):
         wx.Frame.__init__(self, None, title="urbs gui 1.0")
         
+        menubar = wx.MenuBar()
+        fileMenu = wx.Menu()
+        omi = fileMenu.Append(wx.ID_OPEN, '&Load Config')
+        smi = fileMenu.Append(wx.ID_SAVE, '&Save Config')
+        fileMenu.AppendSeparator()
+        qmi = fileMenu.Append(wx.ID_EXIT, 'Exit', 'Quit application')
+        menubar.Append(fileMenu, '&File')
+        self.SetMenuBar(menubar)
+        self.CreateStatusBar()
+        self.Bind(wx.EVT_MENU, self.OnOpen, omi)
+        self.Bind(wx.EVT_MENU, self.OnSave, smi)
+        self.Bind(wx.EVT_MENU, self.OnQuit, qmi)
+        
 
         # Here we create a panel and a notebook on the panel
         p = wx.Panel(self)
@@ -35,6 +48,8 @@ class MainView ( wx.Frame ):
         resTab = res.RESView(self._nb, controller, siteName)        
         self._nb.AddPage(resTab, "Ref. Energy Sys. [" + siteName + "]")
         
+        return resTab
+        
     def RemoveRESTab(self, sites):
         for site in sites:
             for i in range(1, self._nb.GetPageCount()):
@@ -52,6 +67,27 @@ class MainView ( wx.Frame ):
     def __del__( self ):
         pass
 
+    def OnOpen(self, event):
+        # Create open file dialog
+        openFileDialog = wx.FileDialog(self, "Open", "", "", 
+                                      "urbs files (*.json)|*.json",
+                                       wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        openFileDialog.ShowModal()
+        fn = openFileDialog.GetPath()
+        if fn:
+            pub.sendMessage(EVENTS.LOAD_CONFIG, filename=fn)
+        
+    def OnSave(self, event):
+        openFileDialog = wx.FileDialog(self, "Save", "", "", 
+                                      "urbs files (*.json)|*.json", 
+                                       wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        openFileDialog.ShowModal()
+        fn = openFileDialog.GetPath()
+        if fn:
+            pub.sendMessage(EVENTS.SAVE_CONFIG, filename=fn)
+        
+    def OnQuit(self, event):
+        self.Close()
 
    
 

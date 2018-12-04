@@ -174,7 +174,7 @@ class RESView(wx.Panel):
                 lines = self.BuildProcConnections(p, procShape)
                 self.DrawProcConnections(procShape, lines)
                 procShape.SetConnections(lines)
-                if k == lastChangedProcess:
+                if lastChangedProcess is None or k == lastChangedProcess:
                     self.CheckCollision(procShape)
     #-------------------------------------------------------------------------#
     def BuildProcConnections(self, p, procShape):        
@@ -231,13 +231,13 @@ class RESView(wx.Panel):
     def OnItemMove(self, item):
         dc = wx.ClientDC(self._canvas)
         self._canvas.PrepareDC(dc)
-        process = item
-        lines = process.GetConnections()
-        self.DrawProcConnections(process, lines)
-            
+        if item:
+            process = item
+            lines = process.GetConnections()
+            self.DrawProcConnections(process, lines)            
         self._diagram.Clear(dc)
         self._canvas.Redraw(dc)
-    #-------------------------------------------------------------------------#        
+    #-------------------------------------------------------------------------#
     def CheckCollision(self, procShape):
         shapes = []
         for k, v in self._shapes.items():
@@ -259,3 +259,8 @@ class RESView(wx.Panel):
             #print(y)
         procShape.SetY(y)
         self.OnItemMove(procShape)
+    #-------------------------------------------------------------------------#    
+    def Refresh(self):
+        #self.OnItemMove(None)
+        self._canvas.Draw()
+        

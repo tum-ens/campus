@@ -49,3 +49,5 @@ class EVENTS():
     
     ITEM_DOUBLE_CLICK  = "ITEM_DOUBLE_CLICK_"
     ITEM_MOVED         = "ITEM_MOVED_"
+    SAVE_CONFIG        = "SAVE_CONFIG_"
+    LOAD_CONFIG        = "LOAD_CONFIG_"
