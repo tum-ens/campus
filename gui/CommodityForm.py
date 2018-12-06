@@ -45,13 +45,16 @@ class CommodityDialog ( bf.BasicForm ):
         attr = wx.grid.GridCellAttr()
         attr.SetReadOnly(True)
         attr.SetAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        self._yearsGrid.SetColAttr(4, attr)#...
+        self._yearsGrid.SetColAttr(config.DataConfig.TS_BTN_COL, attr)#...
         self._yearsGrid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnTimeSerClick)
         layout1.Add(self._yearsGrid, 1, wx.ALL|wx.EXPAND, 5)
         
         return layout1
         
     def OnTimeSerClick(self, event):
+        if event.GetCol() != config.DataConfig.TS_BTN_COL:
+            return
+
         tsf = ts.TimeSeriesForm(self)
         tsf.PopulateData(self._commodity['Name'], self._gridTable, event.GetRow(), 0)
         tsf.ShowModal()
@@ -96,10 +99,10 @@ class CommodityDialog ( bf.BasicForm ):
         
     def OnDSMChange(self, event):
         if self._chkDSM.IsChecked():
-            for i in range(5, self._yearsGrid.GetNumberCols()):
+            for i in range(config.DataConfig.TS_BTN_COL+1, self._yearsGrid.GetNumberCols()):
                 self._yearsGrid.ShowCol(i)
         else:
-            for i in range(5, self._yearsGrid.GetNumberCols()):
+            for i in range(config.DataConfig.TS_BTN_COL+1, self._yearsGrid.GetNumberCols()):
                 self._yearsGrid.HideCol(i)
         
     def PopulateCommodity(self, comm):
@@ -113,12 +116,11 @@ class CommodityDialog ( bf.BasicForm ):
         #Hide TS column
         if comm['Type'] in (config.DataConfig.COMM_STOCK, config.DataConfig.COMM_ENV):
             #no time series
-            self._yearsGrid.HideCol(4)
+            self._yearsGrid.HideCol(config.DataConfig.TS_BTN_COL)
         if comm['Type'] in (config.DataConfig.COMM_SUPLM, config.DataConfig.COMM_DEMAND):
             #only time series
-            self._yearsGrid.HideCol(1)
-            self._yearsGrid.HideCol(2)
-            self._yearsGrid.HideCol(3)
+            for i in range(1, config.DataConfig.TS_BTN_COL):
+                self._yearsGrid.HideCol(i)
         if comm['Type'] in (config.DataConfig.COMM_DEMAND):
             self._chkDSM.Show()
         

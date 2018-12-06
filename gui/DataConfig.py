@@ -21,6 +21,8 @@ class DataConfig():
     COMM_DEMAND = 'Demand'
     COMM_SELL   = 'Sell'
     COMM_ENV    = 'Env'
+    
+    TS_BTN_COL  = 4
 
 
     YEAR_PARAMS = [
