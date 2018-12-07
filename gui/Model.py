@@ -83,12 +83,19 @@ class RESModel():
 #-----------------------------------------------------------------------------#    
 class SiteModel():
 
-    def __init__(self, name, years, commodities={}, processes={}, connections={}):
+    def __init__(self, name, years, commodities=None, processes=None, connections=None):
         self._name           = name
         self._years          = years
-        self._commodities    = commodities
-        self._processes      = processes
-        self._connections    = connections
+        self._commodities    = {}
+        self._processes      = {}
+        self._connections    = {}
+        
+        if commodities:
+            self._commodities = commodities
+        if processes:
+            self._processes = processes
+        if connections:
+            self._connections = connections
         
     def InitializeData(cols):
         data = {}

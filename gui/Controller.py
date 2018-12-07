@@ -202,16 +202,14 @@ class Controller():
             json.dump(self._resModel, fp, default=self.SerializeObj, indent=2)
     
     def OnLoadConfig(self, filename):
-        s = wx.MessageBox('Are you sure? All non saved data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
-        if s == wx.OK:
-            self._view.RemoveRESTab(self._resModel._sites)
-            with open(filename, 'r') as fp:
-                data = json.load(fp)
-                self._resModel = model.RESModel(data)
-                for site in self._resModel._sites:
-                    resTab = self._view.AddRESTab(self, site)
-                    self._model = self._resModel.GetSiteModel(site)
-                    resTab.RebuildRES(None)
-                    resTab.Refresh()
+        self._view.RemoveRESTab(self._resModel._sites)
+        with open(filename, 'r') as fp:
+            data = json.load(fp)
+            self._resModel = model.RESModel(data)
+            for site in sorted(self._resModel._sites):
+                resTab = self._view.AddRESTab(self, site)
+                self._model = self._resModel.GetSiteModel(site)
+                resTab.RebuildRES(None)
+                resTab.Refresh()
         
         

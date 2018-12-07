@@ -75,7 +75,9 @@ class MainView ( wx.Frame ):
         openFileDialog.ShowModal()
         fn = openFileDialog.GetPath()
         if fn:
-            pub.sendMessage(EVENTS.LOAD_CONFIG, filename=fn)
+            s = wx.MessageBox('Are you sure? All non saved data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+            if s == wx.OK:
+                pub.sendMessage(EVENTS.LOAD_CONFIG, filename=fn)
         
     def OnSave(self, event):
         openFileDialog = wx.FileDialog(self, "Save", "", "", 
