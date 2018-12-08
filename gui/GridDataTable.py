@@ -69,9 +69,14 @@ class GridDataTable(wx.grid.GridTableBase):
     
     def SetValue(self, row, col, value):
         #print('SetValue', row, col, value)
+        v = self.ConvertToNumber(value)
+        if not v:
+            return
+        
         rowKey = self.GetRowLabelValue(row)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
-        self._tmpData[rowKey][colKey] = value
+        
+        self._tmpData[rowKey][colKey] = v
     
     #--------------------------------------------------
     # Some optional methods
@@ -123,4 +128,18 @@ class GridDataTable(wx.grid.GridTableBase):
         for key in data.keys():
             if key != firstKey:
                 data[key] = data[firstKey]
+
+    def ConvertToNumber(self, value):
+        try:
+            vf = float(value)
+            try:
+                vi = int(value)
+                return "{:,}".format(vi)
+            except ValueError:            
+                return "{:,}".format(vf)
+        except ValueError:
+            if value.lower() == config.DataConfig.INF.lower():
+                return config.DataConfig.INF
+            else:
+                return None
 #---------------------------------------------------------------------------
