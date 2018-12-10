@@ -117,7 +117,7 @@ class CommodityDialog ( bf.BasicForm ):
         if comm['Type'] in (config.DataConfig.COMM_STOCK, config.DataConfig.COMM_ENV):
             #no time series
             self._yearsGrid.HideCol(config.DataConfig.TS_BTN_COL)
-        if comm['Type'] in (config.DataConfig.COMM_SUPLM, config.DataConfig.COMM_DEMAND):
+        if comm['Type'] in (config.DataConfig.COMM_SUPIM, config.DataConfig.COMM_DEMAND):
             #only time series
             for i in range(1, config.DataConfig.TS_BTN_COL):
                 self._yearsGrid.HideCol(i)

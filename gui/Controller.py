@@ -10,6 +10,8 @@ import CommodityForm as commf
 import ProcessForm as procf
 import ConnectionForm as connf
 import StorageForm as strgf
+import TransmissionForm as tf
+import pandas as pd
 import json
 import wx
 
@@ -25,7 +27,7 @@ class Controller():
         self._model = None
         
         #view part
-        self._view = view.MainView()
+        self._view = view.MainView(self)
         self._view.Maximize()
         self._view.Show()
         
@@ -53,6 +55,9 @@ class Controller():
         pub.subscribe(self.SaveStorage, EVENTS.STORAGE_SAVE)
         
         pub.subscribe(self.EditConnection, EVENTS.CONNECTION_EDITING)
+        
+        pub.subscribe(self.AddTransmission, EVENTS.TRNSM_ADDING)
+        pub.subscribe(self.SaveTransmission, EVENTS.TRNSM_SAVE)
         
         pub.subscribe(self.RESSelected, EVENTS.RES_SELECTED)
         pub.subscribe(self.OnItemDoubleClick, EVENTS.ITEM_DOUBLE_CLICK)
@@ -93,9 +98,10 @@ class Controller():
         
     def EditCommodity(self, commId):
         comm = self._model.GetCommodity(commId)
-        self._comForm = commf.CommodityDialog(self._view)
-        self._comForm.PopulateCommodity(comm)
-        self._comForm.ShowModal()
+        if comm:
+            self._comForm = commf.CommodityDialog(self._view)
+            self._comForm.PopulateCommodity(comm)
+            self._comForm.ShowModal()
         
     def SaveCommodity(self, data):
         status = self._model.SaveCommodity(data)
@@ -121,7 +127,6 @@ class Controller():
             wx.MessageBox('Please select atleast one input/output commodity!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
             self._processForm.Close()            
-            
         
     def EditProcess(self, processId):
         process = self._model.GetProcess(processId)
@@ -145,9 +150,8 @@ class Controller():
         elif status == 2:
             wx.MessageBox('Please select a commodity!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
-            self._storageForm.Close()            
+            self._storageForm.Close()
             
-        
     def EditStorage(self, storageId):
         storage = self._model.GetStorage(storageId)
         self._storageForm = strgf.StorageDialog(self._view)
@@ -179,6 +183,41 @@ class Controller():
                 
         return d
         
+    def AddTransmission(self):
+        newTrns = self._resModel.CreateNewTrnsm()
+        self._trnsForm = tf.TransmissionDialog(self._view, self)
+        self._trnsForm.PopulateTrans(newTrns, self._resModel.GetSites())
+        self._trnsForm.ShowModal()
+        
+    def SaveTransmission(self, data):
+        status = self._resModel.SaveTransmission(data)
+        if status:
+            self._trnsForm.Close()
+        else:
+            wx.MessageBox('A Transmission line with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
+            
+    def EditTransmission(self, trnsmId):
+        trnsm = self._resModel.GetTransmission(trnsmId)
+        self._trnsForm = tf.TransmissionDialog(self._view, self)
+        self._trnsForm.PopulateTrans(trnsm, self._resModel.GetSites())
+        self._trnsForm.ShowModal()
+            
+    def GetTransmissions(self):
+        return self._resModel._transmissions
+        
+    def GetTrnsmCommodities(self):
+        return self._resModel._trnsmCommodities
+        
+    def GetCommonCommodities(self, site1, site2):
+        m1 = self._resModel.GetSiteModel(site1)
+        m2 = self._resModel.GetSiteModel(site2)
+        
+        c1 = set([x['Name'] for x in m1._commodities.values()])
+        c2 = set([x['Name'] for x in m2._commodities.values()])
+        
+        l = c1 & c2
+        return list(l)
+        
     def OnItemDoubleClick(self, itemId, itemType):
         if itemType == 'Commodity':
             self.EditCommodity(itemId)
@@ -186,6 +225,8 @@ class Controller():
             self.EditProcess(itemId)
         elif itemType == 'Storage':
             self.EditStorage(itemId)
+        elif itemType == 'Trnsm':
+            self.EditTransmission(itemId)
             
     def OnItemMove(self, item):
         pub.sendMessage(EVENTS.ITEM_MOVED + self._model.GetSiteName(), item=item)
@@ -211,5 +252,29 @@ class Controller():
                 self._model = self._resModel.GetSiteModel(site)
                 resTab.RebuildRES(None)
                 resTab.Refresh()
+    
+    def GetGlobalParams(self):
+        return self._resModel.GetGlobalParams()
         
+    def GetDataFrames(self):
+        data = {
+            'global_prop'       : self._resModel.GetGlobalDF(),
+            'site'              : self._resModel.GetSitesDF(),
+            'commodity'         : self._resModel.GetCommoditiesDF(),
+            'process'           : self._resModel.GetProcessesDF(),
+            'process_commodity' : self._resModel.GetConnectionsDF(),
+            'transmission'      : pd.DataFrame(),
+            'storage'           : self._resModel.GetStoragesDF(),
+            'demand'            : self._resModel.GetDemandTimeSerDF(),
+            'supim'             : self._resModel.GetSupImTimeSerDF(),
+            'buy_sell_price'    : self._resModel.GetBuySellTimeSerDF(),
+            'dsm'               : self._resModel.GetDsmDF(),
+            'eff_factor'        : pd.DataFrame()
+        } 
         
+        # sort nested indexes to make direct assignments work
+        for key in data:
+            if isinstance(data[key].index, pd.core.index.MultiIndex):
+                data[key].sort_index(inplace=True)
+            
+        print(data)

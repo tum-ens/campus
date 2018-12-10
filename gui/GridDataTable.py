@@ -69,12 +69,15 @@ class GridDataTable(wx.grid.GridTableBase):
     
     def SetValue(self, row, col, value):
         #print('SetValue', row, col, value)
-        v = self.ConvertToNumber(value)
-        if not v:
-            return
-        
-        rowKey = self.GetRowLabelValue(row)
+        v = value
+        colType = self._cols[col][config.DataConfig.GRID_COL_DATATYPE]
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
+        rowKey = self.GetRowLabelValue(row)
+        
+        if colType != wx.grid.GRID_VALUE_BOOL and colKey != 'timeSer':
+            v = self.ConvertToNumber(value)
+            if not v:
+                return
         
         self._tmpData[rowKey][colKey] = v
     

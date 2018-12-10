@@ -46,6 +46,7 @@ class TimeSeriesForm(wx.Dialog):
         s = self._txtTS.GetValue()
         s = str.replace(s, '\r', '')
         s = str.replace(s, '\n', '|')
+        s = s.strip('|')
         #print(len(s.split('|')))
         self._gt.SetValue(self._row, self._col, s)
         self.Close()

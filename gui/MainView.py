@@ -2,13 +2,14 @@
 import wx
 import GeneralView as gv
 import RESView as res
+import TransmissionView as tv
 
 from pubsub import pub
 from Events import EVENTS
 
 class MainView ( wx.Frame ):
     
-    def __init__(self):
+    def __init__(self, controller):
         wx.Frame.__init__(self, None, title="urbs gui 1.0")
         
         menubar = wx.MenuBar()
@@ -31,12 +32,12 @@ class MainView ( wx.Frame ):
         self._nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageSelected)
         
         # create the page windows as children of the notebook
-        tabOne = gv.GeneralView(self._nb)
-        #tabTwo = res.RESView(nb, controller)
+        tabOne = gv.GeneralView(self._nb, controller)
+        tabTwo = tv.TransmissionView(self._nb, controller)
         
         # add the pages to the notebook with the label to show on the tab
         self._nb.AddPage(tabOne, "Overview")
-        #nb.AddPage(tabTwo, "Ref. Energy Sys.")
+        self._nb.AddPage(tabTwo, "Transmission")
         
         # finally, put the notebook in a sizer for the panel to manage
         # the layout
@@ -59,10 +60,11 @@ class MainView ( wx.Frame ):
         
     def OnPageSelected(self, event):
         pageIndx = event.GetSelection()
-        if pageIndx == 0: return
+        if pageIndx in (0, 1): return
         
         resView = self._nb.GetPage(pageIndx)
         pub.sendMessage(EVENTS.RES_SELECTED, siteName=resView.GetSiteName())
+        resView.Refresh()
     
     def __del__( self ):
         pass
