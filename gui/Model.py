@@ -509,3 +509,38 @@ class RESModel():
     def GetDT(self):
         valueCol = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
         return self._gl['DT'][valueCol]
+#-----------------------------------------------------------------------------#
+    def GetPlotTuples(self):
+        tuples = []
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                for comm in m._commodities.values():
+                    plot = False
+                    try:
+                        plot = comm['Years'][year]['plot']
+                    except KeyError:
+                        plot = False
+                    
+                    if plot == True:
+                        tuples.append((year, site, comm['Name']))
+        #print(tuples)
+        return tuples
+#-----------------------------------------------------------------------------#
+    def GetReportTuples(self):
+        tuples = []
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                for comm in m._commodities.values():
+                    report = False
+                    try:
+                        report = comm['Years'][year]['report']
+                    except KeyError:
+                        report = False
+                    
+                    if report == True:
+                        tuples.append((year, site, comm['Name']))
+        #print(tuples)
+        return tuples
+#-----------------------------------------------------------------------------#

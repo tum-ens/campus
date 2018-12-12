@@ -11,7 +11,6 @@ import ProcessForm as procf
 import ConnectionForm as connf
 import StorageForm as strgf
 import TransmissionForm as tf
-import pandas as pd
 import json
 import wx
 
@@ -286,70 +285,14 @@ class Controller():
         #print(dt)
     
         # plotting commodities/sites
-        plot_tuples = [
-            (2015, 'Campus', 'Elec'),
-            (2015, 'Campus', 'Heat'),
-            (2015, 'Campus', 'Cold'),
-            (2015, 'Campus', 'Heat low'),
-            (2020, 'Campus', 'Elec'),
-            (2020, 'Campus', 'Heat'),
-            (2020, 'Campus', 'Cold'),
-            (2020, 'Campus', 'Heat low'),
-            (2025, 'Campus', 'Elec'),
-            (2025, 'Campus', 'Heat'),
-            (2025, 'Campus', 'Cold'),
-            (2025, 'Campus', 'Heat low'),
-            (2030, 'Campus', 'Elec'),
-            (2030, 'Campus', 'Heat'),
-            (2030, 'Campus', 'Cold'),
-            (2030, 'Campus', 'Heat low'),
-            (2035, 'Campus', 'Elec'),
-            (2035, 'Campus', 'Heat'),
-            (2035, 'Campus', 'Cold'),
-            (2035, 'Campus', 'Heat low'),
-            (2040, 'Campus', 'Elec'),
-            (2040, 'Campus', 'Heat'),
-            (2040, 'Campus', 'Cold'),
-            (2040, 'Campus', 'Heat low')
-            ]
+        plot_tuples = self._resModel.GetPlotTuples()
     
         # optional: define names for sites in plot_tuples
         plot_sites_name = {}
     
         # detailed reporting commodity/sites
-        report_tuples = [
-            (2015, 'Campus', 'Elec'),
-            (2015, 'Campus', 'Heat'),
-            (2015, 'Campus', 'Cold'),
-            (2015, 'Campus', 'Heat low'),
-            (2015, 'Campus', 'CO2'),
-            (2020, 'Campus', 'Elec'),
-            (2020, 'Campus', 'Heat'),
-            (2020, 'Campus', 'Cold'),
-            (2020, 'Campus', 'CO2'),
-            (2020, 'Campus', 'Heat low'),
-            (2025, 'Campus', 'Elec'),
-            (2025, 'Campus', 'Heat'),
-            (2025, 'Campus', 'Cold'),
-            (2025, 'Campus', 'Heat low'),
-            (2025, 'Campus', 'CO2'),
-            (2030, 'Campus', 'Elec'),
-            (2030, 'Campus', 'Heat'),
-            (2030, 'Campus', 'Cold'),
-            (2030, 'Campus', 'Heat low'),
-            (2030, 'Campus', 'CO2'),
-            (2035, 'Campus', 'Elec'),
-            (2035, 'Campus', 'Heat'),
-            (2035, 'Campus', 'Cold'),
-            (2035, 'Campus', 'Heat low'),
-            (2035, 'Campus', 'CO2'),
-            (2040, 'Campus', 'Elec'),
-            (2040, 'Campus', 'Heat'),
-            (2040, 'Campus', 'Cold'),
-            (2040, 'Campus', 'Heat low'),
-            (2040, 'Campus', 'CO2'),
-            ]
-    
+        report_tuples = self._resModel.GetReportTuples()
+        
         # optional: define names for sites in report_tuples
         report_sites_name = {}
     

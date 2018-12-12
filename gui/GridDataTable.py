@@ -67,7 +67,10 @@ class GridDataTable(wx.grid.GridTableBase):
         rowKey = self.GetRowKey(row)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
         if rowKey and colKey:
-            return self._tmpData[rowKey][colKey]
+            try:
+                return self._tmpData[rowKey][colKey]
+            except KeyError:
+                return ''
 
         return ''
     

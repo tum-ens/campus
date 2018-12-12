@@ -47,7 +47,7 @@ class DataConfig():
     
     GLOBAL_COLS = [
         {PARAM_KEY: 'value',
-         GRID_COL_LABEL: 'KKKKKKKKKKKKkk', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING}
+         GRID_COL_LABEL: 'Value', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING}
     ]
 #-----------------------------------------------------------------------------#    
 
@@ -86,7 +86,13 @@ class DataConfig():
         {PARAM_KEY: 'cap-max-do',
          GRID_COL_LABEL:'Downshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'cap-max-up',
-         GRID_COL_LABEL:'Upshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00}
+         GRID_COL_LABEL:'Upshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
+        ########
+        {PARAM_KEY: 'plot',
+         GRID_COL_LABEL:'Plot', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''},
+        {PARAM_KEY: 'report',
+         GRID_COL_LABEL:'Report', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''}
+
     ]
 
     COMMODITY_COLS = [

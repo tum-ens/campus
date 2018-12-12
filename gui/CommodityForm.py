@@ -99,10 +99,10 @@ class CommodityDialog ( bf.BasicForm ):
         
     def OnDSMChange(self, event):
         if self._chkDSM.IsChecked():
-            for i in range(config.DataConfig.TS_BTN_COL+1, self._yearsGrid.GetNumberCols()):
+            for i in range(config.DataConfig.TS_BTN_COL+1, self._yearsGrid.GetNumberCols()-2):
                 self._yearsGrid.ShowCol(i)
         else:
-            for i in range(config.DataConfig.TS_BTN_COL+1, self._yearsGrid.GetNumberCols()):
+            for i in range(config.DataConfig.TS_BTN_COL+1, self._yearsGrid.GetNumberCols()-2):
                 self._yearsGrid.HideCol(i)
         
     def PopulateCommodity(self, comm):
