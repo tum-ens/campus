@@ -10,7 +10,7 @@ import wx.lib.ogl as ogl
 import RESEvtHandler as evt
 
 class ProcessShape(ogl.RectangleShape):
-    def __init__(self, canvas, x, y, uuid, text, subType):
+    def __init__(self, canvas, x, y, uuid, text, pType):
         self._width = 150
         self._hight = 45
         ogl.RectangleShape.__init__(self, self._width, self._hight)
@@ -22,7 +22,7 @@ class ProcessShape(ogl.RectangleShape):
         self.SetBrush(wx.WHITE_BRUSH)        
         if text: 
             self.AddText(text)
-        if subType == 'Storage':            
+        if pType == 'Storage':            
             self.SetCornerRadius(-0.3)
         #shape.SetShadowMode(ogl.SHADOW_RIGHT)
         self.SetFont(wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -34,7 +34,7 @@ class ProcessShape(ogl.RectangleShape):
         
         self._uuid = uuid
         self._connections = []
-        self._subType = subType
+        self._subType = pType
         self._minX = 0
         self._maxX = 0
         

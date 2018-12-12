@@ -41,6 +41,7 @@ class TransmissionView(wx.Panel):
 
         pub.subscribe(self.RebuildTrnsm, EVENTS.TRNSM_ADDED)
         pub.subscribe(self.RebuildTrnsm, EVENTS.TRNSM_EDITED)
+        pub.subscribe(self.OnItemMove, EVENTS.TRNSM_ITEM_MOVED)
     #-------------------------------------------------------------------------#
     def BuildToolBar(self):
         barLayout = wx.BoxSizer( wx.HORIZONTAL )

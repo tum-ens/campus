@@ -53,14 +53,15 @@ class MainView ( wx.Frame ):
         
     def RemoveRESTab(self, sites):
         for site in sites:
-            for i in range(1, self._nb.GetPageCount()):
+            for i in range(2, self._nb.GetPageCount()):
                 if self._nb.GetPage(i).GetSiteName() == site:
                     self._nb.RemovePage(i)
                     break
         
     def OnPageSelected(self, event):
         pageIndx = event.GetSelection()
-        if pageIndx in (0, 1): return
+        if pageIndx in (0, 1):
+            return
         
         resView = self._nb.GetPage(pageIndx)
         pub.sendMessage(EVENTS.RES_SELECTED, siteName=resView.GetSiteName())

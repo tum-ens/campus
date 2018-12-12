@@ -11,6 +11,7 @@ import DataConfig as config
 import GridDataTable as gdt
 import BasicForm as bf
 import copy as cpy
+import TimeSeriesForm as ts
 
 from pubsub import pub
 from Events import EVENTS
@@ -18,7 +19,7 @@ from Events import EVENTS
 
 class ProcessDialog ( bf.BasicForm ):
     
-    _gridCols = config.DataConfig.PROCESS_PARAMS
+    _gridCols = config.DataConfig.PROCESS_COLS
     
     def __init__(self, parent):
         super().__init__(parent, "Process data", wx.Size(800, 650))
@@ -35,11 +36,17 @@ class ProcessDialog ( bf.BasicForm ):
         self._yearsGrid1 = wx.grid.Grid(h1, -1)
         self._yearsGrid1.SetTable(self._gridTable1, True)
         self._yearsGrid1.AutoSizeColumns(False)
+        self._yearsGrid1.HideCol(0)#time series
+        attr = wx.grid.GridCellAttr()
+        attr.SetReadOnly(True)
+        attr.SetAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
+        self._yearsGrid1.SetColAttr(len(self._gridCols)-1, attr)#...
+        self._yearsGrid1.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnTimeSerClick)
         layout1.Add(self._yearsGrid1, 1, wx.ALL, 3)
 
         contentLayout.Add(layout0, 0, wx.ALL, 5)
         contentLayout.Add(layout1, 1, wx.ALL|wx.EXPAND, 1)
-        super().SetContent(contentLayout, wx.ALIGN_CENTER_HORIZONTAL)        
+        super().SetContent(contentLayout, wx.ALIGN_CENTER_HORIZONTAL)
         
     def CreateGeneralLayout(self):
         
@@ -133,6 +140,14 @@ class ProcessDialog ( bf.BasicForm ):
         super().PopulateGrid(self._outCommTbl, outCommList)
         super().PopulateGrid(self._gridTable1, process['Years'])
         #super().PopulateGrid(self._gridTable2, dataPerYear)
+        
+    def OnTimeSerClick(self, event):
+        if event.GetCol() != len(self._gridCols)-1:
+            return
+
+        tsf = ts.TimeSeriesForm(self)
+        tsf.PopulateData(self._process['Name'], self._gridTable1, event.GetRow(), 0)
+        tsf.ShowModal()
     
     def OnOk(self, event):
         self._process['Name'] = self._txtProcessName.GetValue()

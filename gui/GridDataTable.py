@@ -11,13 +11,17 @@ import DataConfig as config
 
 class GridDataTable(wx.grid.GridTableBase):
     
-    def __init__(self, cols, autoCommit=False):
+    def __init__(self, cols, rows=None, autoCommit=False):
         wx.grid.GridTableBase.__init__(self)
         
         self._cols = cols
+        self._rows = []
         self._autoCommit = autoCommit        
         self._tmpData = {}
         self._data = {}
+
+        if rows:
+            self._rows = rows        
     
     #--------------------------------------------------
     def SetTableData(self, data):
@@ -47,7 +51,7 @@ class GridDataTable(wx.grid.GridTableBase):
     
     def IsEmptyCell(self, row, col):
         #print('IsEmptyCell', row, col)
-        rowKey = self.GetRowLabelValue(row)
+        rowKey = self.GetRowKey(row)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
         if rowKey and colKey:
             return not self._tmpData[rowKey][colKey]
@@ -60,7 +64,7 @@ class GridDataTable(wx.grid.GridTableBase):
     # C++ version.
     def GetValue(self, row, col):
         #print('GetValue', row, col)
-        rowKey = self.GetRowLabelValue(row)
+        rowKey = self.GetRowKey(row)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
         if rowKey and colKey:
             return self._tmpData[rowKey][colKey]
@@ -72,9 +76,10 @@ class GridDataTable(wx.grid.GridTableBase):
         v = value
         colType = self._cols[col][config.DataConfig.GRID_COL_DATATYPE]
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
-        rowKey = self.GetRowLabelValue(row)
+        rowKey = self.GetRowKey(row)
         
-        if colType != wx.grid.GRID_VALUE_BOOL and colKey != 'timeSer':
+        if (colType != wx.grid.GRID_VALUE_BOOL and 
+            colKey not in ('timeSer', 'timeEff')):
             v = self.ConvertToNumber(value)
             if not v:
                 return
@@ -90,10 +95,13 @@ class GridDataTable(wx.grid.GridTableBase):
 
     def GetRowLabelValue(self, row):
         #print('GetRowLabelValue', row, len(self._data))
-        if row < len(self._data):
-            return sorted(list(self._data.keys()))[row]
+        lbl = ''
+        if len(self._rows) > 0 and row < len(self._rows):
+            lbl = self._rows[row][config.DataConfig.GRID_ROW_LABEL]
+        elif row < len(self._data):
+            lbl = sorted(self._data.keys())[row]
 
-        return ''
+        return lbl
     
     # Called to determine the kind of editor/renderer to use by
     # default, doesn't necessarily have to be the same type used
@@ -145,4 +153,10 @@ class GridDataTable(wx.grid.GridTableBase):
                 return config.DataConfig.INF
             else:
                 return None
+                
+    def GetRowKey(self, row):
+        if len(self._rows) > 0:
+            return self._rows[row][config.DataConfig.PARAM_KEY]
+
+        return self.GetRowLabelValue(row)
 #---------------------------------------------------------------------------

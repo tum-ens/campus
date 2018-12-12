@@ -15,7 +15,8 @@ from pubsub import pub
 
 class GlobalsView():
     
-    _gridCols = config.DataConfig.GLOBAL_PARAMS
+    _gridCols = config.DataConfig.GLOBAL_COLS
+    _gridRows = config.DataConfig.GLOBAL_PARAMS
     
     def __init__(self, parent, controller):
         self._controller = controller
@@ -27,11 +28,13 @@ class GlobalsView():
         self._mainLayout = wx.StaticBoxSizer(headerBox , wx.VERTICAL )
         
         #Grid and its data table
-        self._gridTable = gdt.GridDataTable(self._gridCols, autoCommit=True)
+        self._gridTable = gdt.GridDataTable(self._gridCols, self._gridRows, autoCommit=True)
         self._gridTable.SetTableData(controller.GetGlobalParams())
         self._glGrid = wx.grid.Grid(parent, -1)
         self._glGrid.SetTable(self._gridTable, True)
-        self._glGrid.AutoSizeColumns()
+        self._glGrid.SetColSize(0, 120)
+        self._glGrid.SetRowLabelSize(150)
+        self._glGrid.SetRowLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTER)
         
         imgLayout = wx.BoxSizer( wx.HORIZONTAL )
         bitmap = wx.Bitmap( u"./imgs/Play.png", wx.BITMAP_TYPE_ANY )
@@ -52,7 +55,7 @@ class GlobalsView():
         return self._mainLayout;
 
     def OnRunClick(self, event):
-        self._controller.GetDataFrames()
+        self._controller.Run()
         
     def PopulateGrid(self, gl):
         self._gridTable.SetTableData(gl)

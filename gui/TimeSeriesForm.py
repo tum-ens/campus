@@ -15,7 +15,7 @@ class TimeSeriesForm(wx.Dialog):
         self.SetBackgroundColour("black")
         
         mainLayout = wx.BoxSizer( wx.VERTICAL )
-        self._lblCommName = wx.StaticText(self, -1, "Commodity name: ")
+        self._lblCommName = wx.StaticText(self, -1, "Name: ")
         self._lblCommName.SetForegroundColour(wx.WHITE)
         self._lblYear = wx.StaticText(self, -1, "Year: ")
         self._lblYear.SetForegroundColour(wx.WHITE)

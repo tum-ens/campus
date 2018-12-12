@@ -18,6 +18,10 @@ import wx
 from pubsub import pub
 from Events import EVENTS
 
+import sys
+sys.path.insert(0, '..')
+import urbs
+
 class Controller():
     
     def __init__(self):
@@ -79,7 +83,7 @@ class Controller():
             self._resModel.RemoveSites(sites)
             self._view.RemoveRESTab(sites)
             
-    def RESSelected(self, siteName):    
+    def RESSelected(self, siteName):
         self._model = self._resModel.GetSiteModel(siteName)
         
     def AddYear(self, year):
@@ -229,7 +233,10 @@ class Controller():
             self.EditTransmission(itemId)
             
     def OnItemMove(self, item):
-        pub.sendMessage(EVENTS.ITEM_MOVED + self._model.GetSiteName(), item=item)
+        if item.GetType() == 'Trnsm':
+            pub.sendMessage(EVENTS.TRNSM_ITEM_MOVED, item=item)
+        else:
+            pub.sendMessage(EVENTS.ITEM_MOVED + self._model.GetSiteName(), item=item)
 
     def SerializeObj(self, obj):
         #print(obj)
@@ -256,25 +263,127 @@ class Controller():
     def GetGlobalParams(self):
         return self._resModel.GetGlobalParams()
         
-    def GetDataFrames(self):
-        data = {
-            'global_prop'       : self._resModel.GetGlobalDF(),
-            'site'              : self._resModel.GetSitesDF(),
-            'commodity'         : self._resModel.GetCommoditiesDF(),
-            'process'           : self._resModel.GetProcessesDF(),
-            'process_commodity' : self._resModel.GetConnectionsDF(),
-            'transmission'      : pd.DataFrame(),
-            'storage'           : self._resModel.GetStoragesDF(),
-            'demand'            : self._resModel.GetDemandTimeSerDF(),
-            'supim'             : self._resModel.GetSupImTimeSerDF(),
-            'buy_sell_price'    : self._resModel.GetBuySellTimeSerDF(),
-            'dsm'               : self._resModel.GetDsmDF(),
-            'eff_factor'        : pd.DataFrame()
-        } 
-        
-        # sort nested indexes to make direct assignments work
-        for key in data:
-            if isinstance(data[key].index, pd.core.index.MultiIndex):
-                data[key].sort_index(inplace=True)
-            
-        print(data)
+    def Run(self):
+        #self.GetDataFrames()
+        #return
+        result_name = 'Campus'
+        result_dir = urbs.prepare_result_directory(result_name) # name + time stamp
+    
+        # copy input file to result directory
+        # shutil.copyfile(input_file, os.path.join(result_dir, input_file))
+        # copy runme.py to result directory
+        # shutil.copyfile(__file__, os.path.join(result_dir, __file__))
+    
+        # Choose Solver (cplex, glpk, gurobi, ...)
+        #Solver = 'gurobi'
+        Solver = self._resModel.GetSolver()
+    
+        # simulation timesteps
+        (offset, length) = self._resModel.GetTimeStepTuple()  # time step selection
+        #print((offset, length))
+        timesteps = range(offset, offset+length+1)
+        dt=self._resModel.GetDT()
+        #print(dt)
+    
+        # plotting commodities/sites
+        plot_tuples = [
+            (2015, 'Campus', 'Elec'),
+            (2015, 'Campus', 'Heat'),
+            (2015, 'Campus', 'Cold'),
+            (2015, 'Campus', 'Heat low'),
+            (2020, 'Campus', 'Elec'),
+            (2020, 'Campus', 'Heat'),
+            (2020, 'Campus', 'Cold'),
+            (2020, 'Campus', 'Heat low'),
+            (2025, 'Campus', 'Elec'),
+            (2025, 'Campus', 'Heat'),
+            (2025, 'Campus', 'Cold'),
+            (2025, 'Campus', 'Heat low'),
+            (2030, 'Campus', 'Elec'),
+            (2030, 'Campus', 'Heat'),
+            (2030, 'Campus', 'Cold'),
+            (2030, 'Campus', 'Heat low'),
+            (2035, 'Campus', 'Elec'),
+            (2035, 'Campus', 'Heat'),
+            (2035, 'Campus', 'Cold'),
+            (2035, 'Campus', 'Heat low'),
+            (2040, 'Campus', 'Elec'),
+            (2040, 'Campus', 'Heat'),
+            (2040, 'Campus', 'Cold'),
+            (2040, 'Campus', 'Heat low')
+            ]
+    
+        # optional: define names for sites in plot_tuples
+        plot_sites_name = {}
+    
+        # detailed reporting commodity/sites
+        report_tuples = [
+            (2015, 'Campus', 'Elec'),
+            (2015, 'Campus', 'Heat'),
+            (2015, 'Campus', 'Cold'),
+            (2015, 'Campus', 'Heat low'),
+            (2015, 'Campus', 'CO2'),
+            (2020, 'Campus', 'Elec'),
+            (2020, 'Campus', 'Heat'),
+            (2020, 'Campus', 'Cold'),
+            (2020, 'Campus', 'CO2'),
+            (2020, 'Campus', 'Heat low'),
+            (2025, 'Campus', 'Elec'),
+            (2025, 'Campus', 'Heat'),
+            (2025, 'Campus', 'Cold'),
+            (2025, 'Campus', 'Heat low'),
+            (2025, 'Campus', 'CO2'),
+            (2030, 'Campus', 'Elec'),
+            (2030, 'Campus', 'Heat'),
+            (2030, 'Campus', 'Cold'),
+            (2030, 'Campus', 'Heat low'),
+            (2030, 'Campus', 'CO2'),
+            (2035, 'Campus', 'Elec'),
+            (2035, 'Campus', 'Heat'),
+            (2035, 'Campus', 'Cold'),
+            (2035, 'Campus', 'Heat low'),
+            (2035, 'Campus', 'CO2'),
+            (2040, 'Campus', 'Elec'),
+            (2040, 'Campus', 'Heat'),
+            (2040, 'Campus', 'Cold'),
+            (2040, 'Campus', 'Heat low'),
+            (2040, 'Campus', 'CO2'),
+            ]
+    
+        # optional: define names for sites in report_tuples
+        report_sites_name = {}
+    
+        # plotting timesteps
+        plot_periods = {
+            'win': range(1000, 1000+24*7),
+            # 'spr': range(3000, 3000+24*7),
+            # 'sum': range(5000, 5000+24*7),
+            # 'win': range(7000, 7000+24*7)
+        }
+    
+        # add or change plot colors
+        my_colors = {
+            'South': (230, 200, 200),
+            'Mid': (200, 230, 200),
+            'North': (200, 200, 230)}
+        for country, color in my_colors.items():
+            urbs.COLORS[country] = color
+    
+        # select scenarios to be run
+        scenarios = [
+                     urbs.scenario_base,
+                     # urbs.sc_CO2limit(40000),
+                     # urbs.sc_1proprop('Campus', 'PV S 30°', 'inv-cost', 600000)
+        ]
+    
+        #print(scenarios)
+        for scenario in scenarios:
+            #print(scenario)
+            prob = urbs.run_scenario(self._resModel.GetDataFrames(), Solver, timesteps, scenario,
+                                result_dir, dt,
+                                plot_tuples=plot_tuples,
+                                plot_sites_name=plot_sites_name,
+                                plot_periods=plot_periods,
+                                report_tuples=report_tuples,
+                                report_sites_name=report_sites_name)
+    

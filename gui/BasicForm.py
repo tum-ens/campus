@@ -56,6 +56,8 @@ class BasicForm(wx.Dialog):
     def PopulateGrid(self, gridTable, dataPerYear):
         self._gridTables.clear()
         self._gridTables.append(gridTable)
+        self._grid = gridTable.GetView()
+        #self._grid.Bind(wx.EVT_KEY_DOWN, self.OnKeyPress)
         new = len(dataPerYear)
         cur = gridTable.GetNumberRows()        
         msg = None
@@ -67,3 +69,21 @@ class BasicForm(wx.Dialog):
         if msg:
             gridTable.SetTableData(dataPerYear)
             gridTable.GetView().ProcessTableMessage(msg)
+
+    def OnKeyPress(self, event):
+        if event.ControlDown() and event.GetKeyCode() == 86:
+            if not wx.TheClipboard.IsOpened():  # may crash, otherwise
+                do = wx.TextDataObject()
+                wx.TheClipboard.Open()
+                success = wx.TheClipboard.GetData(do)
+                wx.TheClipboard.Close()
+                if success:
+                    s = do.GetText()
+                    s = str.replace(s, ',', '')
+                    cells = s.split('\t')
+                    row = self._grid.GetGridCursorRow()
+                    col = self._grid.GetGridCursorCol()
+                    for v in cells:
+                        if col < self._grid.GetNumberCols():
+                            self._grid.SetCellValue(row, col, v)
+                            col+=1                

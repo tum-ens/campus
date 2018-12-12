@@ -12,7 +12,8 @@ class DataConfig():
     PARAM_KEY        = 'key'
     PARAM_DEFVALUE   = 'defVal'
 
-    GRID_COL_LABEL      = 'label'
+    GRID_COL_LABEL      = 'col_label'
+    GRID_ROW_LABEL      = 'row_label'
     GRID_COL_DATATYPE   = 'dataType'
 
     COMM_SUPIM  = 'SupIm'
@@ -24,15 +25,31 @@ class DataConfig():
     
     TS_BTN_COL  = 4
     INF         = 'inf'
-    
+#-----------------------------------------------------------------------------#    
     GLOBAL_PARAMS = [
         {PARAM_KEY: 'Discount rate',
-         GRID_COL_LABEL: 'Discount rate', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.03},
+         GRID_ROW_LABEL: 'Discount rate', PARAM_DEFVALUE: 0.03},
         {PARAM_KEY: 'CO2 budget',
-         GRID_COL_LABEL: 'CO2 budget', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '1,000,000'},
+         GRID_ROW_LABEL: 'CO2 budget', PARAM_DEFVALUE: '1,000,000'},
         {PARAM_KEY: 'Weight',
-         GRID_COL_LABEL: 'Last year weight', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 10}
+         GRID_ROW_LABEL: 'Last year weight', PARAM_DEFVALUE: 10},
+        {PARAM_KEY: 'Solver',
+         GRID_ROW_LABEL: 'Solver', PARAM_DEFVALUE: 'glpk'},
+        {PARAM_KEY: 'Objective',
+         GRID_ROW_LABEL: 'Objective', PARAM_DEFVALUE: 'Cost/CO2'},
+        {PARAM_KEY: 'TSOffset',
+         GRID_ROW_LABEL: 'Time steps offset', PARAM_DEFVALUE: 1000},
+        {PARAM_KEY: 'TSLen',
+         GRID_ROW_LABEL: 'Time steps length', PARAM_DEFVALUE: 168},
+        {PARAM_KEY: 'DT',
+         GRID_ROW_LABEL: 'Time step (in hours)', PARAM_DEFVALUE: 1}
     ]
+    
+    GLOBAL_COLS = [
+        {PARAM_KEY: 'value',
+         GRID_COL_LABEL: 'KKKKKKKKKKKKkk', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING}
+    ]
+#-----------------------------------------------------------------------------#    
 
     YEAR_PARAMS = [
         {PARAM_KEY: 'selected',
@@ -40,14 +57,14 @@ class DataConfig():
         {PARAM_KEY: 'CO2 limit',
          GRID_COL_LABEL: 'CO2 limit', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF}
     ]
-
+#-----------------------------------------------------------------------------#
     SITE_PARAMS = [
         {PARAM_KEY: 'selected',
          GRID_COL_LABEL:'', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''},
         {PARAM_KEY: 'area',
          GRID_COL_LABEL: 'Site Area', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '100,000'}
     ]
-
+#-----------------------------------------------------------------------------#
     COMMODITY_PARAMS = [
         {PARAM_KEY: 'timeSer',
          GRID_COL_LABEL: 'Hidden', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''},
@@ -64,9 +81,9 @@ class DataConfig():
          GRID_COL_LABEL:'Delay time (h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'eff',
          GRID_COL_LABEL:'Efficiency', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
-          {PARAM_KEY: 'recov',
+        {PARAM_KEY: 'recov',
          GRID_COL_LABEL:'Recovery time (h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
-          {PARAM_KEY: 'cap-max-do',
+        {PARAM_KEY: 'cap-max-do',
          GRID_COL_LABEL:'Downshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'cap-max-up',
          GRID_COL_LABEL:'Upshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00}
@@ -80,7 +97,7 @@ class DataConfig():
         {PARAM_KEY: 'Action',
          GRID_COL_LABEL: '', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'}
     ]
-
+#-----------------------------------------------------------------------------#
     PROCESS_PARAMS = [
         {PARAM_KEY: 'inst-cap',
          GRID_COL_LABEL:'Installed capacity (MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
@@ -90,6 +107,10 @@ class DataConfig():
          GRID_COL_LABEL: 'Minimum capacity (MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'cap-up',
          GRID_COL_LABEL:'Maximum capacity (MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
+        {PARAM_KEY: 'max-grad',
+         GRID_COL_LABEL:'Maximum power gradient (1/h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
+        {PARAM_KEY: 'min-fraction',
+         GRID_COL_LABEL: 'Minimum load fraction', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'inv-cost',
          GRID_COL_LABEL: 'Investment cost (€/MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'fix-cost',
@@ -100,23 +121,27 @@ class DataConfig():
          GRID_COL_LABEL: 'Startup cost (€)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'wacc',
          GRID_COL_LABEL: 'Weighted average cost of capital', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.05},
-        {PARAM_KEY: 'max-grad',
-         GRID_COL_LABEL:'Maximum power gradient (1/h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
-        {PARAM_KEY: 'min-fraction',
-         GRID_COL_LABEL: 'Minimum load fraction', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'depreciation',
          GRID_COL_LABEL: 'Depreciation period (a)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 20},
         {PARAM_KEY: 'area-per-cap',
          GRID_COL_LABEL: 'Area use per capacity (m^2/MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF}
     ]
-
+    
+    PROCESS_COLS = [
+        {PARAM_KEY: 'timeEff',
+         GRID_COL_LABEL: 'Hidden', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''}
+    ] + PROCESS_PARAMS + [
+     {PARAM_KEY: 'Action',
+         GRID_COL_LABEL: 'Time Eff.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'}
+     ]
+#-----------------------------------------------------------------------------#
     CONNECTION_PARAMS = [
         {PARAM_KEY: 'ratio',
          GRID_COL_LABEL:'Ratio (1)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1.00},
         {PARAM_KEY: 'ratio-min',
          GRID_COL_LABEL: 'Ratio-Min', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00}
     ]
-
+#-----------------------------------------------------------------------------#
     STORAGE_PARAMS = [
         {PARAM_KEY: 'inst-cap-c',
          GRID_COL_LABEL:'Installed capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
@@ -157,7 +182,7 @@ class DataConfig():
         {PARAM_KEY: 'discharge',
          GRID_COL_LABEL:'Discharge', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
     ]
-    
+#-----------------------------------------------------------------------------#    
     TRANS_PARAMS = [
         {PARAM_KEY: 'eff',
          GRID_COL_LABEL: 'Efficiency (1)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
@@ -178,3 +203,4 @@ class DataConfig():
         {PARAM_KEY: 'depreciation',
          GRID_COL_LABEL: 'Depreciation period (a)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 20}
     ]
+#-----------------------------------------------------------------------------#
