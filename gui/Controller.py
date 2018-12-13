@@ -10,11 +10,16 @@ import CommodityForm as commf
 import ProcessForm as procf
 import ConnectionForm as connf
 import StorageForm as strgf
+import TransmissionForm as tf
 import json
 import wx
 
 from pubsub import pub
 from Events import EVENTS
+
+import sys
+sys.path.insert(0, '..')
+import urbs
 
 class Controller():
     
@@ -25,7 +30,7 @@ class Controller():
         self._model = None
         
         #view part
-        self._view = view.MainView()
+        self._view = view.MainView(self)
         self._view.Maximize()
         self._view.Show()
         
@@ -54,6 +59,9 @@ class Controller():
         
         pub.subscribe(self.EditConnection, EVENTS.CONNECTION_EDITING)
         
+        pub.subscribe(self.AddTransmission, EVENTS.TRNSM_ADDING)
+        pub.subscribe(self.SaveTransmission, EVENTS.TRNSM_SAVE)
+        
         pub.subscribe(self.RESSelected, EVENTS.RES_SELECTED)
         pub.subscribe(self.OnItemDoubleClick, EVENTS.ITEM_DOUBLE_CLICK)
         pub.subscribe(self.OnItemMove, EVENTS.ITEM_MOVED)
@@ -74,7 +82,7 @@ class Controller():
             self._resModel.RemoveSites(sites)
             self._view.RemoveRESTab(sites)
             
-    def RESSelected(self, siteName):    
+    def RESSelected(self, siteName):
         self._model = self._resModel.GetSiteModel(siteName)
         
     def AddYear(self, year):
@@ -93,9 +101,10 @@ class Controller():
         
     def EditCommodity(self, commId):
         comm = self._model.GetCommodity(commId)
-        self._comForm = commf.CommodityDialog(self._view)
-        self._comForm.PopulateCommodity(comm)
-        self._comForm.ShowModal()
+        if comm:
+            self._comForm = commf.CommodityDialog(self._view)
+            self._comForm.PopulateCommodity(comm)
+            self._comForm.ShowModal()
         
     def SaveCommodity(self, data):
         status = self._model.SaveCommodity(data)
@@ -121,7 +130,6 @@ class Controller():
             wx.MessageBox('Please select atleast one input/output commodity!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
             self._processForm.Close()            
-            
         
     def EditProcess(self, processId):
         process = self._model.GetProcess(processId)
@@ -145,9 +153,8 @@ class Controller():
         elif status == 2:
             wx.MessageBox('Please select a commodity!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
-            self._storageForm.Close()            
+            self._storageForm.Close()
             
-        
     def EditStorage(self, storageId):
         storage = self._model.GetStorage(storageId)
         self._storageForm = strgf.StorageDialog(self._view)
@@ -179,6 +186,41 @@ class Controller():
                 
         return d
         
+    def AddTransmission(self):
+        newTrns = self._resModel.CreateNewTrnsm()
+        self._trnsForm = tf.TransmissionDialog(self._view, self)
+        self._trnsForm.PopulateTrans(newTrns, self._resModel.GetSites())
+        self._trnsForm.ShowModal()
+        
+    def SaveTransmission(self, data):
+        status = self._resModel.SaveTransmission(data)
+        if status:
+            self._trnsForm.Close()
+        else:
+            wx.MessageBox('A Transmission line with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
+            
+    def EditTransmission(self, trnsmId):
+        trnsm = self._resModel.GetTransmission(trnsmId)
+        self._trnsForm = tf.TransmissionDialog(self._view, self)
+        self._trnsForm.PopulateTrans(trnsm, self._resModel.GetSites())
+        self._trnsForm.ShowModal()
+            
+    def GetTransmissions(self):
+        return self._resModel._transmissions
+        
+    def GetTrnsmCommodities(self):
+        return self._resModel._trnsmCommodities
+        
+    def GetCommonCommodities(self, site1, site2):
+        m1 = self._resModel.GetSiteModel(site1)
+        m2 = self._resModel.GetSiteModel(site2)
+        
+        c1 = set([x['Name'] for x in m1._commodities.values()])
+        c2 = set([x['Name'] for x in m2._commodities.values()])
+        
+        l = c1 & c2
+        return list(l)
+        
     def OnItemDoubleClick(self, itemId, itemType):
         if itemType == 'Commodity':
             self.EditCommodity(itemId)
@@ -186,9 +228,14 @@ class Controller():
             self.EditProcess(itemId)
         elif itemType == 'Storage':
             self.EditStorage(itemId)
+        elif itemType == 'Trnsm':
+            self.EditTransmission(itemId)
             
     def OnItemMove(self, item):
-        pub.sendMessage(EVENTS.ITEM_MOVED + self._model.GetSiteName(), item=item)
+        if item.GetType() == 'Trnsm':
+            pub.sendMessage(EVENTS.TRNSM_ITEM_MOVED, item=item)
+        else:
+            pub.sendMessage(EVENTS.ITEM_MOVED + self._model.GetSiteName(), item=item)
 
     def SerializeObj(self, obj):
         #print(obj)
@@ -211,5 +258,75 @@ class Controller():
                 self._model = self._resModel.GetSiteModel(site)
                 resTab.RebuildRES(None)
                 resTab.Refresh()
+    
+    def GetGlobalParams(self):
+        return self._resModel.GetGlobalParams()
         
+    def Run(self):
+        #self.GetDataFrames()
+        #return
+        result_name = 'Campus'
+        result_dir = urbs.prepare_result_directory(result_name) # name + time stamp
+    
+        # copy input file to result directory
+        # shutil.copyfile(input_file, os.path.join(result_dir, input_file))
+        # copy runme.py to result directory
+        # shutil.copyfile(__file__, os.path.join(result_dir, __file__))
+    
+        # Choose Solver (cplex, glpk, gurobi, ...)
+        #Solver = 'gurobi'
+        Solver = self._resModel.GetSolver()
+    
+        # simulation timesteps
+        (offset, length) = self._resModel.GetTimeStepTuple()  # time step selection
+        #print((offset, length))
+        timesteps = range(offset, offset+length+1)
+        dt=self._resModel.GetDT()
+        #print(dt)
+    
+        # plotting commodities/sites
+        plot_tuples = self._resModel.GetPlotTuples()
+    
+        # optional: define names for sites in plot_tuples
+        plot_sites_name = {}
+    
+        # detailed reporting commodity/sites
+        report_tuples = self._resModel.GetReportTuples()
         
+        # optional: define names for sites in report_tuples
+        report_sites_name = {}
+    
+        # plotting timesteps
+        plot_periods = {
+            'win': range(1000, 1000+24*7),
+            # 'spr': range(3000, 3000+24*7),
+            # 'sum': range(5000, 5000+24*7),
+            # 'win': range(7000, 7000+24*7)
+        }
+    
+        # add or change plot colors
+        my_colors = {
+            'South': (230, 200, 200),
+            'Mid': (200, 230, 200),
+            'North': (200, 200, 230)}
+        for country, color in my_colors.items():
+            urbs.COLORS[country] = color
+    
+        # select scenarios to be run
+        scenarios = [
+                     urbs.scenario_base,
+                     # urbs.sc_CO2limit(40000),
+                     # urbs.sc_1proprop('Campus', 'PV S 30°', 'inv-cost', 600000)
+        ]
+    
+        #print(scenarios)
+        for scenario in scenarios:
+            #print(scenario)
+            prob = urbs.run_scenario(self._resModel.GetDataFrames(), Solver, timesteps, scenario,
+                                result_dir, dt,
+                                plot_tuples=plot_tuples,
+                                plot_sites_name=plot_sites_name,
+                                plot_periods=plot_periods,
+                                report_tuples=report_tuples,
+                                report_sites_name=report_sites_name)
+    

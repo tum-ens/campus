@@ -9,42 +9,64 @@ from pubsub import pub
 from Events import EVENTS
 
 import DataConfig as config
+import SiteModel as sm
+import pandas as pd
+import math
+import locale
 
 class RESModel():
     
-    def __init__(self, data=None):        
-        self._years  = {}
-        self._sites  = {}
-        self._models = {}
-        if data:            
+    def __init__(self, data=None):
+        self._years             = {}
+        self._sites             = {}
+        self._models            = {}
+        self._transmissions     = {}
+        self._trnsmCommodities  = {}
+        self._gl                = self.InitializeGlobalParams()
+        if data:
+            self._gl = data['_gl']
+            pub.sendMessage(EVENTS.GL_PARAMS_LOADED, gl=self._gl)
             self._sites = data['_sites']
             pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
             self._years = data['_years']
             pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
             for k, v in data['_models'].items():
-                self._models[k] = SiteModel(k, 
-                                            list(self._years.keys()),
+                self._models[k] = sm.SiteModel(k, 
+                                            sorted(self._years.keys()),
                                             v['_commodities'],
                                             v['_processes'],
                                             v['_connections']                                            
                                   )
 
+#-----------------------------------------------------------------------------#
+    def InitializeGlobalParams(self):
+        data = {}
+        for p in config.DataConfig.GLOBAL_PARAMS:
+            key = p[config.DataConfig.PARAM_KEY]
+            v = {}
+            for col in config.DataConfig.GLOBAL_COLS:
+                colKey = col[config.DataConfig.PARAM_KEY]
+                v[colKey] = p[config.DataConfig.PARAM_DEFVALUE]
+            data[key] = v
 
+        return data
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
     def InitializeSite(self, name):
-        return SiteModel.InitializeData(config.DataConfig.SITE_PARAMS)
-
+        return sm.SiteModel.InitializeData(config.DataConfig.SITE_PARAMS)
+#-----------------------------------------------------------------------------#
     def AddSite(self, siteName):
         status = 0        
         if not (siteName in self._sites):
             self._sites[siteName]  = self.InitializeSite(siteName)
-            self._models[siteName] = SiteModel(siteName, list(self._years.keys()))
+            self._models[siteName] = sm.SiteModel(siteName, list(self._years.keys()))
             #notify subscribers that a site is added
             pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
         else:
             status = 1
         
         return status
-
+#-----------------------------------------------------------------------------#
     def RemoveSites(self, sites):
         notify = 0
         for site in sites:
@@ -55,19 +77,24 @@ class RESModel():
         #notify subscribers that a site is removed
         if notify > 0:
             pub.sendMessage(EVENTS.SITE_REMOVED, sites=self._sites, removeCount=notify)
-            
+#-----------------------------------------------------------------------------#
+    def GetSites(self):
+        return sorted(self._sites.keys())
+#-----------------------------------------------------------------------------#
     def InitializeYear(self):
-        return SiteModel.InitializeData(config.DataConfig.YEAR_PARAMS)
-        
+        return sm.SiteModel.InitializeData(config.DataConfig.YEAR_PARAMS)
+#-----------------------------------------------------------------------------#        
     def AddYear(self, year):
         if not (year in self._years):
             self._years[year] = self.InitializeYear()
             for m in self._models.values():
                 m.AddYear(year)
+            for v in self._transmissions.values():
+                v['Years'][year] = sm.SiteModel.InitializeData(config.DataConfig.TRANS_PARAMS)
             
             #notify subscribers that a year is added
             pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
-
+#-----------------------------------------------------------------------------#
     def RemoveYears(self, years):
         for year in years:
             self._years.pop(year)
@@ -76,225 +103,444 @@ class RESModel():
             
         #notify subscribers that years are removed
         pub.sendMessage(EVENTS.YEAR_REMOVED, years=self._years, removeCount=len(years))
-    
+#-----------------------------------------------------------------------------#    
     def GetSiteModel(self, siteName):
         return self._models[siteName]
-            
-#-----------------------------------------------------------------------------#    
-class SiteModel():
-
-    def __init__(self, name, years, commodities=None, processes=None, connections=None):
-        self._name           = name
-        self._years          = years
-        self._commodities    = {}
-        self._processes      = {}
-        self._connections    = {}
-        
-        if commodities:
-            self._commodities = commodities
-        if processes:
-            self._processes = processes
-        if connections:
-            self._connections = connections
-        
-    def InitializeData(cols):
+#-----------------------------------------------------------------------------#
+    def GetGlobalParams(self):
+        return self._gl
+#-----------------------------------------------------------------------------#
+    def CreateNewTrnsm(self):
+        trnsId = 'NewTrnsm#' + str(len(self._transmissions) + 1)
         data = {}
-        for col in cols:
-            data[col[config.DataConfig.PARAM_KEY]] = col[config.DataConfig.PARAM_DEFVALUE]
-
-        return data        
-        
-    def InitializeCommodity(self):
-        return SiteModel.InitializeData(config.DataConfig.COMMODITY_PARAMS)
-        
-    def InitializeProcess(self):
-        return SiteModel.InitializeData(config.DataConfig.PROCESS_PARAMS)
-        
-    def InitializeStorage(self):
-        return SiteModel.InitializeData(config.DataConfig.STORAGE_PARAMS)
-    
-    def InitializeConnection(self):
-        return SiteModel.InitializeData(config.DataConfig.CONNECTION_PARAMS)
-        
-    def AddYear(self, year):
-        self._years.append(year)
-        
-        for data in self._commodities.values():
-            data['Years'][year] = self.InitializeCommodity()
-        
-        for data in self._processes.values():
-            if data['Type'] == 'Storage':
-                data['Years'][year] = self.InitializeStorage()
-            else:
-                data['Years'][year] = self.InitializeProcess()
-            
-        for data in self._connections.values():
-            data['Years'][year] = self.InitializeConnection()
-
-    def RemoveYear(self, year):
-        self._years.remove(year)
-        
-        for data in self._commodities.values():
-            data['Years'].pop(year)
-            
-        for data in self._processes.values():
-            data['Years'].pop(year)
-            
-        for data in self._connections.values():
-            data['Years'].pop(year)
-            
-    def GetCommodityGroup(self, commType):
-        grp = '2-1'
-        if commType in (config.DataConfig.COMM_SUPLM, config.DataConfig.COMM_BUY):
-            grp = '0-1'
-        elif commType in (config.DataConfig.COMM_STOCK):
-            grp = '1-1'
-        elif commType in (config.DataConfig.COMM_ENV):
-            grp = '2-2'
-            
-        return grp
-            
-    def CreateNewCommodity(self, commType):
-        grp = self.GetCommodityGroup(commType)
-        num = str(len(self._commodities) + 1)
-        if(len(num) < 2):
-            num = '0' + num
-        commId = grp + '_' + num + '_' + str.replace(commType, ' ', '_')
-        data = {}
+        data['SiteIn'] = ''
+        data['SiteOut'] = ''
+        data['CommName'] = ''
         data['Years'] = {}
-        data['Id'] = commId
-        data['Name'] = commType + '#' + num
-        data['Type'] = commType
-        data['Group'] = grp[0]
-        data['Color'] = (0,0,0)
-        data['DSM'] = False
+        data['Id'] = trnsId
+        data['Name'] = trnsId
+        data['Type'] = 'Trnsm'
         for year in self._years:
-            data['Years'][year] = self.InitializeCommodity()
-        
+            data['Years'][year] = sm.SiteModel.InitializeData(config.DataConfig.TRANS_PARAMS)
+            
         return data
-    
-    def SaveCommodity(self, data):
-        commId = data['Id']
-        commName = data['Name']
+#-----------------------------------------------------------------------------#
+    def SaveTransmission(self, data):
+        trnsmId = data['Id']
+        trnsmName = data['Name']
         success = True
-        for v in self._commodities.values():
-            if v['Name'] == commName and v['Id'] != commId:
+        for v in self._transmissions.values():
+            if v['Name'] == trnsmName and v['Id'] != trnsmId:
                 success = False
                 break
         if success:
-            if commId not in self._commodities:
-                self._commodities[commId] = data
-                pub.sendMessage(EVENTS.COMMODITY_ADDED + self._name, objId=commId)
+            self.SaveTrnsmCommodities(data)
+            if trnsmId not in self._transmissions:
+                self._transmissions[trnsmId] = data
+                pub.sendMessage(EVENTS.TRNSM_ADDED, objId=trnsmId)
             else:
-                pub.sendMessage(EVENTS.COMMODITY_EDITED + self._name, objId=commId)
+                pub.sendMessage(EVENTS.TRNSM_EDITED, objId=trnsmId)
         
-        #Add further checks for status
-        return success
-        
-    def GetCommodity(self, commId):        
-        return self._commodities[commId]
+        return success            
+#-----------------------------------------------------------------------------#
+    def SaveTrnsmCommodities(self, data):
+        #In part
+        commInId = data['SiteIn'] + '.' + data['CommName']
+        m = self._models[data['SiteIn']]
+        commIn = m.GetCommByName(data['CommName'])
+        self._trnsmCommodities[commInId] = commIn
+        data['IN'] = [commInId]
 
-    def GetCommodityList(self):
-        x = {}
-        ids = sorted(self._commodities.keys())        
-        for k in ids:
-            x[k] = {'selected': '', 'Name': self._commodities[k]['Name'], 'Action': '...'}
+        #out part
+        commOutId = data['SiteOut'] + '.' + data['CommName']
+        m = self._models[data['SiteOut']]
+        commOut = m.GetCommByName(data['CommName'])
+        self._trnsmCommodities[commOutId] = commOut            
+        data['OUT'] = [commOutId]
+#-----------------------------------------------------------------------------#
+    def GetTransmission(self, trnsmId):
+        return self._transmissions[trnsmId]
+#-----------------------------------------------------------------------------#
+    def CreateDF(self, tuples, names, columns, values):
+        index = None
+        if len(tuples) > 0:
+            index = pd.MultiIndex.from_tuples(tuples, names=names)
+            lvls = [index.levels[0].astype(float)]
+            for l in index.levels[1:]:
+                lvls.append(l)
+            index = index.set_levels(lvls)
+        else:
+            l = []
+            for n in names:
+                l.append([])
+            index = pd.MultiIndex(labels=l, levels=l, names=names)
+            
+        df = pd.DataFrame(values, columns=columns, index=index)
+        if len(values) > 0:
+            locale.setlocale(locale.LC_NUMERIC, '')
+            df = df.applymap(lambda x : locale.atof(str(x)))
+        return df
+#-----------------------------------------------------------------------------#        
+    def GetGlobalDF(self):
+        tuples = []
+        values = []
+        colKey = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
+        years = sorted(self._years.keys())
+        for year in years:
+            if year == years[0]:
+                #Discount rate
+                prop = config.DataConfig.GLOBAL_PARAMS[0][config.DataConfig.PARAM_KEY]
+                tuples.append((year, prop))
+                values.append(self._gl[prop][colKey])
+                #co2 budget
+                prop = config.DataConfig.GLOBAL_PARAMS[1][config.DataConfig.PARAM_KEY]
+                tuples.append((year, prop))
+                values.append(self._gl[prop][colKey])
+            data = self._years[year]
+            for k, v in data.items():
+                #skip 'selected'
+                if k == config.DataConfig.YEAR_PARAMS[0][config.DataConfig.PARAM_KEY]:
+                    continue
+                
+                tuples.append((year, k))
+                values.append(v)
+            if year == years[-1]:
+                #Weight
+                param = config.DataConfig.GLOBAL_PARAMS[2]
+                paramKey = param[config.DataConfig.PARAM_KEY]
+                tuples.append((year, paramKey))
+                values.append(self._gl[paramKey][colKey])
         
-        return x
-
-    def CreateNewProcess(self):
-        processId = 'NewProcess#' + str(len(self._processes) + 1)
+        names = ['support_timeframe', 'Property']
+        return self.CreateDF(tuples, names, [colKey], values)
+#-----------------------------------------------------------------------------#        
+    def GetSitesDF(self):
+        tuples  = []
+        values  = []
+        columns = ['area']
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, data in self._sites.items():
+                tuples.append((year, site))
+                for col in columns:
+                    values.append(data[col])
+        
+        names = ['support_timeframe', 'Name']
+        return self.CreateDF(tuples, names, columns, values)
+#-----------------------------------------------------------------------------#        
+    def GetCommoditiesDF(self):
+        tuples  = []
+        values  = []
+        columns = ['price', 'max', 'maxperhour']
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                ids = sorted(m._commodities.keys())
+                for k in ids:
+                    comm = m._commodities[k]
+                    t = (year, site, comm['Name'], comm['Type'])
+                    tuples.append(t)
+                    data = comm['Years'][year]
+                    v = []
+                    for col in columns:
+                        s = data[col]
+                        if comm['Type'] in (config.DataConfig.COMM_SUPIM, 
+                                            config.DataConfig.COMM_DEMAND):
+                            s = math.nan
+                        v.append(s)
+                    values.append(v)
+        
+        names = ['support_timeframe', 'Site', 'Commodity', 'Type']
+        return self.CreateDF(tuples, names, columns, values)
+#-----------------------------------------------------------------------------#        
+    def GetProcessesDF(self):
+        tuples  = []
+        values  = []
+        columns = []
+        for c in config.DataConfig.PROCESS_PARAMS:
+            columns.append(c[config.DataConfig.PARAM_KEY])
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                ids = sorted(m._processes.keys())
+                for k in ids:
+                    p = m._processes[k]
+                    if p['Type'] == 'Storage':
+                        continue
+                    t = (year, site, p['Name'])
+                    tuples.append(t)
+                    data = p['Years'][year]
+                    v = []
+                    for col in columns:
+                        s = data[col]
+                        if year != years[0] and col in (columns[0], columns[1]):
+                            s = math.nan
+                        v.append(s)
+                    values.append(v)
+        
+        names = ['support_timeframe', 'Site', 'Process']
+        return self.CreateDF(tuples, names, columns, values)
+#-----------------------------------------------------------------------------#        
+    def GetStoragesDF(self):
+        tuples  = []
+        values  = []
+        columns = []
+        for c in config.DataConfig.STORAGE_PARAMS:
+            columns.append(c[config.DataConfig.PARAM_KEY])
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                ids = sorted(m._processes.keys())
+                for k in ids:
+                    strg = m._processes[k]
+                    if strg['Type'] != 'Storage':
+                        continue
+                    commName = m._commodities[strg['IN'][0]]['Name']
+                    t = (year, site, strg['Name'], commName)
+                    tuples.append(t)
+                    data = strg['Years'][year]
+                    v = []
+                    for col in columns:
+                        s = data[col]
+                        if year != years[0] and col in ('inst-cap-c', 
+                                                        'inst-cap-p', 
+                                                        'lifetime'):
+                            s = math.nan
+                        v.append(s)
+                    values.append(v)
+        
+        names = ['support_timeframe', 'Site', 'Storage', 'Commodity']
+        return self.CreateDF(tuples, names, columns, values)
+#-----------------------------------------------------------------------------#        
+    def GetConnectionsDF(self):
+        tuples  = []
+        values  = []
+        columns = []
+        for c in config.DataConfig.CONNECTION_PARAMS:
+            columns.append(c[config.DataConfig.PARAM_KEY])
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                ids = sorted(m._connections.keys())
+                for k in ids:
+                    conn = m._connections[k]
+                    t = (year, 
+                         m._processes[conn['Proc']]['Name'], 
+                         m._commodities[conn['Comm']]['Name'],
+                         conn['Dir'].title())
+                    tuples.append(t)
+                    data = conn['Years'][year]
+                    v = []
+                    for col in columns:
+                        v.append(data[col])
+                    values.append(v)
+        
+        names = ['support_timeframe', 'Process', 'Commodity', 'Direction']
+        return self.CreateDF(tuples, names, columns, values)
+#-----------------------------------------------------------------------------#        
+    def GetCommTimeSerDF(self, commTypes, includSite=True):
+        #columns
         data = {}
-        data['IN'] = []
-        data['OUT'] = []
-        data['Years'] = {}
-        data['Id'] = processId
-        data['Name'] = processId
-        data['Type'] = ''
-        for year in self._years:
-            data['Years'][year] = self.InitializeProcess()   
+        for site, m in self._models.items():
+            ids = sorted(m._commodities.keys())
+            for k in ids:
+                comm = m._commodities[k]
+                if comm['Type'] not in commTypes:
+                    continue
+                col = comm['Name']
+                if includSite:
+                    col = site + '.' + col
+                data[col] = comm
+        #tuples        
+        years = sorted(self._years.keys())
+        t = range(0, 8761)
+        tuples  = [(x, y) for x in years for y in t]
+        names = ['support_timeframe', 't']
+        df = self.CreateDF(tuples, names, [], [])
+        for col, comm in data.items():
+            v = []
+            for year in years:
+                timeSer = comm['Years'][year]['timeSer']
+                l = timeSer.split('|')
+                v = v + l
+            df[col] = pd.Series(v, index=df.index, dtype=float)
+        
+        if includSite and len(df.columns) > 0:
+            column_tuples = [tuple(col.split('.')) for col in df.columns]
+            df.columns = pd.MultiIndex.from_tuples(column_tuples)
+        
+        return df
+#-----------------------------------------------------------------------------#
+    def GetDemandTimeSerDF(self):
+        return self.GetCommTimeSerDF([config.DataConfig.COMM_DEMAND])
+#-----------------------------------------------------------------------------#
+    def GetSupImTimeSerDF(self):
+        return self.GetCommTimeSerDF([config.DataConfig.COMM_SUPIM])
+#-----------------------------------------------------------------------------#
+    def GetBuySellTimeSerDF(self):
+        commTypes = [config.DataConfig.COMM_BUY, config.DataConfig.COMM_SELL]
+        return self.GetCommTimeSerDF(commTypes, False)
+#-----------------------------------------------------------------------------#
+    def GetDsmDF(self):
+        tuples  = []
+        values  = []
+        columns = []
+        dsmCols = [x for x in config.DataConfig.COMMODITY_PARAMS[5:]]
+        for c in dsmCols:
+            columns.append(c[config.DataConfig.PARAM_KEY])
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                ids = sorted(m._commodities.keys())
+                for k in ids:
+                    comm = m._commodities[k]
+                    if comm['Type'] != config.DataConfig.COMM_DEMAND or comm['DSM'] != True:
+                        continue
+                        
+                    t = (year, site, comm['Name'])
+                    tuples.append(t)
+                    data = comm['Years'][year]
+                    v = []
+                    for col in columns:
+                        s = data[col]                        
+                        v.append(s)
+                    values.append(v)
+        
+        names = ['support_timeframe', 'Site', 'Commodity']
+        return self.CreateDF(tuples, names, columns, values)    
+#-----------------------------------------------------------------------------#        
+    def GetTrnsmDF(self):
+        tuples  = []
+        values  = []
+        columns = []
+        for c in config.DataConfig.TRANS_PARAMS:
+            columns.append(c[config.DataConfig.PARAM_KEY])
+        years = sorted(self._years.keys())
+        for year in years:
+            ids = sorted(self._transmissions.keys())
+            for k in ids:
+                trnsm = self._transmissions[k]                
+                t = (year, trnsm['SiteIn'], trnsm['SiteOut'], 
+                     trnsm['Name'], trnsm['CommName'])
+                tuples.append(t)
+                data = trnsm['Years'][year]
+                v = []
+                for col in columns:
+                    s = data[col]                        
+                    v.append(s)
+                values.append(v)
+        
+        names = ['support_timeframe', 'Site In', 'Site Out', 
+                     'Transmission', 'Commodity']
+        return self.CreateDF(tuples, names, columns, values)
+#-----------------------------------------------------------------------------#        
+    def GetTimeEffDF(self):
+        data = {}
+        tuples  = []
+        t = range(0, 8761)
+        years = sorted(self._years.keys())
+        foundYears = []
+        for year in years:
+            found = False
+            for site, m in self._models.items():
+                ids = sorted(m._processes.keys())
+                for k in ids:
+                    p = m._processes[k]
+                    if p['Type'] != 'Process':
+                        continue
+                    timeEff = p['Years'][year]['timeEff']
+                    if timeEff != '':
+                        found = True
+                        col = site + '.' + p['Name']
+                        data[col] = p
+            if found:
+                l = [(year, x) for x in t]
+                tuples = tuples + l
+                foundYears.append(year)
+                
+        names = ['support_timeframe', 't']        
+        df = self.CreateDF(tuples, names, [], [])
+        for col, p in data.items():
+            v = []
+            for year in foundYears:
+                timeEff = p['Years'][year]['timeEff']
+                l = timeEff.split('|')
+                v = v + l
+            df[col] = pd.Series(v, index=df.index, dtype=float)
+        
+        if len(df.columns) > 0:
+            column_tuples = [tuple(col.split('.')) for col in df.columns]
+            df.columns = pd.MultiIndex.from_tuples(column_tuples)
+        
+        return df
+#-----------------------------------------------------------------------------#
+    def GetDataFrames(self):
+        data = {
+            'global_prop'       : self.GetGlobalDF(),
+            'site'              : self.GetSitesDF(),
+            'commodity'         : self.GetCommoditiesDF(),
+            'process'           : self.GetProcessesDF(),
+            'process_commodity' : self.GetConnectionsDF(),
+            'transmission'      : self.GetTrnsmDF(),
+            'storage'           : self.GetStoragesDF(),
+            'demand'            : self.GetDemandTimeSerDF(),
+            'supim'             : self.GetSupImTimeSerDF(),
+            'buy_sell_price'    : self.GetBuySellTimeSerDF(),
+            'dsm'               : self.GetDsmDF(),
+            'eff_factor'        : self.GetTimeEffDF()
+        } 
+        
+        # sort nested indexes to make direct assignments work
+        for key in data:
+            if isinstance(data[key].index, pd.core.index.MultiIndex):
+                data[key].sort_index(inplace=True)
+            #print(data[key].info(verbose=True))
             
         return data
-    
-    
-    def SaveProcess(self, data):
-        processId = data['Id']
-        processName = data['Name']
-        status = 0
-        for v in self._processes.values():
-            if v['Name'] == processName and v['Id'] != processId:
-                status = 1
-                break
-        
-        if len(data['IN']) == 0 and len(data['OUT']) == 0:
-            status = 2
-        
-        if status == 0:                        
-            self.SaveConnections(processId, data['IN'], 'IN')
-            self.SaveConnections(processId, data['OUT'], 'OUT')
-            if processId not in self._processes:
-                self._processes[processId] = data
-                pub.sendMessage(EVENTS.PROCESS_ADDED + self._name, objId=processId)
-            else:
-                pub.sendMessage(EVENTS.PROCESS_EDITED + self._name, objId=processId)
-        
-        #Add further checks for status
-        return status
-
-    def GetProcess(self, processId):
-        return self._processes[processId]  
-    
-    def AddConnection(self, procId, commId, In_Out):
-        connId = procId+'$'+commId+'$'+In_Out
-        if connId not in self._connections.keys():            
-            yearsData = {}
-            for year in self._years:
-                yearsData[year] = self.InitializeConnection()
-            data = {}            
-            data['Dir'] = In_Out
-            data['Proc'] = procId
-            data['Comm'] = commId
-            data['Years'] = yearsData
-            self._connections[connId] = data
-
-        return connId
-        
-    def SaveConnections(self, processId, commList, direction):
-        #Remove deselcted connections
-        idsToDel = []
-        for k, v in self._connections.items():
-            if v['Proc'] == processId and v['Dir'] == direction:
-                if v['Comm'] not in commList:
-                    idsToDel.append(k)
-        
-        for k in idsToDel:
-            self._connections.pop(k)
-        
-        for comm in commList:
-            self.AddConnection(processId, comm, direction)
-        #
-        #print(direction, self._connections.keys())
-            
-    def GetConnection(self, procId, commId, In_Out):
-        connId = self.AddConnection(procId, commId, In_Out)
-        return self._connections[connId]
-
-    def CreateNewStorage(self):
-        storageId = 'NewStorage#' + str(len(self._processes) + 1)
-        data = {}
-        data['IN'] = []
-        data['OUT'] = []
-        data['Years'] = {}
-        data['Id'] = storageId
-        data['Name'] = storageId
-        data['Type'] = 'Storage'
-        for year in self._years:
-            data['Years'][year] = self.InitializeStorage()   
-            
-        return data
-
-    def GetStorage(self, storageId):
-        return self._processes[storageId]
-
-    def GetSiteName(self):
-        return self._name
+#-----------------------------------------------------------------------------#
+    def GetSolver(self):
+        valueCol = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
+        return self._gl['Solver'][valueCol]
+#-----------------------------------------------------------------------------#
+    def GetTimeStepTuple(self):
+        valueCol = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
+        return (self._gl['TSOffset'][valueCol], self._gl['TSLen'][valueCol])
+#-----------------------------------------------------------------------------#
+    def GetDT(self):
+        valueCol = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
+        return self._gl['DT'][valueCol]
+#-----------------------------------------------------------------------------#
+    def GetPlotTuples(self):
+        tuples = []
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                for comm in m._commodities.values():
+                    plot = False
+                    try:
+                        plot = comm['Years'][year]['plot']
+                    except KeyError:
+                        plot = False
+                    
+                    if plot == True:
+                        tuples.append((year, site, comm['Name']))
+        #print(tuples)
+        return tuples
+#-----------------------------------------------------------------------------#
+    def GetReportTuples(self):
+        tuples = []
+        years = sorted(self._years.keys())
+        for year in years:
+            for site, m in self._models.items():
+                for comm in m._commodities.values():
+                    report = False
+                    try:
+                        report = comm['Years'][year]['report']
+                    except KeyError:
+                        report = False
+                    
+                    if report == True:
+                        tuples.append((year, site, comm['Name']))
+        #print(tuples)
+        return tuples
+#-----------------------------------------------------------------------------#
