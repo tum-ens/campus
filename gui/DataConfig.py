@@ -65,17 +65,8 @@ class DataConfig():
          GRID_COL_LABEL: 'Site Area', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '100,000'}
     ]
 #-----------------------------------------------------------------------------#
-    COMMODITY_PARAMS = [
-        {PARAM_KEY: 'timeSer',
-         GRID_COL_LABEL: 'Hidden', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''},
-        {PARAM_KEY: 'price',
-         GRID_COL_LABEL:'Commodity price (€/MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
-        {PARAM_KEY: 'max',
-         GRID_COL_LABEL: 'Maximum commodity use', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
-        {PARAM_KEY: 'maxperhour',
-         GRID_COL_LABEL: 'Maximum commodity use per step', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
-        {PARAM_KEY: 'Action',
-         GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'},
+
+    DSM_PARAMS = [
         #DSM
         {PARAM_KEY: 'delay',
          GRID_COL_LABEL:'Delay time (h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
@@ -86,7 +77,21 @@ class DataConfig():
         {PARAM_KEY: 'cap-max-do',
          GRID_COL_LABEL:'Downshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'cap-max-up',
-         GRID_COL_LABEL:'Upshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
+         GRID_COL_LABEL:'Upshift capacity (MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00}
+    ]
+    
+    COMMODITY_PARAMS = [
+        {PARAM_KEY: 'timeSer',
+         GRID_COL_LABEL: 'Hidden', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''},
+        {PARAM_KEY: 'price',
+         GRID_COL_LABEL:'Commodity price (€/MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
+        {PARAM_KEY: 'max',
+         GRID_COL_LABEL: 'Maximum commodity use', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
+        {PARAM_KEY: 'maxperhour',
+         GRID_COL_LABEL: 'Maximum commodity use per step', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
+        {PARAM_KEY: 'Action',
+         GRID_COL_LABEL: 'Time S.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'}
+    ] + DSM_PARAMS + [        
         ########
         {PARAM_KEY: 'plot',
          GRID_COL_LABEL:'Plot', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''},
@@ -137,9 +142,9 @@ class DataConfig():
         {PARAM_KEY: 'timeEff',
          GRID_COL_LABEL: 'Hidden', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''}
     ] + PROCESS_PARAMS + [
-     {PARAM_KEY: 'Action',
+        {PARAM_KEY: 'Action',
          GRID_COL_LABEL: 'Time Eff.', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '...'}
-     ]
+    ]
 #-----------------------------------------------------------------------------#
     CONNECTION_PARAMS = [
         {PARAM_KEY: 'ratio',

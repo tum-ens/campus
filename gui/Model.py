@@ -385,8 +385,7 @@ class RESModel():
         tuples  = []
         values  = []
         columns = []
-        dsmCols = [x for x in config.DataConfig.COMMODITY_PARAMS[5:]]
-        for c in dsmCols:
+        for c in config.DataConfig.DSM_PARAMS:
             columns.append(c[config.DataConfig.PARAM_KEY])
         years = sorted(self._years.keys())
         for year in years:
