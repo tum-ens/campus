@@ -6,6 +6,7 @@ Created on Sat Nov  3 15:02:37 2018
 """
 
 import wx.grid
+import math
 
 class DataConfig():
 
@@ -24,13 +25,16 @@ class DataConfig():
     COMM_ENV    = 'Env'
     
     TS_BTN_COL  = 4
+    TS_LEN      = 8761
+    
     INF         = 'inf'
+    NAN         = 'nan'
 #-----------------------------------------------------------------------------#    
     GLOBAL_PARAMS = [
         {PARAM_KEY: 'Discount rate',
          GRID_ROW_LABEL: 'Discount rate', PARAM_DEFVALUE: 0.03},
         {PARAM_KEY: 'CO2 budget',
-         GRID_ROW_LABEL: 'CO2 budget', PARAM_DEFVALUE: '1,000,000'},
+         GRID_ROW_LABEL: 'CO2 budget', PARAM_DEFVALUE: 1000000},
         {PARAM_KEY: 'Weight',
          GRID_ROW_LABEL: 'Last year weight', PARAM_DEFVALUE: 10},
         {PARAM_KEY: 'Solver',
@@ -62,7 +66,7 @@ class DataConfig():
         {PARAM_KEY: 'selected',
          GRID_COL_LABEL:'', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''},
         {PARAM_KEY: 'area',
-         GRID_COL_LABEL: 'Site Area', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: '100,000'}
+         GRID_COL_LABEL: 'Site Area', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 100000}
     ]
 #-----------------------------------------------------------------------------#
 
@@ -121,7 +125,7 @@ class DataConfig():
         {PARAM_KEY: 'max-grad',
          GRID_COL_LABEL:'Maximum power gradient (1/h)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'min-fraction',
-         GRID_COL_LABEL: 'Minimum load fraction', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
+         GRID_COL_LABEL: 'Minimum load fraction', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'inv-cost',
          GRID_COL_LABEL: 'Investment cost (€/MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'fix-cost',
@@ -150,7 +154,7 @@ class DataConfig():
         {PARAM_KEY: 'ratio',
          GRID_COL_LABEL:'Ratio (1)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1.00},
         {PARAM_KEY: 'ratio-min',
-         GRID_COL_LABEL: 'Ratio-Min', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00}
+         GRID_COL_LABEL: 'Ratio-Min', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: math.nan}
     ]
 #-----------------------------------------------------------------------------#
     STORAGE_PARAMS = [
