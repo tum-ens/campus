@@ -11,6 +11,8 @@ import ProcessForm as procf
 import ConnectionForm as connf
 import StorageForm as strgf
 import TransmissionForm as tf
+import DataConfig as config
+import Errors as ERR
 import json
 import wx
 
@@ -127,7 +129,7 @@ class Controller():
         if status == 1:
             wx.MessageBox('A process with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
         elif status == 2:
-            wx.MessageBox('Please select atleast one input/output commodity!', 'Error', wx.OK|wx.ICON_ERROR)
+            wx.MessageBox('Please select atleast one input and one output commodity!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
             self._processForm.Close()            
         
@@ -262,7 +264,46 @@ class Controller():
     def GetGlobalParams(self):
         return self._resModel.GetGlobalParams()
         
+    def VallidateData(self):
+        success = True
+        if len(self._resModel._years) == 0:
+            success = False
+            wx.MessageBox(ERR.ERRORS[ERR.NO_YEAR], 'Error', wx.OK|wx.ICON_ERROR)
+            
+        if len(self._resModel._sites) == 0:
+            success = False
+            wx.MessageBox(ERR.ERRORS[ERR.NO_SITE], 'Error', wx.OK|wx.ICON_ERROR)
+            
+        for site, m in self._resModel._models.items():
+            if len(m._commodities) > 0:
+                for comm in m._commodities.values():
+                    if comm['Type'] in (config.DataConfig.COMM_SUPIM):
+                        for year in m._years:
+                            timeSer = comm['Years'][year]['timeSer']
+                            if timeSer != '':
+                                ln = len(timeSer.split('|'))
+                                if ln != config.DataConfig.TS_LEN:
+                                    success = False
+                                    msg = ERR.ERRORS[ERR.TS_LEN] % (config.DataConfig.TS_LEN, ln, site, comm['Name'], year)
+                                    wx.MessageBox(msg, 'Error', wx.OK|wx.ICON_ERROR)
+                            else:
+                                success = False
+                                wx.MessageBox(ERR.ERRORS[ERR.NO_TS] % (site, comm['Name'], year), 
+                                    'Error', wx.OK|wx.ICON_ERROR)
+            else:
+                success = False
+                wx.MessageBox(ERR.ERRORS[ERR.NO_COMM] % site, 'Error', wx.OK|wx.ICON_ERROR)
+                
+            processes = {k:v for k,v in m._processes.items() if v['Type'] == 'Process'}
+            if len(processes) == 0:
+                success = False
+                wx.MessageBox(ERR.ERRORS[ERR.NO_PROC] % site, 'Error', wx.OK|wx.ICON_ERROR)
+                
+        return success
+        
     def Run(self):
+        if not self.VallidateData():
+            return
         #self.GetDataFrames()
         #return
         result_name = 'Campus'

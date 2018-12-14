@@ -57,6 +57,8 @@ class MainView ( wx.Frame ):
                 if self._nb.GetPage(i).GetSiteName() == site:
                     self._nb.RemovePage(i)
                     break
+                
+        self._nb.SetSelection(0)
         
     def OnPageSelected(self, event):
         pageIndx = event.GetSelection()

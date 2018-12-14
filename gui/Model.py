@@ -12,7 +12,6 @@ import DataConfig as config
 import SiteModel as sm
 import pandas as pd
 import math
-import locale
 
 class RESModel():
     
@@ -30,6 +29,8 @@ class RESModel():
             pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
             self._years = data['_years']
             pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
+            self._transmissions = data['_transmissions']
+            self._trnsmCommodities = data['_trnsmCommodities']
             for k, v in data['_models'].items():
                 self._models[k] = sm.SiteModel(k, 
                                             sorted(self._years.keys()),
@@ -174,11 +175,14 @@ class RESModel():
             for n in names:
                 l.append([])
             index = pd.MultiIndex(labels=l, levels=l, names=names)
+            #print(index)
             
         df = pd.DataFrame(values, columns=columns, index=index)
         if len(values) > 0:
-            locale.setlocale(locale.LC_NUMERIC, '')
-            df = df.applymap(lambda x : locale.atof(str(x)))
+            for col in df.columns:
+                df[col] = pd.to_numeric(df[col])
+        
+        #print(df.info())        
         return df
 #-----------------------------------------------------------------------------#        
     def GetGlobalDF(self):
@@ -353,7 +357,7 @@ class RESModel():
                 data[col] = comm
         #tuples        
         years = sorted(self._years.keys())
-        t = range(0, 8761)
+        t = range(0, config.DataConfig.TS_LEN)
         tuples  = [(x, y) for x in years for y in t]
         names = ['support_timeframe', 't']
         df = self.CreateDF(tuples, names, [], [])
@@ -385,8 +389,7 @@ class RESModel():
         tuples  = []
         values  = []
         columns = []
-        dsmCols = [x for x in config.DataConfig.COMMODITY_PARAMS[5:]]
-        for c in dsmCols:
+        for c in config.DataConfig.DSM_PARAMS:
             columns.append(c[config.DataConfig.PARAM_KEY])
         years = sorted(self._years.keys())
         for year in years:
@@ -437,7 +440,7 @@ class RESModel():
     def GetTimeEffDF(self):
         data = {}
         tuples  = []
-        t = range(0, 8761)
+        t = range(0, config.DataConfig.TS_LEN)
         years = sorted(self._years.keys())
         foundYears = []
         for year in years:
@@ -495,7 +498,7 @@ class RESModel():
             if isinstance(data[key].index, pd.core.index.MultiIndex):
                 data[key].sort_index(inplace=True)
             #print(data[key].info(verbose=True))
-            
+        #print(data)    
         return data
 #-----------------------------------------------------------------------------#
     def GetSolver(self):

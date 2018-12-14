@@ -59,7 +59,7 @@ class TransmissionDialog ( bf.BasicForm ):
         
         #######################################################################
         layout1 = wx.BoxSizer( wx.HORIZONTAL )
-        label = wx.StaticText(self, -1, "Site In:", size=wx.Size(120, -1))
+        label = wx.StaticText(self, -1, "Site 1:", size=wx.Size(120, -1))
         label.SetForegroundColour(wx.WHITE)
         layout1.Add(label, 0, wx.ALL, 5)
         self._ddlSiteIn = wx.ComboBox(self, -1, size = wx.Size(200, 25), 
@@ -70,7 +70,7 @@ class TransmissionDialog ( bf.BasicForm ):
         
         ###
         layout1 = wx.BoxSizer( wx.HORIZONTAL )
-        label = wx.StaticText(self, -1, "Site Out:", size=wx.Size(120, -1))
+        label = wx.StaticText(self, -1, "Site 2:", size=wx.Size(120, -1))
         label.SetForegroundColour(wx.WHITE)
         layout1.Add(label, 0, wx.ALL, 5)
         self._ddlSiteOut = wx.ComboBox(self, -1, size = wx.Size(200, 25), 
