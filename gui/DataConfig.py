@@ -132,8 +132,6 @@ class DataConfig():
          GRID_COL_LABEL: 'Annual fix cost (€/MW/a)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'var-cost',
          GRID_COL_LABEL:'Variable costs (€/MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
-        {PARAM_KEY: 'startup-cost',
-         GRID_COL_LABEL: 'Startup cost (€)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'wacc',
          GRID_COL_LABEL: 'Weighted average cost of capital', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.05},
         {PARAM_KEY: 'depreciation',
