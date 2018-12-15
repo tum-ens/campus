@@ -426,6 +426,9 @@ class RESModel():
                 t = (year, trnsm['SiteIn'], trnsm['SiteOut'], 
                      trnsm['Name'], trnsm['CommName'])
                 tuples.append(t)
+                t = (year, trnsm['SiteOut'], trnsm['SiteIn'], 
+                     trnsm['Name'], trnsm['CommName'])
+                tuples.append(t)
                 data = trnsm['Years'][year]
                 v = []
                 for col in columns:
@@ -498,7 +501,7 @@ class RESModel():
             if isinstance(data[key].index, pd.core.index.MultiIndex):
                 data[key].sort_index(inplace=True)
             #print(data[key].info(verbose=True))
-        #print(data)    
+        #print(data['transmission'])
         return data
 #-----------------------------------------------------------------------------#
     def GetSolver(self):
