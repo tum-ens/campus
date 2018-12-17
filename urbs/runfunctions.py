@@ -64,7 +64,7 @@ def run_scenario(input_files, Solver, timesteps, scenario, result_dir, dt,
 
     # scenario name, read and modify data for scenario
     sce = scenario.__name__
-    #data = read_excel(input_files)
+    data = read_excel(input_files)
     data = scenario(data)
     validate_input(data)
 
