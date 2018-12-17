@@ -88,7 +88,7 @@ class DataConfig():
         {PARAM_KEY: 'timeSer',
          GRID_COL_LABEL: 'Hidden', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: ''},
         {PARAM_KEY: 'price',
-         GRID_COL_LABEL:'Commodity price (€/MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0},
+         GRID_COL_LABEL:'Commodity price (€/MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'max',
          GRID_COL_LABEL: 'Maximum commodity use', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'maxperhour',
