@@ -1237,7 +1237,7 @@ def res_global_co2_budget_rule(m):
                                        stf_dist(stf, m))
 
         return (co2_output_sum <=
-                m.global_prop.loc[m.stf, 'CO2 budget']['value'])
+                m.global_prop.loc[min(m.stf), 'CO2 budget']['value'])
     else:
         return pyomo.Constraint.Skip
 
