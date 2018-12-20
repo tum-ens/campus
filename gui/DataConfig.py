@@ -15,7 +15,8 @@ class DataConfig():
 
     GRID_COL_LABEL      = 'col_label'
     GRID_ROW_LABEL      = 'row_label'
-    GRID_COL_DATATYPE   = 'dataType'
+    GRID_COL_DATATYPE   = 'col_dataType'
+    GRID_ROW_DATATYPE   = 'row_dataType'
 
     COMM_SUPIM  = 'SupIm'
     COMM_BUY    = 'Buy'
@@ -32,21 +33,21 @@ class DataConfig():
 #-----------------------------------------------------------------------------#    
     GLOBAL_PARAMS = [
         {PARAM_KEY: 'Discount rate',
-         GRID_ROW_LABEL: 'Discount rate', PARAM_DEFVALUE: 0.03},
+         GRID_ROW_LABEL: 'Discount rate', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.03},
         {PARAM_KEY: 'CO2 budget',
-         GRID_ROW_LABEL: 'CO2 budget', PARAM_DEFVALUE: INF},
+         GRID_ROW_LABEL: 'CO2 budget', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1000000},
         {PARAM_KEY: 'Weight',
-         GRID_ROW_LABEL: 'Last year weight', PARAM_DEFVALUE: 10},
+         GRID_ROW_LABEL: 'Last year weight', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 10},
         {PARAM_KEY: 'Solver',
-         GRID_ROW_LABEL: 'Solver', PARAM_DEFVALUE: 'glpk'},
+         GRID_ROW_LABEL: 'Solver', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_CHOICE + ':cplex,glpk,gurobi', PARAM_DEFVALUE: 'glpk'},
         {PARAM_KEY: 'Objective',
-         GRID_ROW_LABEL: 'Objective', PARAM_DEFVALUE: 'Cost/CO2'},
+         GRID_ROW_LABEL: 'Objective', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_CHOICE + ':cost,CO2', PARAM_DEFVALUE: 'cost'},
         {PARAM_KEY: 'TSOffset',
-         GRID_ROW_LABEL: 'Time steps offset', PARAM_DEFVALUE: 3000},
+         GRID_ROW_LABEL: 'Time steps offset', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1000},
         {PARAM_KEY: 'TSLen',
-         GRID_ROW_LABEL: 'Time steps length', PARAM_DEFVALUE: 168},
+         GRID_ROW_LABEL: 'Time steps length', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 168},
         {PARAM_KEY: 'DT',
-         GRID_ROW_LABEL: 'Time step (in hours)', PARAM_DEFVALUE: 1}
+         GRID_ROW_LABEL: 'Time step (in hours)', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1}
     ]
     
     GLOBAL_COLS = [

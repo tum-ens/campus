@@ -25,6 +25,8 @@ import urbs
 
 class Controller():
     
+    _scenarios = {'scenario_base': urbs.scenario_base}
+    
     def __init__(self):
         
         #Model part
@@ -69,8 +71,10 @@ class Controller():
         pub.subscribe(self.OnItemMove, EVENTS.ITEM_MOVED)
         pub.subscribe(self.OnSaveConfig, EVENTS.SAVE_CONFIG)
         pub.subscribe(self.OnLoadConfig, EVENTS.LOAD_CONFIG)
+        
+        pub.subscribe(self.AddScenario, EVENTS.SCENARIO_ADDED)
+        pub.subscribe(self.RemoveScenario, EVENTS.SCENARIO_REMOVED)
 
-    
     def AddSite(self, site):
         status = self._resModel.AddSite(site)
         if status == 1:
@@ -263,6 +267,15 @@ class Controller():
     
     def GetGlobalParams(self):
         return self._resModel.GetGlobalParams()
+    
+    def GetScenarios(self):
+        return list(self._scenarios.keys())
+        
+    def AddScenario(self, scName):
+        self._resModel.AddScenario(scName)
+        
+    def RemoveScenario(self, scName):
+        self._resModel.RemoveScenario(scName)
         
     def VallidateData(self):
         success = True
@@ -273,6 +286,10 @@ class Controller():
         if len(self._resModel._sites) == 0:
             success = False
             wx.MessageBox(ERR.ERRORS[ERR.NO_SITE], 'Error', wx.OK|wx.ICON_ERROR)
+            
+        if len(self._resModel._scenarios) == 0:
+            success = False
+            wx.MessageBox(ERR.ERRORS[ERR.NO_SCENARIO], 'Error', wx.OK|wx.ICON_ERROR)
             
         for site, m in self._resModel._models.items():
             if len(m._commodities) > 0:
@@ -354,11 +371,10 @@ class Controller():
             urbs.COLORS[country] = color
     
         # select scenarios to be run
-        scenarios = [
-                     urbs.scenario_base,
-                     # urbs.sc_CO2limit(40000),
-                     # urbs.sc_1proprop('Campus', 'PV S 30°', 'inv-cost', 600000)
-        ]
+        scenarios = []
+        for k, v in self._scenarios.items():
+            if k in self._resModel._scenarios:
+                scenarios.append(v)
     
         #print(scenarios)
         for scenario in scenarios:
