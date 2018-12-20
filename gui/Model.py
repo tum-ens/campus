@@ -523,6 +523,10 @@ class RESModel():
         valueCol = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
         return self._gl['Solver'][valueCol]
 #-----------------------------------------------------------------------------#
+    def GetObjective(self):
+        valueCol = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
+        return self._gl['Objective'][valueCol]
+#-----------------------------------------------------------------------------#
     def GetTimeStepTuple(self):
         valueCol = config.DataConfig.GLOBAL_COLS[0][config.DataConfig.PARAM_KEY]
         return (self._gl['TSOffset'][valueCol], self._gl['TSLen'][valueCol])

@@ -334,6 +334,10 @@ class Controller():
         # Choose Solver (cplex, glpk, gurobi, ...)
         #Solver = 'gurobi'
         Solver = self._resModel.GetSolver()
+        
+        # objective function
+        # set either 'cost' or 'CO2' as objective
+        objective = self._resModel.GetObjective()
     
         # simulation timesteps
         (offset, length) = self._resModel.GetTimeStepTuple()  # time step selection
@@ -381,6 +385,7 @@ class Controller():
             #print(scenario)
             prob = urbs.run_scenario(self._resModel.GetDataFrames(), Solver, timesteps, scenario,
                                 result_dir, dt,
+                                objective,
                                 plot_tuples=plot_tuples,
                                 plot_sites_name=plot_sites_name,
                                 plot_periods=plot_periods,
