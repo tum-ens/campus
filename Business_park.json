@@ -90,8 +90,8 @@
               "Action": "...",
               "delay": 0.0,
               "eff": 0.0,
-              "plot": false,
-              "report": false,
+              "plot": true,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -104,8 +104,8 @@
               "Action": "...",
               "delay": 0.0,
               "eff": 0.0,
-              "plot": false,
-              "report": false,
+              "plot": true,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -118,8 +118,8 @@
               "Action": "...",
               "delay": 0.0,
               "eff": 0.0,
-              "plot": false,
-              "report": false,
+              "plot": true,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -1317,64 +1317,64 @@
             "2020": {
               "inst-cap-c": 0.0,
               "cap-lo-c": 0.0,
-              "cap-up-c": 0.0,
+              "cap-up-c": 10,
               "inst-cap-p": 0.0,
               "cap-lo-p": 0.0,
-              "cap-up-p": 0.0,
-              "eff-in": 0.0,
-              "eff-out": 0.0,
-              "inv-cost-p": 0.0,
-              "inv-cost-c": 0.0,
-              "fix-cost-p": 0.0,
-              "fix-cost-c": 0.0,
-              "var-cost-p": 0.0,
-              "var-cost-c": 0.0,
+              "cap-up-p": 10,
+              "eff-in": 0.9,
+              "eff-out": 0.85,
+              "inv-cost-p": 1000,
+              "inv-cost-c": 1000,
+              "fix-cost-p": 10,
+              "fix-cost-c": 10,
+              "var-cost-p": 1,
+              "var-cost-c": 1,
               "lifetime": 0.0,
-              "depreciation": 0.0,
-              "wacc": 0.0,
-              "init": 0.0,
+              "depreciation": 20,
+              "wacc": 0.05,
+              "init": NaN,
               "discharge": 0.0
             },
             "2030": {
               "inst-cap-c": 0.0,
               "cap-lo-c": 0.0,
-              "cap-up-c": 0.0,
+              "cap-up-c": 10,
               "inst-cap-p": 0.0,
               "cap-lo-p": 0.0,
-              "cap-up-p": 0.0,
-              "eff-in": 0.0,
-              "eff-out": 0.0,
-              "inv-cost-p": 0.0,
-              "inv-cost-c": 0.0,
-              "fix-cost-p": 0.0,
-              "fix-cost-c": 0.0,
-              "var-cost-p": 0.0,
-              "var-cost-c": 0.0,
+              "cap-up-p": 10,
+              "eff-in": 0.9,
+              "eff-out": 0.85,
+              "inv-cost-p": 1000,
+              "inv-cost-c": 1000,
+              "fix-cost-p": 10,
+              "fix-cost-c": 10,
+              "var-cost-p": 1,
+              "var-cost-c": 1,
               "lifetime": 0.0,
-              "depreciation": 0.0,
-              "wacc": 0.0,
-              "init": 0.0,
+              "depreciation": 20,
+              "wacc": 0.05,
+              "init": NaN,
               "discharge": 0.0
             },
             "2040": {
               "inst-cap-c": 0.0,
               "cap-lo-c": 0.0,
-              "cap-up-c": 0.0,
+              "cap-up-c": 10,
               "inst-cap-p": 0.0,
               "cap-lo-p": 0.0,
-              "cap-up-p": 0.0,
-              "eff-in": 0.0,
-              "eff-out": 0.0,
-              "inv-cost-p": 0.0,
-              "inv-cost-c": 0.0,
-              "fix-cost-p": 0.0,
-              "fix-cost-c": 0.0,
-              "var-cost-p": 0.0,
-              "var-cost-c": 0.0,
+              "cap-up-p": 10,
+              "eff-in": 0.9,
+              "eff-out": 0.85,
+              "inv-cost-p": 1000,
+              "inv-cost-c": 1000,
+              "fix-cost-p": 10,
+              "fix-cost-c": 10,
+              "var-cost-p": 1,
+              "var-cost-c": 1,
               "lifetime": 0.0,
-              "depreciation": 0.0,
-              "wacc": 0.0,
-              "init": 0.0,
+              "depreciation": 20,
+              "wacc": 0.05,
+              "init": NaN,
               "discharge": 0.0
             }
           },
@@ -2059,7 +2059,7 @@
       "value": 0.03
     },
     "CO2 budget": {
-      "value": 1000000
+      "value": Infinity
     },
     "Weight": {
       "value": 10
@@ -2068,7 +2068,7 @@
       "value": "glpk"
     },
     "Objective": {
-      "value": "Cost/CO2"
+      "value": "cost"
     },
     "TSOffset": {
       "value": 1000
@@ -2079,5 +2079,8 @@
     "DT": {
       "value": 1
     }
-  }
+  },
+  "_scenarios": [
+    "scenario_base"
+  ]
 }

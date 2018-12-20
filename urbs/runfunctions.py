@@ -15,7 +15,7 @@ def prepare_result_directory(result_name):
     now = datetime.now().strftime('%Y%m%dT%H%M')
 
     # create result directory if not existent
-    result_dir = os.path.join('result', '{}-{}'.format(result_name, now))
+    result_dir = os.path.join('../result', '{}-{}'.format(result_name, now))
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
@@ -42,7 +42,7 @@ def setup_solver(optim, logfile='solver.log'):
     return optim
 
 
-def run_scenario(input_files, Solver, timesteps, scenario, result_dir, dt,
+def run_scenario(data, Solver, timesteps, scenario, result_dir, dt,
                  objective,
                  plot_tuples=None, plot_sites_name=None, plot_periods=None,
                  report_tuples=None, report_sites_name=None):
@@ -64,7 +64,7 @@ def run_scenario(input_files, Solver, timesteps, scenario, result_dir, dt,
 
     # scenario name, read and modify data for scenario
     sce = scenario.__name__
-    data = read_excel(input_files)
+    #data = read_excel(input_files)
     data = scenario(data)
     validate_input(data)
 

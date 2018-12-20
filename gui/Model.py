@@ -548,7 +548,7 @@ class RESModel():
                         plot = False
                     
                     if plot == True:
-                        tuples.append((year, site, comm['Name']))
+                        tuples.append((float(year), site, comm['Name']))
         #print(tuples)
         return tuples
 #-----------------------------------------------------------------------------#
@@ -565,7 +565,7 @@ class RESModel():
                         report = False
                     
                     if report == True:
-                        tuples.append((year, site, comm['Name']))
+                        tuples.append((float(year), site, comm['Name']))
         #print(tuples)
         return tuples
 #-----------------------------------------------------------------------------#
