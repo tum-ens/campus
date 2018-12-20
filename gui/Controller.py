@@ -14,18 +14,13 @@ import TransmissionForm as tf
 import DataConfig as config
 import Errors as ERR
 import json
+import urbs
 import wx
 
 from pubsub import pub
 from Events import EVENTS
 
-import sys
-sys.path.insert(0, '..')
-import urbs
-
 class Controller():
-    
-    _scenarios = {'scenario_base': urbs.scenario_base}
     
     def __init__(self):
         
@@ -269,7 +264,7 @@ class Controller():
         return self._resModel.GetGlobalParams()
     
     def GetScenarios(self):
-        return list(self._scenarios.keys())
+        return list(config.DataConfig.SCENARIOS.keys())
         
     def AddScenario(self, scName):
         self._resModel.AddScenario(scName)
@@ -376,14 +371,14 @@ class Controller():
     
         # select scenarios to be run
         scenarios = []
-        for k, v in self._scenarios.items():
+        for k, v in config.DataConfig.SCENARIOS.items():
             if k in self._resModel._scenarios:
                 scenarios.append(v)
     
         #print(scenarios)
         for scenario in scenarios:
             #print(scenario)
-            prob = urbs.run_scenario(self._resModel.GetDataFrames(), Solver, timesteps, scenario,
+            urbs.run_scenario(self._resModel.GetDataFrames(), Solver, timesteps, scenario,
                                 result_dir, dt,
                                 objective,
                                 plot_tuples=plot_tuples,

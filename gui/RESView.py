@@ -136,7 +136,7 @@ class RESView(wx.Panel):
         #self._shapes.clear()
     #-------------------------------------------------------------------------#
     def DrawCommodities(self):        
-        x = 50
+        x = 60
         prevGrp = '0'
         prevCommHasProc = False
         commDict = self._controller.GetCommodities()

@@ -8,6 +8,10 @@ Created on Sat Nov  3 15:02:37 2018
 import wx.grid
 import math
 
+import sys
+sys.path.insert(0, '..')
+import urbs
+
 class DataConfig():
 
     PARAM_KEY        = 'key'
@@ -218,3 +222,4 @@ class DataConfig():
          GRID_COL_LABEL: 'Depreciation period (a)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 20}
     ]
 #-----------------------------------------------------------------------------#
+    SCENARIOS = {'scenario_base': urbs.scenario_base}
