@@ -254,6 +254,9 @@ class Controller():
         with open(filename, 'r') as fp:
             data = json.load(fp)
             self._resModel = model.RESModel(data)
+            trnsmView = self._view.GetTrnsmTab()
+            trnsmView.RebuildTrnsm(None)
+            trnsmView.Refresh()
             for site in sorted(self._resModel._sites):
                 resTab = self._view.AddRESTab(self, site)
                 self._model = self._resModel.GetSiteModel(site)
