@@ -278,13 +278,16 @@ def pyomo_model_prep(data, timesteps):
                                             axis=1))
     except ValueError:
         pass
-    m.storage['invcost-factor'] = (m.storage.apply(lambda x:
-                                   invcost_factor(x['depreciation'],
-                                                  x['wacc'],
-                                                  x['discount'],
-                                                  x['support_timeframe'],
-                                                  x['stf_min']),
-                                   axis=1))
+    try:
+        m.storage['invcost-factor'] = (m.storage.apply(lambda x:
+                                       invcost_factor(x['depreciation'],
+                                                      x['wacc'],
+                                                      x['discount'],
+                                                      x['support_timeframe'],
+                                                      x['stf_min']),
+                                       axis=1))
+    except ValueError:
+        pass
 
     # derive overpay-factor from WACC, depreciation and discount untility
     m.process['overpay-factor'] = (m.process.apply(lambda x:
