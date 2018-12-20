@@ -78,11 +78,12 @@ class GridDataTable(wx.grid.GridTableBase):
     def SetValue(self, row, col, value):
         #print('SetValue', row, col, value)
         v = value
-        colType = self._cols[col][config.DataConfig.GRID_COL_DATATYPE]
+        cellType = self.GetTypeName(row, col)
         colKey = self._cols[col][config.DataConfig.PARAM_KEY]
         rowKey = self.GetRowKey(row)
         
-        if (colType != wx.grid.GRID_VALUE_BOOL and 
+        if (cellType != wx.grid.GRID_VALUE_BOOL and 
+            not cellType.startswith(wx.grid.GRID_VALUE_CHOICE) and 
             colKey not in ('timeSer', 'timeEff')):
             v = self.ConvertToNumber(value)
             if not v:
@@ -112,14 +113,18 @@ class GridDataTable(wx.grid.GridTableBase):
     # natively by the editor/renderer if they know how to convert.
     def GetTypeName(self, row, col):
         #print('GetTypeName', row, col)
+        if len(self._rows) > 0 and row < len(self._rows):
+            dataType = self._rows[row][config.DataConfig.GRID_ROW_DATATYPE]
+            return dataType
+
         return self._cols[col][config.DataConfig.GRID_COL_DATATYPE]
     
     # Called to determine how the data can be fetched and stored by the
     # editor and renderer.  This allows you to enforce some type-safety
     # in the grid.
     def CanGetValueAs(self, row, col, typeName):
-        colType = self._cols[col][config.DataConfig.GRID_COL_DATATYPE]
-        if typeName == colType:
+        cellType = self.GetTypeName(row, col).split(':')[0]
+        if typeName == cellType:
             return True
         else:
             return False

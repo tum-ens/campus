@@ -20,25 +20,34 @@ class RESModel():
         self._sites             = {}
         self._models            = {}
         self._transmissions     = {}
-        self._trnsmCommodities  = {}
+        self._trnsmCommodities  = {}        
         self._gl                = self.InitializeGlobalParams()
+        self._scenarios         = []
         if data:
-            self._gl = data['_gl']
-            pub.sendMessage(EVENTS.GL_PARAMS_LOADED, gl=self._gl)
-            self._sites = data['_sites']
-            pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
-            self._years = data['_years']
-            pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
-            self._transmissions = data['_transmissions']
-            self._trnsmCommodities = data['_trnsmCommodities']
-            for k, v in data['_models'].items():
-                self._models[k] = sm.SiteModel(k, 
+            if '_scenarios' in data:
+                self._scenarios = data['_scenarios']
+                pub.sendMessage(EVENTS.SCENARIOS_LOADED, scenarios=self._scenarios)
+            if '_gl' in data:
+                self._gl = data['_gl']
+                pub.sendMessage(EVENTS.GL_PARAMS_LOADED, gl=self._gl)
+            if '_sites' in data:
+                self._sites = data['_sites']
+                pub.sendMessage(EVENTS.SITE_ADDED, sites=self._sites)
+            if '_years' in data:
+                self._years = data['_years']
+                pub.sendMessage(EVENTS.YEAR_ADDED, years=self._years)
+            if '_transmissions' in data:
+                self._transmissions = data['_transmissions']
+            if '_trnsmCommodities' in data:
+                self._trnsmCommodities = data['_trnsmCommodities']
+            if '_models' in data:
+                for k, v in data['_models'].items():
+                    self._models[k] = sm.SiteModel(k, 
                                             sorted(self._years.keys()),
                                             v['_commodities'],
                                             v['_processes'],
                                             v['_connections']                                            
-                                  )
-
+                                      )
 #-----------------------------------------------------------------------------#
     def InitializeGlobalParams(self):
         data = {}
@@ -110,6 +119,12 @@ class RESModel():
 #-----------------------------------------------------------------------------#
     def GetGlobalParams(self):
         return self._gl
+#-----------------------------------------------------------------------------#
+    def AddScenario(self, scName):
+        self._scenarios.append(scName)
+#-----------------------------------------------------------------------------#
+    def RemoveScenario(self, scName):
+        self._scenarios.remove(scName)
 #-----------------------------------------------------------------------------#
     def CreateNewTrnsm(self):
         trnsId = 'NewTrnsm#' + str(len(self._transmissions) + 1)
@@ -426,6 +441,9 @@ class RESModel():
                 t = (year, trnsm['SiteIn'], trnsm['SiteOut'], 
                      trnsm['Name'], trnsm['CommName'])
                 tuples.append(t)
+                t = (year, trnsm['SiteOut'], trnsm['SiteIn'], 
+                     trnsm['Name'], trnsm['CommName'])
+                tuples.append(t)
                 data = trnsm['Years'][year]
                 v = []
                 for col in columns:
@@ -498,7 +516,7 @@ class RESModel():
             if isinstance(data[key].index, pd.core.index.MultiIndex):
                 data[key].sort_index(inplace=True)
             #print(data[key].info(verbose=True))
-        #print(data)    
+        #print(data['transmission'])
         return data
 #-----------------------------------------------------------------------------#
     def GetSolver(self):
