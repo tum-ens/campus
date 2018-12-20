@@ -155,7 +155,7 @@ class SiteModel():
                 status = 1
                 break
         
-        if len(data['IN']) == 0 or len(data['OUT']) == 0:
+        if len(data['IN']) == 0 and len(data['OUT']) == 0:
             status = 2
         
         if status == 0:                        
