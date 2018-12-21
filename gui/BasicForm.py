@@ -11,7 +11,7 @@ class BasicForm(wx.Dialog):
     
     _gridTables = []
     
-    def __init__(self, parent, formTitle, formSize):
+    def __init__(self, parent, formTitle, formSize, allowCopy=True):
         wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = formTitle, size= formSize)
         self.SetBackgroundColour("black")
         
@@ -26,10 +26,16 @@ class BasicForm(wx.Dialog):
         btnCancel.Bind(wx.EVT_BUTTON, self.OnCancel)
         btnFillAll = wx.Button(self, label="Fill all as first year")
         btnFillAll.Bind(wx.EVT_BUTTON, self.OnFillAll)
+        btnCopy = wx.Button(self, label="Copy")
+        btnCopy.Bind(wx.EVT_BUTTON, self.OnCopy)
+        if not allowCopy:
+            btnCopy.Hide()
         btnsLayout.Add(btnOk, 0, wx.ALL, 5)
         btnsLayout.Add(btnCancel, 0, wx.ALL, 5)
-        btnsLayout.Add(btnFillAll, 0, wx.ALL, 5)        
+        btnsLayout.Add(btnFillAll, 0, wx.ALL, 5)
+        btnsLayout.Add(btnCopy, 0, wx.ALL, 5)
         mainLayout.Add(btnsLayout, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
+        
         
         self.SetSizer( mainLayout )
         self.Layout()
@@ -49,6 +55,9 @@ class BasicForm(wx.Dialog):
             gt.FillAll()
             msg = wx.grid.GridTableMessage(gt, wx.grid.GRIDTABLE_REQUEST_VIEW_GET_VALUES)
             gt.GetView().ProcessTableMessage(msg)
+            
+    def OnCopy(self, event):
+        pass
     
     def SetContent(self, content, align):
         self._contentLayout.Add(content, 1, wx.ALL|wx.EXPAND|align, 5)

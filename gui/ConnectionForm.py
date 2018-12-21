@@ -17,7 +17,7 @@ class ConnectionDialog ( bf.BasicForm ):
     _gridCols = config.DataConfig.CONNECTION_PARAMS
     
     def __init__(self, parent):
-        super().__init__(parent, "Connection data", wx.Size(500, 400))
+        super().__init__(parent, "Connection data", wx.Size(500, 400), False)
         
         self._gridTable = gdt.GridDataTable(self._gridCols)
         self._yearsGrid = wx.grid.Grid(self, -1)
