@@ -222,4 +222,8 @@ class DataConfig():
          GRID_COL_LABEL: 'Depreciation period (a)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 20}
     ]
 #-----------------------------------------------------------------------------#
-    SCENARIOS = {'scenario_base': urbs.scenario_base}
+    SCENARIOS = {
+        'scenario_base'     : urbs.scenario_base,
+        'scenario_co2limit' : urbs.sc_CO2limit(2020, 40000),
+        'scenario_oneProProp' : urbs.sc_1proprop(2020, 'Campus', 'PV S 30°', 'inv-cost', 600000)
+    }

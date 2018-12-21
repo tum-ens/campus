@@ -267,7 +267,7 @@ class Controller():
         return self._resModel.GetGlobalParams()
     
     def GetScenarios(self):
-        return list(config.DataConfig.SCENARIOS.keys())
+        return sorted(config.DataConfig.SCENARIOS.keys())
         
     def AddScenario(self, scName):
         self._resModel.AddScenario(scName)
