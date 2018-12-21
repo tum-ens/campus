@@ -60,6 +60,9 @@ class MainView ( wx.Frame ):
                 
         self._nb.SetSelection(0)
         
+    def GetTrnsmTab(self):
+        return self._nb.GetPage(1)
+        
     def OnPageSelected(self, event):
         pageIndx = event.GetSelection()
         if pageIndx in (0, 1):

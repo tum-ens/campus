@@ -14,18 +14,13 @@ import TransmissionForm as tf
 import DataConfig as config
 import Errors as ERR
 import json
+import urbs
 import wx
 
 from pubsub import pub
 from Events import EVENTS
 
-import sys
-sys.path.insert(0, '..')
-import urbs
-
 class Controller():
-    
-    _scenarios = {'scenario_base': urbs.scenario_base}
     
     def __init__(self):
         
@@ -259,6 +254,9 @@ class Controller():
         with open(filename, 'r') as fp:
             data = json.load(fp)
             self._resModel = model.RESModel(data)
+            trnsmView = self._view.GetTrnsmTab()
+            trnsmView.RebuildTrnsm(None)
+            trnsmView.Refresh()
             for site in sorted(self._resModel._sites):
                 resTab = self._view.AddRESTab(self, site)
                 self._model = self._resModel.GetSiteModel(site)
@@ -269,7 +267,7 @@ class Controller():
         return self._resModel.GetGlobalParams()
     
     def GetScenarios(self):
-        return list(self._scenarios.keys())
+        return sorted(config.DataConfig.SCENARIOS.keys())
         
     def AddScenario(self, scName):
         self._resModel.AddScenario(scName)
@@ -376,14 +374,14 @@ class Controller():
     
         # select scenarios to be run
         scenarios = []
-        for k, v in self._scenarios.items():
+        for k, v in config.DataConfig.SCENARIOS.items():
             if k in self._resModel._scenarios:
                 scenarios.append(v)
     
         #print(scenarios)
         for scenario in scenarios:
             #print(scenario)
-            prob = urbs.run_scenario(self._resModel.GetDataFrames(), Solver, timesteps, scenario,
+            urbs.run_scenario(self._resModel.GetDataFrames(), Solver, timesteps, scenario,
                                 result_dir, dt,
                                 objective,
                                 plot_tuples=plot_tuples,
