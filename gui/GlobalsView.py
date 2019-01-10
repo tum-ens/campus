@@ -19,6 +19,7 @@ class GlobalsView():
     _gridRows = config.DataConfig.GLOBAL_PARAMS
     
     def __init__(self, parent, controller):
+        self._parent = parent
         self._controller = controller
         
         #manage layout
@@ -62,7 +63,23 @@ class GlobalsView():
         return self._mainLayout;
 
     def OnRunClick(self, event):
+        dlg = wx.ProgressDialog("Run",
+                               "Please wait, this could take few minutes...",
+                               maximum = 10,
+                               parent=self._parent,
+                               style = 0
+                                | wx.PD_APP_MODAL
+                                #| wx.PD_CAN_ABORT
+                                #| wx.PD_CAN_SKIP
+                                | wx.PD_ELAPSED_TIME
+                                #| wx.PD_ESTIMATED_TIME
+                                #| wx.PD_REMAINING_TIME
+                                #| wx.PD_AUTO_HIDE
+                                )
+        dlg.Update(5)
         self._controller.Run()
+        dlg.Update(10)
+        dlg.Destroy()
         
     def OnScenarioChange(self, event):
         index = event.GetSelection()
