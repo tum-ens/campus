@@ -91,3 +91,7 @@ class StorageDialog ( bf.BasicForm ):
     def OnCancel(self, event):
         self._storage.update(self._orgStrg)
         super().OnCancel(event)
+        
+    def OnCopy(self, event):
+        pub.sendMessage(EVENTS.ITEM_COPY, item=self._storage)
+

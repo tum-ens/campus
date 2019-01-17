@@ -13,6 +13,8 @@ TS_LEN      = 'TS_LEN'
 NO_COMM     = 'NO_COMM'
 NO_PROC     = 'NO_PROC'
 NO_SCENARIO = 'NO_SC'
+ONE_SITE    = 'ONE_SITE_'
+NO_SITE_SEL = 'NO_SITE_SEL'
 
 
 ERRORS = {
@@ -22,5 +24,7 @@ ERRORS = {
     NO_COMM     : 'No commodities defined for the site: %s',
     NO_TS       : 'Time Series is not defined for (site, commodity, year): (%s, %s, %s)',
     TS_LEN      : 'Time Series should be exactly %s (not %s) entries, for (site, commodity, year): (%s, %s, %s)',
-    NO_PROC     : 'No processes defined for the site: %s'
+    NO_PROC     : 'No processes defined for the site: %s',
+    ONE_SITE    : 'There is only one site defined.',
+    NO_SITE_SEL : 'Please select atleast one site.'
 }
