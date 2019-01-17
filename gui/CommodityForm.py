@@ -140,3 +140,6 @@ class CommodityDialog ( bf.BasicForm ):
     def OnCancel(self, event):
         self._commodity.update(self._orgComm)
         super().OnCancel(event)
+
+    def OnCopy(self, event):
+        pub.sendMessage(EVENTS.ITEM_COPY, item=self._commodity)

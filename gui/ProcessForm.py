@@ -170,6 +170,9 @@ class ProcessDialog ( bf.BasicForm ):
     def OnCancel(self, event):
         self._process.update(self._orgProc)
         super().OnCancel(event)
+        
+    def OnCopy(self, event):
+        pub.sendMessage(EVENTS.ITEM_COPY, item=self._process)
       
     def OnInConnEdit(self, event):
         self.OnCellDblClk(event, 'IN')

@@ -135,23 +135,23 @@ class RESView(wx.Panel):
         self._canvas.Redraw(dc)
         #self._shapes.clear()
     #-------------------------------------------------------------------------#
-    def DrawCommodities(self):        
+    def DrawCommodities(self):
         x = 60
         prevGrp = '0'
         prevCommHasProc = False
-        commDict = self._controller.GetCommodities()
+        commDict = self._controller.GetCommodities(self._siteName)
         for k in sorted(commDict):
-            data = commDict[k]            
+            data = commDict[k]
             if prevGrp != data['Group']:
                 if prevCommHasProc: 
                     x -= 100
                 self.DrawGroupArea(x)
-                prevGrp = data['Group']                
+                prevGrp = data['Group']
                 x += 100
 
-            commShape = res.CommodityShape(self._canvas, x, 10, k, data['Name'], data['Color'])            
+            commShape = res.CommodityShape(self._canvas, x, 10, k, data['Name'], data['Color'])
             self._shapes[k] = commShape
-            processes = self._controller.GetLinkedProcesses(k)
+            processes = self._controller.GetLinkedProcesses(self._siteName, k)
             if len(processes) > 0: 
                 x += 25+150+25
                 prevCommHasProc = True
@@ -160,15 +160,15 @@ class RESView(wx.Panel):
                 prevCommHasProc = False
     #-------------------------------------------------------------------------#
     def DrawProcesses(self, lastChangedProcess):        
-        commDict = self._controller.GetCommodities()
+        commDict = self._controller.GetCommodities(self._siteName)
         for commId in sorted(commDict):
             x = self._shapes[commId].GetX() + 100
             y = 50
-            processes = self._controller.GetLinkedProcesses(commId)
-            for k in sorted(processes):                
+            processes = self._controller.GetLinkedProcesses(self._siteName, commId)
+            for k in sorted(processes):
                 p = processes[k]
                 if k in self._shapes.keys():
-                    y = self._shapes[k].GetY()                
+                    y = self._shapes[k].GetY()
                 procShape = res.ProcessShape(self._canvas, x, y, k, p['Name'], p['Type'])
                 self._shapes[k] = procShape
                 lines = self.BuildProcConnections(p, procShape)

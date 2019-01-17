@@ -11,8 +11,10 @@ import ProcessForm as procf
 import ConnectionForm as connf
 import StorageForm as strgf
 import TransmissionForm as tf
+import SitesForm as sf
 import DataConfig as config
 import Errors as ERR
+import copy as cpy
 import json
 import urbs
 import wx
@@ -69,6 +71,9 @@ class Controller():
         
         pub.subscribe(self.AddScenario, EVENTS.SCENARIO_ADDED)
         pub.subscribe(self.RemoveScenario, EVENTS.SCENARIO_REMOVED)
+        
+        pub.subscribe(self.OnCopyClick, EVENTS.ITEM_COPY)
+        pub.subscribe(self.CopyItem, EVENTS.ITEM_COPIED)
 
     def AddSite(self, site):
         status = self._resModel.AddSite(site)
@@ -168,22 +173,23 @@ class Controller():
         connForm.PopulateConnectionGrid(connection)
         connForm.ShowModal()
         
-    def GetCommodities(self):
-        return self._model._commodities
+    def GetCommodities(self, siteName):
+        m = self._resModel.GetSiteModel(siteName)
+        return m._commodities
     
     def GetProcesses(self):
         return self._model._processes
         
-    def GetLinkedProcesses(self, commName):
+    def GetLinkedProcesses(self, siteName, commName):
         d = {}
-        for k, p in self._model._processes.items():
+        m = self._resModel.GetSiteModel(siteName)
+        for k, p in m._processes.items():
             if len(p['IN']) > 0 and p['IN'][-1] == commName:
                 d[k] = p
 
-        for k, p in self._model._processes.items():
+        for k, p in m._processes.items():
             if len(p['IN']) == 0 and len(p['OUT']) > 0 and p['OUT'][0] == commName:
                 d[k] = p
-
                 
         return d
         
@@ -274,6 +280,31 @@ class Controller():
         
     def RemoveScenario(self, scName):
         self._resModel.RemoveScenario(scName)
+        
+    def OnCopyClick(self, item):
+        sites = [x for x in self._resModel.GetSites() if x != self._model.GetSiteName()]
+        if len(sites) > 0:
+            self._sitesForm = sf.SitesDialog(self._view, sites, item)
+            self._sitesForm.ShowModal()
+        else:
+            wx.MessageBox(ERR.ERRORS[ERR.ONE_SITE], 'Error', wx.OK|wx.ICON_ERROR)
+            
+    def CopyItem(self, item, sites):
+        #print(item)
+        for site in sites:
+            m = self._resModel.GetSiteModel(site)
+            if item['Type'] in ('Process', 'Storage'):
+                for commId in item['IN']:
+                    if commId not in m._commodities:
+                        comm = self._model._commodities[commId]
+                        m.SaveCommodity(cpy.deepcopy(comm))
+                for commId in item['OUT']:
+                    if commId not in m._commodities:
+                        comm = self._model._commodities[commId]
+                        m.SaveCommodity(cpy.deepcopy(comm))
+                m.SaveProcess(item)
+            else:
+                m.SaveCommodity(item)
         
     def VallidateData(self):
         success = True
