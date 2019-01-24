@@ -74,6 +74,8 @@ class Controller():
         
         pub.subscribe(self.OnCopyClick, EVENTS.ITEM_COPY)
         pub.subscribe(self.CopyItem, EVENTS.ITEM_COPIED)
+        pub.subscribe(self.DeleteItem, EVENTS.ITEM_DELETE)
+        pub.subscribe(self.CloneItem, EVENTS.ITEM_CLONE)
 
     def AddSite(self, site):
         status = self._resModel.AddSite(site)
@@ -118,10 +120,7 @@ class Controller():
             self._comForm.Close()
         else:
             wx.MessageBox('A Commodity with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
-    
-    def RemoveCommodities(self, commodities):
-        self._model.RemoveCommodities(commodities)
-        
+
     def AddProcess(self):
         newProcess = self._model.CreateNewProcess()        
         self._processForm = procf.ProcessDialog(self._view)
@@ -135,19 +134,16 @@ class Controller():
         elif status == 2:
             wx.MessageBox('Please select atleast one input and one output commodity!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
-            self._processForm.Close()            
+            self._processForm.Close()
         
     def EditProcess(self, processId):
         process = self._model.GetProcess(processId)
         self._processForm = procf.ProcessDialog(self._view)
         self._processForm.PopulateProcess(process, self._model.GetCommodityList())
         self._processForm.ShowModal()
-    
-    def RemoveProcesses(self, processes):
-        self._model.RemoveProcesses(processes)        
-        
+
     def AddStorage(self):
-        newStorage = self._model.CreateNewStorage()        
+        newStorage = self._model.CreateNewStorage()
         self._storageForm = strgf.StorageDialog(self._view)
         self._storageForm.PopulateStorage(newStorage, self._model.GetCommodityList())
         self._storageForm.ShowModal()
@@ -305,7 +301,21 @@ class Controller():
                 m.SaveProcess(item)
             else:
                 m.SaveCommodity(item)
+                
+    def DeleteItem(self, item):
+        if item['Type'] in ('Process', 'Storage'):
+            self._model.RemoveProcess(item['Id'])
+        else:
+            self._model.RemoveCommodity(item['Id'])
+            
+        pub.sendMessage(EVENTS.ITEM_DELETED + self._model.GetSiteName(), objId=None)
         
+    def CloneItem(self, item):
+        if item['Type'] in ('Process', 'Storage'):
+            self._model.CloneProcess(cpy.deepcopy(item))
+        else:
+            self._model.CloneCommodity(cpy.deepcopy(item))
+            
     def VallidateData(self):
         success = True
         if len(self._resModel._years) == 0:

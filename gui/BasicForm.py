@@ -7,6 +7,9 @@ Created on Sat Nov  3 20:50:45 2018
 
 import wx
 
+from pubsub import pub
+from Events import EVENTS
+
 class BasicForm(wx.Dialog):
     
     _gridTables = []
@@ -26,13 +29,21 @@ class BasicForm(wx.Dialog):
         btnCancel.Bind(wx.EVT_BUTTON, self.OnCancel)
         btnFillAll = wx.Button(self, label="Fill all as first year")
         btnFillAll.Bind(wx.EVT_BUTTON, self.OnFillAll)
-        btnCopy = wx.Button(self, label="Copy")
+        btnCopy = wx.Button(self, label="Copy to other sites")
         btnCopy.Bind(wx.EVT_BUTTON, self.OnCopy)
+        btnDel = wx.Button(self, label="Delete")
+        btnDel.Bind(wx.EVT_BUTTON, self.OnDelete)
+        btnClone = wx.Button(self, label="Clone here")
+        btnClone.Bind(wx.EVT_BUTTON, self.OnClone)
         if not allowCopy:
             btnCopy.Hide()
+            btnDel.Hide()
+            btnClone.Hide()
         btnsLayout.Add(btnOk, 0, wx.ALL, 5)
         btnsLayout.Add(btnCancel, 0, wx.ALL, 5)
         btnsLayout.Add(btnFillAll, 0, wx.ALL, 5)
+        btnsLayout.Add(btnDel, 0, wx.ALL, 5)
+        btnsLayout.Add(btnClone, 0, wx.ALL, 5)
         btnsLayout.Add(btnCopy, 0, wx.ALL, 5)
         mainLayout.Add(btnsLayout, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
         
@@ -57,10 +68,22 @@ class BasicForm(wx.Dialog):
             gt.GetView().ProcessTableMessage(msg)
             
     def OnCopy(self, event):
-        pass
+        pub.sendMessage(EVENTS.ITEM_COPY, item=self._dataItem)
+        
+    def OnClone(self, event):
+        pub.sendMessage(EVENTS.ITEM_CLONE, item=self._dataItem)
+    
+    def OnDelete(self, event):
+        s = wx.MessageBox('[Delete] Are you sure?', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+        if s == wx.OK:
+            pub.sendMessage(EVENTS.ITEM_DELETE, item=self._dataItem)
+            self.Close()
     
     def SetContent(self, content, align):
         self._contentLayout.Add(content, 1, wx.ALL|wx.EXPAND|align, 5)
+        
+    def SetDataItem(self, data):
+        self._dataItem = data
     
     def PopulateGrid(self, gridTable, dataPerYear):
         self._gridTables.clear()

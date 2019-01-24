@@ -139,7 +139,7 @@ class ProcessDialog ( bf.BasicForm ):
         super().PopulateGrid(self._inCommTbl, inCommList)
         super().PopulateGrid(self._outCommTbl, outCommList)
         super().PopulateGrid(self._gridTable1, process['Years'])
-        #super().PopulateGrid(self._gridTable2, dataPerYear)
+        super().SetDataItem(self._process)
         
     def OnTimeSerClick(self, event):
         if event.GetCol() != len(self._gridCols)-1:
@@ -170,9 +170,6 @@ class ProcessDialog ( bf.BasicForm ):
     def OnCancel(self, event):
         self._process.update(self._orgProc)
         super().OnCancel(event)
-        
-    def OnCopy(self, event):
-        pub.sendMessage(EVENTS.ITEM_COPY, item=self._process)
       
     def OnInConnEdit(self, event):
         self.OnCellDblClk(event, 'IN')

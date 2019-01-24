@@ -116,6 +116,7 @@ class CommodityDialog ( bf.BasicForm ):
         self._txtCommName.SetValue(comm['Name'])
         self._color.SetColour(comm['Color'])        
         super().PopulateGrid(self._gridTable, comm['Years'])
+        super().SetDataItem(self._commodity)
         #Hide TS column
         if comm['Type'] in (config.DataConfig.COMM_STOCK, config.DataConfig.COMM_ENV):
             #no time series
@@ -140,6 +141,3 @@ class CommodityDialog ( bf.BasicForm ):
     def OnCancel(self, event):
         self._commodity.update(self._orgComm)
         super().OnCancel(event)
-
-    def OnCopy(self, event):
-        pub.sendMessage(EVENTS.ITEM_COPY, item=self._commodity)
