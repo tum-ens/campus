@@ -58,7 +58,7 @@ class RESView(wx.Panel):
         pub.subscribe(self.RebuildRES, EVENTS.COMMODITY_EDITED + self._siteName)
         pub.subscribe(self.RebuildRES, EVENTS.PROCESS_ADDED + self._siteName)
         pub.subscribe(self.RebuildRES, EVENTS.PROCESS_EDITED + self._siteName)
-        #pub.subscribe(self.ConnectionIsAdded, EVENTS.CONNECTION_ADDED)
+        pub.subscribe(self.RebuildRES, EVENTS.ITEM_DELETED + self._siteName)
         
         pub.subscribe(self.OnItemMove, EVENTS.ITEM_MOVED + self._siteName)
     #-------------------------------------------------------------------------#

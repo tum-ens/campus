@@ -123,6 +123,24 @@ class SiteModel():
         if commId in self._commodities:
             return self._commodities[commId]
 
+    def RemoveCommodity(self, commId):
+        idsToDel = []
+        for k, v in self._connections.items():
+            if v['Comm'] == commId:
+                idsToDel.append(k)
+        
+        for k in idsToDel:
+            self._connections.pop(k)
+            
+        for v in self._processes.values():
+            if commId in v['IN']:
+                v['IN'].remove(commId)
+            if commId in v['OUT']:
+                v['OUT'].remove(commId)                
+            
+        if commId in self._commodities:
+            self._commodities.pop(commId)
+
     def GetCommodityList(self):
         x = {}
         ids = sorted(self._commodities.keys())        
@@ -171,11 +189,22 @@ class SiteModel():
         return status
 
     def GetProcess(self, processId):
-        return self._processes[processId]  
+        return self._processes[processId]
+
+    def RemoveProcess(self, processId):
+        idsToDel = []
+        for k, v in self._connections.items():
+            if v['Proc'] == processId:
+                idsToDel.append(k)
+        
+        for k in idsToDel:
+            self._connections.pop(k)
+            
+        self._processes.pop(processId)
     
     def AddConnection(self, procId, commId, In_Out):
         connId = procId+'$'+commId+'$'+In_Out
-        if connId not in self._connections.keys():            
+        if connId not in self._connections.keys():
             yearsData = {}
             for year in self._years:
                 yearsData[year] = self.InitializeConnection()

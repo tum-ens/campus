@@ -57,6 +57,8 @@ class EVENTS():
     ITEM_MOVED         = "ITEM_MOVED_"
     ITEM_COPY          = "ITEM_COPY_"
     ITEM_COPIED        = "ITEM_COPIED_"
+    ITEM_DELETE        = "ITEM_DELETE_"
+    ITEM_DELETED       = "ITEM_DELETED_"
     TRNSM_ITEM_MOVED   = "TRNSM_ITEM_MOVED_"
     SAVE_CONFIG        = "SAVE_CONFIG_"
     LOAD_CONFIG        = "LOAD_CONFIG_"
