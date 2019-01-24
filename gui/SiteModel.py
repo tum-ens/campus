@@ -81,13 +81,18 @@ class SiteModel():
             grp = '2-2'
             
         return grp
-            
-    def CreateNewCommodity(self, commType):
+        
+    def CreateNewCommId(self, commType):
         grp = self.GetCommodityGroup(commType)
         num = str(len(self._commodities) + 1)
         if(len(num) < 2):
             num = '0' + num
         commId = grp + '_' + num + '_' + str.replace(commType, ' ', '_')
+
+        return grp, num, commId
+            
+    def CreateNewCommodity(self, commType):
+        grp, num, commId = self.CreateNewCommId(commType)
         data = {}
         data['Years'] = {}
         data['Id'] = commId
@@ -140,6 +145,12 @@ class SiteModel():
             
         if commId in self._commodities:
             self._commodities.pop(commId)
+            
+    def CloneCommodity(self, comm):
+        grp, num, commId = self.CreateNewCommId(comm['Type'])
+        comm['Id'] = commId
+        comm['Name'] = comm['Type'] + '#' + num
+        self.SaveCommodity(comm)
 
     def GetCommodityList(self):
         x = {}
@@ -201,6 +212,12 @@ class SiteModel():
             self._connections.pop(k)
             
         self._processes.pop(processId)
+        
+    def CloneProcess(self, proc):
+        processId = 'New' + proc['Type'] + '#' + str(len(self._processes) + 1)
+        proc['Id'] = processId
+        proc['Name'] = processId
+        self.SaveProcess(proc)
     
     def AddConnection(self, procId, commId, In_Out):
         connId = procId+'$'+commId+'$'+In_Out

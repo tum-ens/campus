@@ -75,6 +75,7 @@ class Controller():
         pub.subscribe(self.OnCopyClick, EVENTS.ITEM_COPY)
         pub.subscribe(self.CopyItem, EVENTS.ITEM_COPIED)
         pub.subscribe(self.DeleteItem, EVENTS.ITEM_DELETE)
+        pub.subscribe(self.CloneItem, EVENTS.ITEM_CLONE)
 
     def AddSite(self, site):
         status = self._resModel.AddSite(site)
@@ -308,6 +309,12 @@ class Controller():
             self._model.RemoveCommodity(item['Id'])
             
         pub.sendMessage(EVENTS.ITEM_DELETED + self._model.GetSiteName(), objId=None)
+        
+    def CloneItem(self, item):
+        if item['Type'] in ('Process', 'Storage'):
+            self._model.CloneProcess(cpy.deepcopy(item))
+        else:
+            self._model.CloneCommodity(cpy.deepcopy(item))
             
     def VallidateData(self):
         success = True

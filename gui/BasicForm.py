@@ -29,17 +29,21 @@ class BasicForm(wx.Dialog):
         btnCancel.Bind(wx.EVT_BUTTON, self.OnCancel)
         btnFillAll = wx.Button(self, label="Fill all as first year")
         btnFillAll.Bind(wx.EVT_BUTTON, self.OnFillAll)
-        btnCopy = wx.Button(self, label="Copy")
+        btnCopy = wx.Button(self, label="Copy to other sites")
         btnCopy.Bind(wx.EVT_BUTTON, self.OnCopy)
         btnDel = wx.Button(self, label="Delete")
         btnDel.Bind(wx.EVT_BUTTON, self.OnDelete)
+        btnClone = wx.Button(self, label="Clone here")
+        btnClone.Bind(wx.EVT_BUTTON, self.OnClone)
         if not allowCopy:
             btnCopy.Hide()
             btnDel.Hide()
+            btnClone.Hide()
         btnsLayout.Add(btnOk, 0, wx.ALL, 5)
         btnsLayout.Add(btnCancel, 0, wx.ALL, 5)
         btnsLayout.Add(btnFillAll, 0, wx.ALL, 5)
         btnsLayout.Add(btnDel, 0, wx.ALL, 5)
+        btnsLayout.Add(btnClone, 0, wx.ALL, 5)
         btnsLayout.Add(btnCopy, 0, wx.ALL, 5)
         mainLayout.Add(btnsLayout, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
         
@@ -65,6 +69,9 @@ class BasicForm(wx.Dialog):
             
     def OnCopy(self, event):
         pub.sendMessage(EVENTS.ITEM_COPY, item=self._dataItem)
+        
+    def OnClone(self, event):
+        pub.sendMessage(EVENTS.ITEM_CLONE, item=self._dataItem)
     
     def OnDelete(self, event):
         s = wx.MessageBox('[Delete] Are you sure?', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
