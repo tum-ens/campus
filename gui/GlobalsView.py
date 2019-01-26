@@ -7,11 +7,24 @@ Created on Sat Dec  8 23:59:15 2018
 
 import wx
 import wx.grid
+import sys
 import DataConfig as config
 import GridDataTable as gdt
 
 from Events import EVENTS
 from pubsub import pub
+
+class RedirectText(object):
+    
+    def __init__(self, aWxTextCtrl):        
+        self.out = aWxTextCtrl
+ 
+    def write(self, string):
+        wx.CallAfter(self.out.WriteText, string)
+        #self.out.WriteText(string)
+    
+    def flush(self):
+        self.out.flush()
 
 class GlobalsView():
     
@@ -53,16 +66,32 @@ class GlobalsView():
         btnAbort = wx.BitmapButton(parent, wx.ID_ANY, bitmap, wx.DefaultPosition, (132, 132), wx.BU_AUTODRAW|wx.RAISED_BORDER)
         imgLayout.Add(btnAbort, 0, wx.ALL|wx.ALIGN_CENTER, 5)
         
+        sb = wx.StaticBox(parent, wx.ID_ANY, u"Log:" )
+        sb.SetForegroundColour('white')
+        logLayout = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+        self._logCtrl = wx.TextCtrl(parent, wx.ID_ANY, size=(300,100),
+                          style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
+        logLayout.Add(self._logCtrl, 1, wx.ALL|wx.EXPAND, 5)
+        
         self._mainLayout.Add(gridLayout, 1, wx.ALL|wx.EXPAND, 5)
         self._mainLayout.Add(imgLayout, 1, wx.ALL|wx.ALIGN_CENTER, 5)
+        self._mainLayout.Add(logLayout, 1, wx.ALL|wx.EXPAND, 5)
         
         pub.subscribe(self.PopulateGrid, EVENTS.GL_PARAMS_LOADED)
         pub.subscribe(self.PopulateScenarios, EVENTS.SCENARIOS_LOADED)
+        
+        redirStd = RedirectText(self._logCtrl)
+        sys.stdout = redirStd
+        sys.stderr = redirStd
         
     def GetLayout(self):
         return self._mainLayout;
 
     def OnRunClick(self, event):
+        if not self._controller.ValidateData():
+            return
+        
+        self._logCtrl.Clear()
         dlg = wx.ProgressDialog("Run",
                                "Please wait, this could take few minutes...",
                                maximum = 10,
@@ -74,7 +103,7 @@ class GlobalsView():
                                 | wx.PD_ELAPSED_TIME
                                 #| wx.PD_ESTIMATED_TIME
                                 #| wx.PD_REMAINING_TIME
-                                #| wx.PD_AUTO_HIDE
+                                | wx.PD_AUTO_HIDE
                                 )
         dlg.Update(5)
         self._controller.Run()
