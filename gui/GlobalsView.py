@@ -106,7 +106,11 @@ class GlobalsView():
                                 | wx.PD_AUTO_HIDE
                                 )
         dlg.Update(5)
-        self._controller.Run()
+        try:
+            self._controller.Run()
+        except:
+            dlg.Destroy()
+            raise
         dlg.Update(10)
         dlg.Destroy()
         

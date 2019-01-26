@@ -59,6 +59,14 @@ class ProcessDialog ( bf.BasicForm ):
         layout0.Add(label, 0, wx.ALL, 5)
         self._txtProcessName = wx.TextCtrl(self, size = wx.Size(200, 25))        
         layout0.Add(self._txtProcessName, 0, wx.ALL, 5)
+        #Color
+        label = wx.StaticText(self, -1, "...........................")
+        layout0.Add(label, 0, wx.ALL, 5)
+        label = wx.StaticText(self, -1, "Plot Color:")
+        label.SetForegroundColour(wx.WHITE)
+        layout0.Add(label, 0, wx.ALL, 5)        
+        self._plotColor = wx.ColourPickerCtrl(self, -1, wx.Colour(0,0,0))
+        layout0.Add(self._plotColor, 0, wx.ALL, 5)
         #######################################################################
         
         layout1 = wx.BoxSizer( wx.HORIZONTAL )
@@ -125,6 +133,7 @@ class ProcessDialog ( bf.BasicForm ):
         self._orgProc = cpy.deepcopy(process)
         self._process = process
         self._txtProcessName.SetValue(process['Name'])
+        self._plotColor.SetColour(process['PlotColor'])
         ##
         inCommList = cpy.deepcopy(commList)
         for k, v in inCommList.items():
@@ -151,6 +160,7 @@ class ProcessDialog ( bf.BasicForm ):
     
     def OnOk(self, event):
         self._process['Name'] = self._txtProcessName.GetValue()
+        self._process['PlotColor'] = self._plotColor.GetColour()
         self._inCommTbl.Commit()
         self._process['IN'] = self.GetSelectedCommodities(self._inCommTbl)
         self._outCommTbl.Commit()

@@ -508,7 +508,8 @@
           },
           "Id": "NewProcess#1",
           "Name": "Photovoltaics",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#2": {
           "IN": [
@@ -573,7 +574,8 @@
           },
           "Id": "NewProcess#2",
           "Name": "Grid connection",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#3": {
           "IN": [
@@ -638,7 +640,8 @@
           },
           "Id": "NewProcess#3",
           "Name": "CHP (Operational state)",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#4": {
           "IN": [
@@ -705,7 +708,8 @@
           },
           "Id": "NewProcess#4",
           "Name": "CHP (Electricity driven)",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#5": {
           "IN": [
@@ -770,7 +774,8 @@
           },
           "Id": "NewProcess#5",
           "Name": "CHP (Heat driven)",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#6": {
           "IN": [
@@ -835,7 +840,8 @@
           },
           "Id": "NewProcess#6",
           "Name": "Gas heater",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#7": {
           "IN": [
@@ -899,7 +905,8 @@
           },
           "Id": "NewProcess#7",
           "Name": "Compression chiller",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#8": {
           "IN": [
@@ -964,7 +971,8 @@
           },
           "Id": "NewProcess#8",
           "Name": "Absorption chiller",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#9": {
           "IN": [
@@ -1028,7 +1036,8 @@
           },
           "Id": "NewProcess#9",
           "Name": "Power-to-Heat (Heat pump)",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#10": {
           "IN": [
@@ -1094,7 +1103,8 @@
           },
           "Id": "NewProcess#10",
           "Name": "Gas engine CHP",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewProcess#11": {
           "IN": [
@@ -1158,7 +1168,8 @@
           },
           "Id": "NewProcess#11",
           "Name": "Power-to-Heat (Resistive)",
-          "Type": "Process"
+          "Type": "Process",
+          "PlotColor": "rgb(243, 174, 0)"
         },
         "NewStorage#12": {
           "IN": [

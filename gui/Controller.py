@@ -409,6 +409,13 @@ class Controller():
             'North': (200, 200, 230)}
         for country, color in my_colors.items():
             urbs.COLORS[country] = color
+
+        for m in self._resModel._models.values():
+            for p in m._processes.values():
+                if p['Type'] == 'Process': #not storage
+                    color = wx.Colour()
+                    color.Set(p['PlotColor'])
+                    urbs.COLORS[p['Name']] = color.Get(False)
     
         # select scenarios to be run
         scenarios = []
