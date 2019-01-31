@@ -169,6 +169,7 @@ class SiteModel():
         data['Id'] = processId
         data['Name'] = processId
         data['Type'] = 'Process'
+        data['PlotColor'] = (0,0,0)
         for year in self._years:
             data['Years'][year] = self.InitializeProcess()   
             

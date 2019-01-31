@@ -160,7 +160,7 @@ class ProcessDialog ( bf.BasicForm ):
     
     def OnOk(self, event):
         self._process['Name'] = self._txtProcessName.GetValue()
-        self._process['PlotColor'] = self._plotColor.GetColour()
+        self._process['PlotColor'] = self._plotColor.GetColour().GetAsString()
         self._inCommTbl.Commit()
         self._process['IN'] = self.GetSelectedCommodities(self._inCommTbl)
         self._outCommTbl.Commit()
