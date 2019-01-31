@@ -316,7 +316,7 @@ class Controller():
         else:
             self._model.CloneCommodity(cpy.deepcopy(item))
             
-    def VallidateData(self):
+    def ValidateData(self):
         success = True
         if len(self._resModel._years) == 0:
             success = False
@@ -358,10 +358,7 @@ class Controller():
         return success
         
     def Run(self):
-        if not self.VallidateData():
-            return
-        #self.GetDataFrames()
-        #return
+
         result_name = 'Campus'
         result_dir = urbs.prepare_result_directory(result_name) # name + time stamp
     
@@ -412,6 +409,13 @@ class Controller():
             'North': (200, 200, 230)}
         for country, color in my_colors.items():
             urbs.COLORS[country] = color
+
+        for m in self._resModel._models.values():
+            for p in m._processes.values():
+                if p['Type'] == 'Process': #not storage
+                    color = wx.Colour()
+                    color.Set(p['PlotColor'])
+                    urbs.COLORS[p['Name']] = color.Get(False)
     
         # select scenarios to be run
         scenarios = []
