@@ -245,7 +245,9 @@ class RESModel():
                     values.append(data[col])
         
         names = ['support_timeframe', 'Name']
-        return self.CreateDF(tuples, names, columns, values)
+        df = self.CreateDF(tuples, names, columns, values)
+        #print(df)
+        return df
 #-----------------------------------------------------------------------------#        
     def GetCommoditiesDF(self):
         tuples  = []
@@ -329,7 +331,9 @@ class RESModel():
                     values.append(v)
         
         names = ['support_timeframe', 'Site', 'Storage', 'Commodity']
-        return self.CreateDF(tuples, names, columns, values)
+        df = self.CreateDF(tuples, names, columns, values)
+        #print(df)
+        return df
 #-----------------------------------------------------------------------------#        
     def GetConnectionsDF(self):
         tuples  = []
@@ -449,7 +453,8 @@ class RESModel():
                 for col in columns:
                     s = data[col]                        
                     v.append(s)
-                values.append(v)
+                values.append(v)#SiteIn->SiteOut
+                values.append(v)#SiteOut->SiteIn
         
         names = ['support_timeframe', 'Site In', 'Site Out', 
                      'Transmission', 'Commodity']
