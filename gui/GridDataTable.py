@@ -86,7 +86,7 @@ class GridDataTable(wx.grid.GridTableBase):
             not cellType.startswith(wx.grid.GRID_VALUE_CHOICE) and 
             colKey not in ('timeSer', 'timeEff')):
             v = self.ConvertToNumber(value)
-            if not v:
+            if v is None:
                 return
         
         self._tmpData[rowKey][colKey] = v
