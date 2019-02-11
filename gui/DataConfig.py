@@ -212,6 +212,8 @@ class DataConfig():
          GRID_COL_LABEL:'Variable costs (€/MWh)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: INF},
         {PARAM_KEY: 'inst-cap',
          GRID_COL_LABEL:'Installed capacity (MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
+        {PARAM_KEY: 'lifetime',
+         GRID_COL_LABEL: 'Lifetime of inst-cap (years)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},        
         {PARAM_KEY: 'cap-lo',
          GRID_COL_LABEL: 'Minimum capacity (MW)', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.00},
         {PARAM_KEY: 'cap-up',
