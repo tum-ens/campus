@@ -451,7 +451,9 @@ class RESModel():
                 data = trnsm['Years'][year]
                 v = []
                 for col in columns:
-                    s = data[col]                        
+                    s = data[col]
+                    if year != years[0] and col in ('lifetime'):
+                        s = math.nan
                     v.append(s)
                 values.append(v)#SiteIn->SiteOut
                 values.append(v)#SiteOut->SiteIn
