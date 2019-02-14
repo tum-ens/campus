@@ -351,6 +351,8 @@ class RESModel():
                          m._processes[conn['Proc']]['Name'], 
                          m._commodities[conn['Comm']]['Name'],
                          conn['Dir'].title())
+                    if t in tuples:
+                        continue
                     tuples.append(t)
                     data = conn['Years'][year]
                     v = []
@@ -359,7 +361,9 @@ class RESModel():
                     values.append(v)
         
         names = ['support_timeframe', 'Process', 'Commodity', 'Direction']
-        return self.CreateDF(tuples, names, columns, values)
+        df = self.CreateDF(tuples, names, columns, values)
+        #print(df)
+        return df
 #-----------------------------------------------------------------------------#        
     def GetCommTimeSerDF(self, commTypes, includSite=True):
         #columns
