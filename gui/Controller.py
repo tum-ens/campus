@@ -264,6 +264,8 @@ class Controller():
                 self._model = self._resModel.GetSiteModel(site)
                 resTab.RebuildRES(None)
                 resTab.Refresh()
+                
+        self._view.Refresh(False)
     
     def GetGlobalParams(self):
         return self._resModel.GetGlobalParams()
