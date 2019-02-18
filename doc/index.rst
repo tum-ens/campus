@@ -35,6 +35,7 @@ first running model.
 
    overview
    tutorial
+   tutorial_gui
    workflow
    
 Technical documentation
