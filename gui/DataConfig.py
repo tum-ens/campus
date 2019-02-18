@@ -87,10 +87,10 @@ class DataConfig():
     PERIOD_PARAMS = [
         {PARAM_KEY: 'selected',
          GRID_COL_LABEL:'', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''},
-        {PARAM_KEY: 'start',
-         GRID_COL_LABEL: 'Start', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1000},
-        {PARAM_KEY: 'end',
-         GRID_COL_LABEL: 'End', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1168}
+        {PARAM_KEY: 'offset',
+         GRID_COL_LABEL: 'Offset', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1000},
+        {PARAM_KEY: 'length',
+         GRID_COL_LABEL: 'Length', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 168}
     ]    
 #-----------------------------------------------------------------------------#
 

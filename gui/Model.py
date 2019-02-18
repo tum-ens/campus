@@ -18,6 +18,7 @@ class RESModel():
     def __init__(self, data=None):
         self._years             = {}
         self._sites             = {}
+        self._periods           = {}
         self._models            = {}
         self._transmissions     = {}
         self._trnsmCommodities  = {}        
@@ -40,6 +41,9 @@ class RESModel():
                 self._transmissions = data['_transmissions']
             if '_trnsmCommodities' in data:
                 self._trnsmCommodities = data['_trnsmCommodities']
+            if '_periods' in data:
+                self._periods = data['_periods']
+                pub.sendMessage(EVENTS.PERIOD_ADDED, periods=self._periods)
             if '_models' in data:
                 for k, v in data['_models'].items():
                     self._models[k] = sm.SiteModel(k, 
@@ -113,7 +117,29 @@ class RESModel():
             
         #notify subscribers that years are removed
         pub.sendMessage(EVENTS.YEAR_REMOVED, years=self._years, removeCount=len(years))
-#-----------------------------------------------------------------------------#    
+#-----------------------------------------------------------------------------#
+    def AddPeriod(self, pName):
+        status = 0        
+        if not (pName in self._periods):
+            newP = sm.SiteModel.InitializeData(config.DataConfig.PERIOD_PARAMS)
+            self._periods[pName]  = newP
+            #notify subscribers that a period is added
+            pub.sendMessage(EVENTS.PERIOD_ADDED, periods=self._periods)
+        else:
+            status = 1
+        
+        return status
+#-----------------------------------------------------------------------------#
+    def RemovePeriods(self, periods):
+        notify = 0
+        for p in periods:
+            self._periods.pop(p)
+            notify += 1
+            
+        #notify subscribers that a period is removed
+        if notify > 0:
+            pub.sendMessage(EVENTS.PERIOD_REMOVED, periods=self._periods, removeCount=notify)
+#-----------------------------------------------------------------------------#
     def GetSiteModel(self, siteName):
         return self._models[siteName]
 #-----------------------------------------------------------------------------#
@@ -580,3 +606,9 @@ class RESModel():
         #print(tuples)
         return tuples
 #-----------------------------------------------------------------------------#
+    def GetPlotPeriods(self):
+        pp = {}
+        for k,v in self._periods.items():
+            pp[k] = range(v['offset'], v['offset'] + v['length'])
+            
+        return pp
