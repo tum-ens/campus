@@ -43,8 +43,8 @@ They force all processes that interact with them to operate with a percentage
 of their total capacity specified by a time series associated with the SupIm
 commodity. A typical example for SupIm commodities is the capacity factor of
 renewable energy generation units. The paramter input window that opens when
-double clicking on the name or line of an existing SupIm commodity or the
-clicking leftmost symbol in the RES header (Solar panel) for a new SupIm
+double clicking on the name or line of an existing SupIm commodity or clicking
+the leftmost symbol in the RES header (Solar panel) for a new SupIm
 commodity looks like this:
 
 .. image:: img_gui_tutorial/RES_Com_SupIm.png
@@ -238,4 +238,3 @@ the process window. The parameters there are the following:
 * **Variable costs (€/MWh)** are linked to the operation of a process and are
   to be paid for each unit of throughput through the process. They can
   represent anything from usage ageing to taxes.
-  
