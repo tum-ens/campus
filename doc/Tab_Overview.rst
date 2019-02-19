@@ -10,12 +10,12 @@ The overview tab for the standard example looks the following:
     :width: 100%
     :align: center
 
-It is split into 3 main parts, all of which will be presented separately in the
+It is split into 6 main parts, all of which will be presented separately in the
 following.
 
 Manage Sites
 ^^^^^^^^^^^^
-In the left hand side the locations (sites) of the
+In the top left hand side the locations (sites) of the
 model are specified.
 
 .. image:: img_gui_tutorial/Manage_Sites.png
@@ -34,10 +34,10 @@ button.
 
 Manage Years
 ^^^^^^^^^^^^
-In the middle part of the overview tab you can manage the desired modeled years
-These years are then the support years for the intertemporal modeling. It is
-also possible to enter just one year for a non-intertemporal, single year
-optimization.
+In the bottom left hand part of the overview tab you can manage the desired
+modeled years. These years are then the support years for the intertemporal
+modeling. It is also possible to enter just one year for a non-intertemporal,
+single year optimization.
 
 .. image:: img_gui_tutorial/Manage_Years.png
     :width: 60%
@@ -52,20 +52,17 @@ by entering its name into the text line next to the *Add Year* button and
 clicking it. A modeled year can be removed by first checking the checkbox next
 to the year and then clicking the *Remove Selected Year(s)* button.
 
-Global Parameters
-^^^^^^^^^^^^^^^^^
-The right hand part of the overview tab is used to specify global parameters.
-In addition scenarios can be chosen and the optimization can be started and
-supervised.
+Manage Global Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^
+The upper middle part of the overview tab is used to specify global parameters.
 
 .. image:: img_gui_tutorial/Global_Parameters.png
-    :width: 80%
+    :width: 40%
     :align: center
 
-The global parameters are set in the upper right hand part of the screen
-section. They are set by clicking on the field next to the quantity. In all
-cases except for *Solver* and *Objective* a number has to be entered. In the
-two cases singled out a drop down menu appears which offers the allowed
+The global parameters are set by clicking on the field next to the quantity. In
+all cases except for *Solver* and *Objective* a number has to be entered. In
+the two cases singled out a drop down menu appears which offers the allowed
 choices. The parameters are:
 
 * **Discount rate**: This value gives the discount rate that is used for
@@ -103,12 +100,44 @@ choices. The parameters are:
   series. With this global parameter you can specify how long each entry of a
   time series is in hours.
 
-On the top right hand side of this section scenarios can be specified. These
+Manage plot periods
+^^^^^^^^^^^^^^^^^^^
+To the right of the global parameters the plot periods can be defined. This is
+necessary since standard graphs become large and difficult to read if the
+optimization horizon is much longer than a week. The corresponding section on
+the screen looks like the following: 
+
+.. image:: img_gui_tutorial/Plot_periods.png
+    :width: 60%
+    :align: center
+
+You can add new plot periods by specifying a name in the text field in the top
+section of the sub-window and then clicking the 'Add Period' button. The
+corresponding period will then appear in the lower section of the sub-window.
+You then have to specify the strating time step and the duration in the columns
+denoted 'Offset' and 'Length', respectively. For removing a plot period check
+the checkbox and then click the 'Remove Selcted Period(s)' button in the top
+section of the sub-window.
+
+Scenarios
+^^^^^^^^^
+In the upper right hand section of the screen scenarios can be specified. These
 refer to variations in the input parameters which can be specified in functions
 in the subfolder 'urbs' in file 'scenarios.py'. A few standard examples are
-listed already and can be chosen by chacking the boxes next to their names.
+listed already and can be chosen by checking the boxes next to their names.
 
-The lower part of this screen section is dedicated to model running and
+.. image:: img_gui_tutorial/Scenarios.png
+    :width: 20%
+    :align: center
+
+Model running and supervision
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The lower right hand part of the screen is dedicated to model running and
 supervision. With the 'Play' button a model run is started and can be
 interrupted with the red 'Stop' button. The lower section displays the log file
-of the model run.   
+of the model run.
+
+.. image:: img_gui_tutorial/Running.png
+    :width: 100%
+    :align: center
+ 
