@@ -26,10 +26,12 @@ class GeneralView(wx.Panel):
         
         globalsLayout = gv.GlobalsView(self, controller).GetLayout()
         
-        mainLayout = wx.BoxSizer( wx.HORIZONTAL )        
-        mainLayout.Add(sitesLayout, 0, wx.ALL|wx.EXPAND, 5)
-        mainLayout.Add(yearsLayout, 0, wx.ALL|wx.EXPAND, 5)
-        mainLayout.Add(globalsLayout, 1, wx.ALL|wx.EXPAND, 5)
+        mainLayout = wx.BoxSizer( wx.HORIZONTAL )
+        vLayout = wx.BoxSizer( wx.VERTICAL )
+        vLayout.Add(sitesLayout, 1, wx.ALL|wx.EXPAND, 5)
+        vLayout.Add(yearsLayout, 1, wx.ALL|wx.EXPAND, 5)
+        mainLayout.Add(vLayout, 0, wx.ALL|wx.EXPAND, 1)
+        mainLayout.Add(globalsLayout, 1, wx.ALL|wx.EXPAND, 1)
         
         
         self.SetSizer( mainLayout )

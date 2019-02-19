@@ -6,13 +6,23 @@ Created on Sat Nov  3 15:02:37 2018
 """
 
 import wx.grid
+import wx._adv, wx._html, wx._xml
 import math
+import os
 
 import sys
 sys.path.insert(0, '..')
 import urbs
 
 class DataConfig():
+    
+    def resource_path(relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+    
+        return os.path.join(base_path, relative_path)
 
     PARAM_KEY        = 'key'
     PARAM_DEFVALUE   = 'defVal'
@@ -73,6 +83,15 @@ class DataConfig():
         {PARAM_KEY: 'area',
          GRID_COL_LABEL: 'Site Area', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 100000}
     ]
+#-----------------------------------------------------------------------------#
+    PERIOD_PARAMS = [
+        {PARAM_KEY: 'selected',
+         GRID_COL_LABEL:'', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_BOOL, PARAM_DEFVALUE: ''},
+        {PARAM_KEY: 'offset',
+         GRID_COL_LABEL: 'Offset', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1000},
+        {PARAM_KEY: 'length',
+         GRID_COL_LABEL: 'Length', GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 168}
+    ]    
 #-----------------------------------------------------------------------------#
 
     DSM_PARAMS = [

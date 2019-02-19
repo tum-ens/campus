@@ -10,6 +10,8 @@ import wx.grid
 import sys
 import DataConfig as config
 import GridDataTable as gdt
+import PeriodsView as pv
+import wx.richtext as rt
 
 from Events import EVENTS
 from pubsub import pub
@@ -24,7 +26,8 @@ class RedirectText(object):
         #self.out.WriteText(string)
     
     def flush(self):
-        self.out.flush()
+        #self.out.flush()
+        pass
 
 class GlobalsView():
     
@@ -35,47 +38,26 @@ class GlobalsView():
         self._parent = parent
         self._controller = controller
         
-        #manage layout
-        headerBox = wx.StaticBox(parent, wx.ID_ANY, u"Global Parameters:" )
-        headerBox.SetForegroundColour('white')
-        
-        self._mainLayout = wx.StaticBoxSizer(headerBox , wx.VERTICAL )
-        
         gridLayout = wx.BoxSizer( wx.HORIZONTAL )
-        #Grid and its data table
-        self._gridTable = gdt.GridDataTable(self._gridCols, self._gridRows, autoCommit=True)
-        self._gridTable.SetTableData(controller.GetGlobalParams())
-        self._glGrid = wx.grid.Grid(parent, -1)
-        self._glGrid.SetTable(self._gridTable, True)
-        self._glGrid.SetColSize(0, 120)
-        self._glGrid.SetRowLabelSize(150)
-        self._glGrid.SetRowLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTER)
-        gridLayout.Add(self._glGrid, 1, wx.ALL|wx.EXPAND, 5)
+        #Global Params Section
+        layout = self.CreateGlobalParamsLayout()
+        gridLayout.Add(layout, 1, wx.ALL|wx.EXPAND, 1)
+        #Periods Section
+        periodsView = pv.PeriodsView(parent)
+        gridLayout.Add(periodsView.GetLayout(), 1, wx.ALL|wx.EXPAND, 1)
+        #Scenarios Section
+        layout = self.CreateScenariosLayout()
+        gridLayout.Add(layout, 1, wx.ALL|wx.EXPAND, 1)        
         
-        self._lb = wx.CheckListBox(parent, -1, choices=controller.GetScenarios())
-        self._lb.Bind(wx.EVT_CHECKLISTBOX, self.OnScenarioChange)
-        gridLayout.Add(self._lb, 1, wx.ALL|wx.EXPAND, 5)
+        imgLayout = self.CreateImgsLayout()        
+        logLayout = self.CreateLogLayout()
+        layout = wx.BoxSizer( wx.HORIZONTAL )
+        layout.Add(logLayout, 1, wx.ALL|wx.EXPAND, 5)
+        layout.Add(imgLayout, 0, wx.ALL|wx.ALIGN_CENTER, 5)
         
-        imgLayout = wx.BoxSizer( wx.HORIZONTAL )
-        bitmap = wx.Bitmap( u"./imgs/Play.png", wx.BITMAP_TYPE_ANY )
-        btnRun = wx.BitmapButton(parent, wx.ID_ANY, bitmap, wx.DefaultPosition, (132, 132), wx.BU_AUTODRAW|wx.RAISED_BORDER)
-        btnRun.Bind(wx.EVT_BUTTON, self.OnRunClick)
-        imgLayout.Add(btnRun, 0, wx.ALL|wx.ALIGN_CENTER, 5)
-        
-        bitmap = wx.Bitmap( u"./imgs/Abort.png", wx.BITMAP_TYPE_ANY )
-        btnAbort = wx.BitmapButton(parent, wx.ID_ANY, bitmap, wx.DefaultPosition, (132, 132), wx.BU_AUTODRAW|wx.RAISED_BORDER)
-        imgLayout.Add(btnAbort, 0, wx.ALL|wx.ALIGN_CENTER, 5)
-        
-        sb = wx.StaticBox(parent, wx.ID_ANY, u"Log:" )
-        sb.SetForegroundColour('white')
-        logLayout = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
-        self._logCtrl = wx.TextCtrl(parent, wx.ID_ANY, size=(300,100),
-                          style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
-        logLayout.Add(self._logCtrl, 1, wx.ALL|wx.EXPAND, 5)
-        
+        self._mainLayout = wx.BoxSizer( wx.VERTICAL )
         self._mainLayout.Add(gridLayout, 1, wx.ALL|wx.EXPAND, 5)
-        self._mainLayout.Add(imgLayout, 1, wx.ALL|wx.ALIGN_CENTER, 5)
-        self._mainLayout.Add(logLayout, 1, wx.ALL|wx.EXPAND, 5)
+        self._mainLayout.Add(layout, 1, wx.ALL|wx.EXPAND, 0)
         
         pub.subscribe(self.PopulateGrid, EVENTS.GL_PARAMS_LOADED)
         pub.subscribe(self.PopulateScenarios, EVENTS.SCENARIOS_LOADED)
@@ -86,6 +68,52 @@ class GlobalsView():
         
     def GetLayout(self):
         return self._mainLayout;
+        
+    def CreateGlobalParamsLayout(self):
+        #Grid and its data table
+        self._gridTable = gdt.GridDataTable(self._gridCols, self._gridRows, autoCommit=True)
+        self._gridTable.SetTableData(self._controller.GetGlobalParams())
+        self._glGrid = wx.grid.Grid(self._parent, -1)
+        self._glGrid.SetTable(self._gridTable, True)
+        self._glGrid.SetColSize(0, 120)
+        self._glGrid.SetRowLabelSize(150)
+        self._glGrid.SetRowLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTER)
+        headerBox = wx.StaticBox(self._parent, wx.ID_ANY, u"Manage Global Parameters:" )
+        headerBox.SetForegroundColour('white')
+        layout = wx.StaticBoxSizer(headerBox, wx.HORIZONTAL)
+        layout.Add(self._glGrid, 1, wx.ALL|wx.EXPAND, 5)
+        return layout
+        
+    def CreateScenariosLayout(self):
+        self._lb = wx.CheckListBox(self._parent, -1, choices=self._controller.GetScenarios())
+        self._lb.Bind(wx.EVT_CHECKLISTBOX, self.OnScenarioChange)
+        headerBox = wx.StaticBox(self._parent, wx.ID_ANY, u"Select Scenarios:" )
+        headerBox.SetForegroundColour('white')
+        layout = wx.StaticBoxSizer(headerBox, wx.HORIZONTAL)
+        layout.Add(self._lb, 1, wx.ALL|wx.EXPAND, 5)
+        return layout
+        
+    def CreateLogLayout(self):
+        self._logCtrl = rt.RichTextCtrl(self._parent, wx.ID_ANY, size=(300,100),
+                          style = rt.RE_MULTILINE|rt.RE_READONLY|wx.VSCROLL)
+        sb = wx.StaticBox(self._parent, wx.ID_ANY, u"Log:" )
+        sb.SetForegroundColour('white')
+        logLayout = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+        logLayout.Add(self._logCtrl, 1, wx.ALL|wx.EXPAND, 5)
+        return logLayout
+        
+    def CreateImgsLayout(self):
+        imgLayout = wx.BoxSizer( wx.VERTICAL )
+        bitmap = wx.Bitmap(config.DataConfig.resource_path("imgs/Play.png"), wx.BITMAP_TYPE_ANY )
+        btnRun = wx.BitmapButton(self._parent, wx.ID_ANY, bitmap, wx.DefaultPosition, (132, 132), wx.BU_AUTODRAW|wx.RAISED_BORDER)
+        btnRun.Bind(wx.EVT_BUTTON, self.OnRunClick)
+        imgLayout.Add(btnRun, 0, wx.ALL|wx.ALIGN_CENTER, 5)
+        
+        bitmap = wx.Bitmap(config.DataConfig.resource_path("imgs/Abort.png"), wx.BITMAP_TYPE_ANY )
+        btnAbort = wx.BitmapButton(self._parent, wx.ID_ANY, bitmap, wx.DefaultPosition, (132, 132), wx.BU_AUTODRAW|wx.RAISED_BORDER)
+        imgLayout.Add(btnAbort, 0, wx.ALL|wx.ALIGN_CENTER, 5)
+        
+        return imgLayout        
 
     def OnRunClick(self, event):
         if not self._controller.ValidateData():

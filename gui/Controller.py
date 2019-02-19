@@ -41,6 +41,9 @@ class Controller():
         
         pub.subscribe(self.AddSite, EVENTS.SITE_ADDING)
         pub.subscribe(self.RemoveSites, EVENTS.SITE_REMOVING)
+
+        pub.subscribe(self.AddPeriod, EVENTS.PERIOD_ADDING)
+        pub.subscribe(self.RemovePeriods, EVENTS.PERIOD_REMOVING)
         
         pub.subscribe(self.AddCommodity, EVENTS.COMMODITY_ADDING)
         pub.subscribe(self.EditCommodity, EVENTS.COMMODITY_EDITING)
@@ -89,6 +92,16 @@ class Controller():
         if s == wx.OK:
             self._resModel.RemoveSites(sites)
             self._view.RemoveRESTab(sites)
+            
+    def AddPeriod(self, period):
+        status = self._resModel.AddPeriod(period)
+        if status == 1:
+            wx.MessageBox('A Period with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
+    
+    def RemovePeriods(self, periods):
+        s = wx.MessageBox('Are you sure? ', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+        if s == wx.OK:
+            self._resModel.RemovePeriods(periods)
             
     def RESSelected(self, siteName):
         self._model = self._resModel.GetSiteModel(siteName)
@@ -264,6 +277,8 @@ class Controller():
                 self._model = self._resModel.GetSiteModel(site)
                 resTab.RebuildRES(None)
                 resTab.Refresh()
+                
+        self._view.Refresh(False)
     
     def GetGlobalParams(self):
         return self._resModel.GetGlobalParams()
@@ -395,12 +410,8 @@ class Controller():
         report_sites_name = {}
     
         # plotting timesteps
-        plot_periods = {
-            'win': range(1000, 1000+24*7),
-            # 'spr': range(3000, 3000+24*7),
-            # 'sum': range(5000, 5000+24*7),
-            # 'win': range(7000, 7000+24*7)
-        }
+        plot_periods = self._resModel.GetPlotPeriods()
+        #print(plot_periods)
     
         # add or change plot colors
         my_colors = {
