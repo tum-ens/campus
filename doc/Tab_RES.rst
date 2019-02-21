@@ -205,7 +205,7 @@ minimla allowed operation point and full load in each time step. The default
 case here, however, is a flexible orperation and the default value in this
 column is *nan* accordingly.
 
-The all other inputs are to be specified in the window in the lower section of
+All the other inputs are to be specified in the window in the lower section of
 the process window. The parameters there are the following:
 
 * **Installed capacity (MW)** gives the capacity of the process that is already
@@ -232,9 +232,103 @@ the process window. The parameters there are the following:
   the process. You should give the book value here. The program will then
   translate this into the correct total, discounted cost within the model
   horizon.
-* **Annual fiy costs (€/MW)** are the amout of money that has to be spent
-  annually for the operation of a process capacity. They can represent, e.g.,
-  labour costs or calendaric ageing costs.
+* **Annual fix costs (€/MW)** represent the amount of money that has to be
+  spent annually for the operation of a process capacity. They can represent,
+  e.g., labour costs or calendaric ageing costs.
 * **Variable costs (€/MWh)** are linked to the operation of a process and are
   to be paid for each unit of throughput through the process. They can
   represent anything from usage ageing to taxes.
+* **Weighted average cost of capital** denotes the interest rate or expected
+  return on investment with which the investor responsible for the energy
+  system calculates.
+* **Depreciation period** denotes both the economical and technical lifetime of
+  all units in the system. It thus determines two things: the total costs of a
+  given investment and the end of operational time for all units in the energy
+  system modeled.
+* **Area use per capcacity (m^2/MW)** specifies the physical area a given
+  process takes up at the site it is built. This can be used, e.g. to
+  restrict the capacity of solar technologies by a total maximal roof area. The
+  restricting area is defined in the *Overview* tab next to the site name.
+* **Time Var. Eff** by double clicking the three dots in this column a new
+  window opens, where you can paste a time series from a spreadsheet similar to
+  the corresponding windows for *SupIm*, *Buy*, *Sell* and *Demand*
+  commodities. This time series then varies the output ratio of the process as
+  a multiplier. It can be used to restrict process operations to pre-defined
+  time intervalls or capture temperature dependence of the process efficiency.
+
+Storages
+~~~~~~~~
+Storages are used by the system to store a single given commodity. In general
+the storage capacity and charging/discharging power can be sized independently
+by the system. The parameter input window that opens when double clicking on
+the rectangle with rounded edges representing an existing process or clicking
+the rightmost symbol in the RES header (battery) for a new storage looks like
+this:
+
+.. image:: img_gui_tutorial/RES_Sto.png
+    :width: 100%
+    :align: center
+
+In the case shown the drop down menu on top which is used to specify the stored
+commodity is already opened. It displays all commodities in the system.
+
+All parameter inputs for storages are to be specified in the window in the
+lower section of the storage window. The parameters there are the following:
+
+* **Installed capacity (MWh)** gives the storage capacity of storages already
+  installed at the start of the modeling horizon.
+* **Installed storage power (MW)** gives the charging/dischargin power of
+  storages already installed at the start of the modeling horizon.
+* **Lifetime of installed capacity (years)** gives the rest lifetime of the
+  installed storagess in years. A storage can be used in a modeled year *y*
+  still if the lifetime plus the first modeled year exceeds the next year
+  *y+1*.
+* **Minimum storage capacity (MWh)** denotes a storage capacity target that has
+  to be met by the storage in a given modeled year. This means that the system
+  will build at least this capacity.
+* **Maximum storage capacity (MWh)** restricts the storage capacity that can be
+  built to the specified value.
+* **Minimum storage power (MW)** denotes a storage charging/discharging power
+  target that has to be met by the storage in a given modeled year. This means
+  that the system will build at least this power.
+* **Maximum storage power (MW)** restricts the storage charging/discharging
+  that can be built to the specified value.
+* **Efficiency input (1)** specifies the charging efficiency of the storage.
+* **Efficiency output (1)** specifies the discharging efficiency of the
+  storage.
+* **Investment cost capacity (€/MWh)** denotes the storage capacity specific
+  investment costs for the storage. You should give the book value here. The
+  program will then translate this into the correct total, discounted cost
+  within the model horizon.
+* **Investment cost power (€/MW)** denotes the storage charging/discharging
+  power specific investment costs for the storage. You should give the book
+  value here. The program will then translate this into the correct total,
+  discounted cost within the model horizon.
+* **Annual fix costs capacity (€/MWh)** represent the amount of money that has
+  to be spent annually for the operation of a storage capacity. They can
+  represent, e.g., labour costs or calendaric ageing costs.
+* **Annual fix costs power (€/MW)** represent the amount of money that has to
+  be spent annually for the operation of a storage power. They can represent,
+  e.g., labour costs or calendaric ageing costs.
+* **Variable costs capacity (€/MWh)** are linked to the operation of a given
+  storage state, i.e. they lead to costs whenever a storage has a non-zero
+  state of charge. These costs should typically set to zero but can be used to
+  manipulate the storage duration or model state-of-charge dependent ageing.
+* **Variable costs power (€/MWh)** are linked to the charging and discharging
+  of a storage. Each unit of commodity leaving the storage requires the payment
+  of these costs.
+* **Weighted average cost of capital** denotes the interest rate or expected
+  return on investment with which the investor responsible for the energy
+  system calculates.
+* **Depreciation period** denotes both the economical and technical lifetime of
+  all units in the system. It thus determines two things: the total costs of a
+  given investment and the end of operational time for all units in the energy
+  system modeled.
+* **Initial storage state** can be used to set the state of charge of a storages
+  in the beginning of the modeling time steps. If *nan* is given this value is
+  an optimization variable. In any case the storage content in the end is the
+  same as in the beginning to avoid windfall profits from simply discharging a
+  storage.
+* **Discharge** gives the hourly dischage of a storage. Over time, when no
+  charging or discharging occurs, the storage content will decrease
+  exponentially. 
