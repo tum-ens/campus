@@ -4038,6 +4038,9 @@
     "CO2 budget": {
       "value": Infinity
     },
+    "Cost budget": {
+      "value": 300000000
+    },
     "Weight": {
       "value": 10
     },
