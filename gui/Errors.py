@@ -16,6 +16,7 @@ NO_SCENARIO = 'NO_SC'
 ONE_SITE    = 'ONE_SITE_'
 NO_SITE_SEL = 'NO_SITE_SEL'
 
+ALREADY_COPIED = 'ALREADY_COPIED_'
 
 ERRORS = {
     NO_SITE     : 'Please define at least one site!',
@@ -26,5 +27,7 @@ ERRORS = {
     TS_LEN      : 'Time Series should be exactly %s (not %s) entries, for (site, commodity, year): (%s, %s, %s)',
     NO_PROC     : 'No processes defined for the site: %s',
     ONE_SITE    : 'There is only one site defined.',
-    NO_SITE_SEL : 'Please select atleast one site.'
+    NO_SITE_SEL : 'Please select atleast one site.',
+    
+    ALREADY_COPIED : 'This Process/Storage is already copied to the site (%s) before. Please go to that site and use "Clone" feature.'
 }

@@ -305,7 +305,10 @@ class Controller():
         for site in sites:
             m = self._resModel.GetSiteModel(site)
             if item['Type'] in ('Process', 'Storage'):
-                m.CopyProcess(item, self._model)                
+                if item['Id'] in m._processes:
+                    wx.MessageBox(ERR.ERRORS[ERR.ALREADY_COPIED] % site, 'Error', wx.OK|wx.ICON_ERROR)
+                else:                    
+                    m.CopyProcess(item, self._model)
             else:
                 m.SaveCommodity(item)
                 
