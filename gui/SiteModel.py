@@ -8,6 +8,7 @@ from pubsub import pub
 from Events import EVENTS
 
 import DataConfig as config
+import copy as cpy
 
 class SiteModel():
 
@@ -214,11 +215,40 @@ class SiteModel():
             
         self._processes.pop(processId)
         
-    def CloneProcess(self, proc):
-        processId = 'New' + proc['Type'] + '#' + str(len(self._processes) + 1)
-        proc['Id'] = processId
-        proc['Name'] = processId
+    def CopyProcess(self, proc, fromSiteModel):
+        #copy the linked process commodities (if not there)
+        self.SyncProcessCommodities(proc['IN'], fromSiteModel)
+        self.SyncProcessCommodities(proc['OUT'], fromSiteModel)
+        
+        #Save the process itself
         self.SaveProcess(proc)
+
+        #update connections data
+        self.SyncProcessConnections(proc, fromSiteModel, proc['Id'], 'IN')
+        self.SyncProcessConnections(proc, fromSiteModel, proc['Id'], 'OUT')
+        
+    def CloneProcess(self, proc):
+        oldProcId = proc['Id']
+        newProcId = 'New' + proc['Type'] + '#' + str(len(self._processes) + 1)
+        proc['Id'] = newProcId
+        proc['Name'] = newProcId
+        self.SaveProcess(proc)
+        #update connections data
+        self.SyncProcessConnections(proc, self, oldProcId, 'IN')
+        self.SyncProcessConnections(proc, self, oldProcId, 'OUT')
+        
+    def SyncProcessCommodities(self, commList, fromSiteModel):
+        for commId in commList:
+            if commId not in self._commodities:
+                comm = fromSiteModel._commodities[commId]
+                self.SaveCommodity(cpy.deepcopy(comm))
+            
+    def SyncProcessConnections(self, proc, fromSiteModel, fromProcId, connDir):
+        procId = proc['Id']            
+        for commId in proc[connDir]:
+            fromConn = fromSiteModel.GetConnection(fromProcId, commId, connDir)
+            toConn   = self.GetConnection(procId, commId, connDir)
+            toConn['Years'] = cpy.deepcopy(fromConn['Years'])
     
     def AddConnection(self, procId, commId, In_Out):
         connId = procId+'$'+commId+'$'+In_Out

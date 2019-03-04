@@ -305,15 +305,7 @@ class Controller():
         for site in sites:
             m = self._resModel.GetSiteModel(site)
             if item['Type'] in ('Process', 'Storage'):
-                for commId in item['IN']:
-                    if commId not in m._commodities:
-                        comm = self._model._commodities[commId]
-                        m.SaveCommodity(cpy.deepcopy(comm))
-                for commId in item['OUT']:
-                    if commId not in m._commodities:
-                        comm = self._model._commodities[commId]
-                        m.SaveCommodity(cpy.deepcopy(comm))
-                m.SaveProcess(item)
+                m.CopyProcess(item, self._model)                
             else:
                 m.SaveCommodity(item)
                 
