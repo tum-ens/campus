@@ -86,6 +86,7 @@ class Controller():
             wx.MessageBox('A Site with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
             self._view.AddRESTab(self, site)
+            self._view.Refresh(False)
     
     def RemoveSites(self, sites):
         s = wx.MessageBox('Are you sure? All site(s) data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
