@@ -39,12 +39,12 @@ class GlobalsView():
         self._controller = controller
         
         gridLayout = wx.BoxSizer( wx.HORIZONTAL )
-        #Global Params Section
-        layout = self.CreateGlobalParamsLayout()
-        gridLayout.Add(layout, 1, wx.ALL|wx.EXPAND, 1)
         #Periods Section
         periodsView = pv.PeriodsView(parent)
-        gridLayout.Add(periodsView.GetLayout(), 1, wx.ALL|wx.EXPAND, 1)
+        gridLayout.Add(periodsView.GetLayout(), 0, wx.ALL|wx.EXPAND, 1)
+        #Global Params Section
+        layout = self.CreateGlobalParamsLayout()
+        gridLayout.Add(layout, 0, wx.ALL|wx.EXPAND, 1)        
         #Scenarios Section
         layout = self.CreateScenariosLayout()
         gridLayout.Add(layout, 1, wx.ALL|wx.EXPAND, 1)        

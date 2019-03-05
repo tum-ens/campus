@@ -50,6 +50,8 @@ class DataConfig():
          GRID_ROW_LABEL: 'Discount rate', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 0.03},
         {PARAM_KEY: 'CO2 budget',
          GRID_ROW_LABEL: 'CO2 budget', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 1000000},
+        {PARAM_KEY: 'Cost budget',
+         GRID_ROW_LABEL: 'Cost budget', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 300000000},
         {PARAM_KEY: 'Weight',
          GRID_ROW_LABEL: 'Last year weight', GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING, PARAM_DEFVALUE: 10},
         {PARAM_KEY: 'Solver',

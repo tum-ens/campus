@@ -46,10 +46,10 @@ class YearsView():
         self._btnAdd.Disable()
         addYearLayout.Add(self._btnAdd, 0, wx.ALL, 5)
         
-        self._btnRemove = wx.Button(addYearLayout.GetStaticBox(), label="Remove Selected Year(s)")
+        self._btnRemove = wx.Button(parent, label="Remove Selected Year(s)")
         self._btnRemove.Bind(wx.EVT_BUTTON, self.BtnRemoveOnClick)
         #self._btnRemove.Disable()
-        addYearLayout.Add(self._btnRemove, 0, wx.ALL, 5 )
+        #addYearLayout.Add(self._btnRemove, 0, wx.ALL, 5 )
         
         yearsLayout.Add(addYearLayout, 0, wx.ALL|wx.EXPAND, 5)
         
@@ -63,6 +63,7 @@ class YearsView():
         self._yearsGrid.SetColSize(0, 20)
                 
         yearsLayout.Add(self._yearsGrid, 1, wx.ALL|wx.EXPAND, 5)
+        yearsLayout.Add(self._btnRemove, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
         
         #bitmap = wx.StaticBitmap( self, wx.ID_ANY, wx.Bitmap( u"Energy.jpeg", wx.BITMAP_TYPE_ANY ))
         #imgLayout.Add(bitmap, 1, wx.EXPAND, 5)          

@@ -30,7 +30,7 @@ class SitesView():
         self._mainLayout.Add(sitesLayout, 0, wx.ALL|wx.EXPAND, 5 )
         #mainLayout.Add(imgLayout, 1, wx.EXPAND|wx.ALIGN_CENTER, 5 )
         
-        #Add site section        
+        #Add site section
         addSiteLayout = wx.StaticBoxSizer( wx.StaticBox(parent, wx.ID_ANY, u"" ), wx.HORIZONTAL )
         #label = wx.StaticText(addSiteLayout.GetStaticBox(), -1, "Site:")
         #addSiteLayout.Add(label, 0, wx.ALL, 5)
@@ -44,10 +44,10 @@ class SitesView():
         self._btnAdd.Disable()
         addSiteLayout.Add(self._btnAdd, 0, wx.ALL, 5)
         
-        self._btnRemove = wx.Button(addSiteLayout.GetStaticBox(), label="Remove Selected Site(s)")
+        self._btnRemove = wx.Button(parent, label="Remove Selected Site(s)")
         self._btnRemove.Bind(wx.EVT_BUTTON, self.BtnRemoveOnClick)
         #self._btnRemove.Disable()
-        addSiteLayout.Add(self._btnRemove, 0, wx.ALL, 5 )
+        #addSiteLayout.Add(self._btnRemove, 0, wx.ALL, 5 )
         
         sitesLayout.Add(addSiteLayout, 0, wx.ALL|wx.EXPAND, 5)
         
@@ -62,6 +62,7 @@ class SitesView():
         self._sitesGrid.SetRowLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTER)
                 
         sitesLayout.Add(self._sitesGrid, 1, wx.ALL|wx.EXPAND, 5)
+        sitesLayout.Add(self._btnRemove, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
         
         #bitmap = wx.StaticBitmap( self, wx.ID_ANY, wx.Bitmap( u"Energy.jpeg", wx.BITMAP_TYPE_ANY ))
         #imgLayout.Add(bitmap, 1, wx.EXPAND, 5)          

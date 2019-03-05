@@ -241,6 +241,10 @@ class RESModel():
                 prop = config.DataConfig.GLOBAL_PARAMS[1][config.DataConfig.PARAM_KEY]
                 tuples.append((year, prop))
                 values.append(self._gl[prop][colKey])
+                #Cost budget
+                prop = config.DataConfig.GLOBAL_PARAMS[2][config.DataConfig.PARAM_KEY]
+                tuples.append((year, prop))
+                values.append(self._gl[prop][colKey])
             data = self._years[year]
             for k, v in data.items():
                 #skip 'selected'

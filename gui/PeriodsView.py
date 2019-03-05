@@ -31,24 +31,24 @@ class PeriodsView():
         #mainLayout.Add(imgLayout, 1, wx.EXPAND|wx.ALIGN_CENTER, 5 )
         
         #Add period section        
-        #addPeriodLayout = wx.StaticBoxSizer( wx.StaticBox(parent, wx.ID_ANY, u"" ), wx.HORIZONTAL )
-        addPeriodLayout = wx.BoxSizer( wx.HORIZONTAL )
+        addPeriodLayout = wx.StaticBoxSizer( wx.StaticBox(parent, wx.ID_ANY, u"" ), wx.HORIZONTAL )
+        #addPeriodLayout = wx.BoxSizer( wx.HORIZONTAL )
         #label = wx.StaticText(addPeriodLayout.GetStaticBox(), -1, "Period:")
         #addPeriodLayout.Add(label, 0, wx.ALL, 5)
         
         self._txtPeriod = wx.TextCtrl(parent)
         self._txtPeriod.Bind(wx.EVT_TEXT, self.TxtPeriodOnTextChange)
-        addPeriodLayout.Add(self._txtPeriod, 0, wx.ALL, 5)
+        addPeriodLayout.Add(self._txtPeriod, 1, wx.ALL, 5)
         
         self._btnAdd = wx.Button(parent, label="Add Period")
         self._btnAdd.Bind(wx.EVT_BUTTON, self.BtnAddOnClick) 
         self._btnAdd.Disable()
-        addPeriodLayout.Add(self._btnAdd, 0, wx.ALL, 5)
+        addPeriodLayout.Add(self._btnAdd, 1, wx.ALL, 5)
         
         self._btnRemove = wx.Button(parent, label="Remove Selected Period(s)")
         self._btnRemove.Bind(wx.EVT_BUTTON, self.BtnRemoveOnClick)
         #self._btnRemove.Disable()
-        addPeriodLayout.Add(self._btnRemove, 0, wx.ALL, 5 )
+        #addPeriodLayout.Add(self._btnRemove, 0, wx.ALL, 5 )
         
         periodsLayout.Add(addPeriodLayout, 0, wx.ALL|wx.EXPAND, 5)
         
@@ -58,11 +58,12 @@ class PeriodsView():
         self._periodsGrid.SetTable(self._gridTable, True)       
         #col2-4
         for i in range(0, len(self._gridCols)):
-            self._periodsGrid.SetColSize(i, 120)
+            self._periodsGrid.SetColSize(i, 100)
         self._periodsGrid.SetColSize(0, 20)
         self._periodsGrid.SetRowLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTER)
                 
         periodsLayout.Add(self._periodsGrid, 1, wx.ALL|wx.EXPAND, 5)
+        periodsLayout.Add(self._btnRemove, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
         
         #bitmap = wx.StaticBitmap( self, wx.ID_ANY, wx.Bitmap( u"Energy.jpeg", wx.BITMAP_TYPE_ANY ))
         #imgLayout.Add(bitmap, 1, wx.EXPAND, 5)          

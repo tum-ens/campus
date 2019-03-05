@@ -86,6 +86,7 @@ class Controller():
             wx.MessageBox('A Site with the same name already exist!', 'Error', wx.OK|wx.ICON_ERROR)
         else:
             self._view.AddRESTab(self, site)
+            self._view.Refresh(False)
     
     def RemoveSites(self, sites):
         s = wx.MessageBox('Are you sure? All site(s) data will be lost!', 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
@@ -305,15 +306,10 @@ class Controller():
         for site in sites:
             m = self._resModel.GetSiteModel(site)
             if item['Type'] in ('Process', 'Storage'):
-                for commId in item['IN']:
-                    if commId not in m._commodities:
-                        comm = self._model._commodities[commId]
-                        m.SaveCommodity(cpy.deepcopy(comm))
-                for commId in item['OUT']:
-                    if commId not in m._commodities:
-                        comm = self._model._commodities[commId]
-                        m.SaveCommodity(cpy.deepcopy(comm))
-                m.SaveProcess(item)
+                if item['Id'] in m._processes:
+                    wx.MessageBox(ERR.ERRORS[ERR.ALREADY_COPIED] % site, 'Error', wx.OK|wx.ICON_ERROR)
+                else:                    
+                    m.CopyProcess(item, self._model)
             else:
                 m.SaveCommodity(item)
                 
