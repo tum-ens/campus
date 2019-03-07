@@ -2,15 +2,15 @@
   "_years": {
     "2020": {
       "selected": "",
-      "CO2 limit": "inf"
+      "CO2 limit": 50000
     },
     "2030": {
       "selected": "",
-      "CO2 limit": "inf"
+      "CO2 limit": 35000
     },
     "2040": {
       "selected": "",
-      "CO2 limit": "inf"
+      "CO2 limit": 25000
     }
   },
   "_sites": {
@@ -407,7 +407,7 @@
               "delay": 0.0,
               "eff": 0.0,
               "plot": false,
-              "report": false,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -421,7 +421,7 @@
               "delay": 0.0,
               "eff": 0.0,
               "plot": false,
-              "report": false,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -435,7 +435,7 @@
               "delay": 0.0,
               "eff": 0.0,
               "plot": false,
-              "report": false,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -2940,7 +2940,7 @@
               "delay": 0.0,
               "eff": 0.0,
               "plot": false,
-              "report": false,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -2954,7 +2954,7 @@
               "delay": 0.0,
               "eff": 0.0,
               "plot": false,
-              "report": false,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -2968,7 +2968,7 @@
               "delay": 0.0,
               "eff": 0.0,
               "plot": false,
-              "report": false,
+              "report": true,
               "recov": 0.0,
               "cap-max-do": 0.0,
               "cap-max-up": 0.0
@@ -4037,6 +4037,9 @@
     },
     "CO2 budget": {
       "value": Infinity
+    },
+    "Cost budget": {
+      "value": 3000000
     },
     "Weight": {
       "value": 10
