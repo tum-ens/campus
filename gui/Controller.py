@@ -307,7 +307,7 @@ class Controller():
         return self._resModel.GetGlobalParams()
 
     def GetScenarios(self):
-        return sorted(config.DataConfig.SCENARIOS.keys())
+        return sorted(config.DataConfig.GetScenarios(None).keys())
 
     def AddScenario(self, scName):
         self._resModel.AddScenario(scName)
@@ -462,8 +462,9 @@ class Controller():
                     urbs.COLORS[p['Name']] = color.Get(False)
 
         #  select scenarios to be run
+        data = self._resModel.GetDataFrames()
         scenarios = []
-        for k, v in config.DataConfig.SCENARIOS.items():
+        for k, v in config.DataConfig.GetScenarios(data).items():
             if k in self._resModel._scenarios:
                 scenarios.append(v)
 
@@ -471,7 +472,7 @@ class Controller():
         for scenario in scenarios:
             # print(scenario)
             urbs.run_scenario(
-                self._resModel.GetDataFrames(),
+                data,
                 Solver,
                 timesteps,
                 scenario,

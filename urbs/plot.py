@@ -101,8 +101,6 @@ def plot(prob, stf, com, sit, dt, timesteps, timesteps_plot,
     (created, consumed, stored, imported, exported,
      dsm) = get_timeseries(prob, stf, com, sit, timesteps)
 
-    costs, cpro, ctra, csto = get_constants(prob)
-
     # move retrieved/stored storage timeseries to created/consumed and
     # rename storage columns back to 'storage' for color mapping
     created = created.join(stored['Retrieved'])
@@ -119,6 +117,7 @@ def plot(prob, stf, com, sit, dt, timesteps, timesteps_plot,
 
     # move demand to its own plot
     demand = consumed.pop('Demand')
+    # if DSM mode was activated
     original = dsm.pop('Unshifted')
     deltademand = dsm.pop('Delta')
     try:
@@ -126,7 +125,7 @@ def plot(prob, stf, com, sit, dt, timesteps, timesteps_plot,
         # if so, show DSM subplot (even if delta == 0 for the whole time)
         df_dsm = get_input(prob, 'dsm')
         plot_dsm = df_dsm.loc[(sit, com),
-                              ['cap-max-do', 'cap-max-up']].sum().sum() > 0
+                            ['cap-max-do', 'cap-max-up']].sum().sum() > 0
     except (KeyError, TypeError):
         plot_dsm = False
 
@@ -164,7 +163,7 @@ def plot(prob, stf, com, sit, dt, timesteps, timesteps_plot,
 
     # stack plot for consumed commodities (divided by dt for power)
     sp00 = ax0.stackplot(hoursteps[1:],
-                         -consumed.as_matrix().T/dt[0],
+                         -consumed.values.T/dt[0],
                          labels=tuple(consumed.columns),
                          linewidth=0.15)
     # color
@@ -178,7 +177,7 @@ def plot(prob, stf, com, sit, dt, timesteps, timesteps_plot,
 
     # stack plot for created commodities (divided by dt for power)
     sp0 = ax0.stackplot(hoursteps[1:],
-                        created.as_matrix().T/dt[0],
+                        created.values.T/dt[0],
                         labels=tuple(created.columns),
                         linewidth=0.15)
 
@@ -223,12 +222,12 @@ def plot(prob, stf, com, sit, dt, timesteps, timesteps_plot,
     plt.setp(ax0.get_xticklabels(), visible=False)
 
     # PLOT DEMAND
-
     # line plot for demand (unshifted) commodities (divided by dt for power)
     ax0.plot(hoursteps, original.values/dt[0], linewidth=0.8,
-             color=to_color('Unshifted'))
-
-    # line plot for demand (shifted) commodities (divided by dt for power)
+            color=to_color('Unshifted'))
+     
+    # line plot for demand (in case of DSM mode: shifted) commodities 
+    # (divided by dt for power)
     ax0.plot(hoursteps[1:], demand.values/dt[0], linewidth=1.0,
              color=to_color('Shifted'))
 
@@ -237,7 +236,11 @@ def plot(prob, stf, com, sit, dt, timesteps, timesteps_plot,
     all_axes.append(ax1)
 
     # stack plot for stored commodities
-    sp1 = ax1.stackplot(hoursteps, stored.values, linewidth=0.15)
+    try:
+        sp1 = ax1.stackplot(hoursteps, stored.values, linewidth=0.15)
+    except:
+        stored = pd.Series(0, index=hoursteps)
+        sp1 = ax1.stackplot(hoursteps, stored.values, linewidth=0.15)
     if plot_dsm:
         # hide xtick labels only if DSM plot follows
         plt.setp(ax1.get_xticklabels(), visible=False)
