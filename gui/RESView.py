@@ -15,6 +15,7 @@ Created on Mon Oct 29 19:03:07 2018
 import wx
 import wx.lib.ogl as ogl
 import RESShapes as res
+import DataConfig as cfg
 
 from pubsub import pub
 from Events import EVENTS
@@ -71,7 +72,8 @@ class RESView(wx.Panel):
         actionsLayout = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Actions:" ), wx.HORIZONTAL )
         tb = wx.ToolBar( actionsLayout.GetStaticBox(), -1 , style=wx.TB_HORIZONTAL|wx.TB_FLAT) 
         for key, val in self._actions.items():
-            img = wx.Image('./imgs/' + val['ImgPath'], wx.BITMAP_TYPE_ANY)
+            res_path = cfg.DataConfig.resource_path('imgs/' + val['ImgPath'])
+            img = wx.Image(res_path, wx.BITMAP_TYPE_ANY)
             #img = img.Scale(32, 32)
             tooltip = val['Name']
             if key%10 == 0:
