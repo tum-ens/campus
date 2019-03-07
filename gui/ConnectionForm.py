@@ -12,21 +12,21 @@ import GridDataTable as gdt
 import BasicForm as bf
 
 
-class ConnectionDialog ( bf.BasicForm ):
-    
+class ConnectionDialog (bf.BasicForm):
+
     _gridCols = config.DataConfig.CONNECTION_PARAMS
-    
+
     def __init__(self, parent):
         super().__init__(parent, "Connection data", wx.Size(500, 400), False)
-        
+
         self._gridTable = gdt.GridDataTable(self._gridCols)
         self._yearsGrid = wx.grid.Grid(self, -1)
         self._yearsGrid.SetTable(self._gridTable, True)
         for i in range(0, len(self._gridCols)):
-            self._yearsGrid.SetColSize(i, 150)        
-        #self._yearsGrid.AutoSizeColumns(False)
+            self._yearsGrid.SetColSize(i, 150)
+        # self._yearsGrid.AutoSizeColumns(False)
         super().SetContent(self._yearsGrid, wx.ALIGN_CENTER_HORIZONTAL)
-        
+
     def PopulateConnectionGrid(self, connection):
         self._conn = connection
         super().PopulateGrid(self._gridTable, connection['Years'])
