@@ -373,9 +373,13 @@ class DataConfig():
                      GRID_COL_DATATYPE: wx.grid.GRID_VALUE_STRING,
                      PARAM_DEFVALUE: 20}]
 # ----------------------------------------------------------------------------#
-    def GetScenarios(data):
-        SCENARIOS = {
-            'scenario_base': urbs.scenario_base(data),
-            'scenario_co2limit': urbs.scenario_co2_limit(data),
-        }
-        return SCENARIOS
+    SCENARIOS = {
+        'scenario_base': urbs.scenario_base,
+        'scenario_stock_prices': urbs.scenario_stock_prices,
+        'scenario_co2_limit': urbs.scenario_co2_limit,
+        'scenario_co2_tax_mid': urbs.scenario_co2_tax_mid,
+        'scenario_north_process_caps': urbs.scenario_north_process_caps,
+        'scenario_no_dsm': urbs.scenario_no_dsm,
+    }
+# ----------------------------------------------------------------------------#
+    RESULT_DIR = os.path.expanduser('~/Documents/urbs/result')
