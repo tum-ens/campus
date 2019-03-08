@@ -11,13 +11,13 @@ from .validation import *
 from .saveload import *
 
 
-def prepare_result_directory(result_name):
+def prepare_result_directory(result_name, base_path='result'):
     """ create a time stamped directory within the result folder """
     # timestamp for result directory
     now = datetime.now().strftime('%Y%m%dT%H%M')
 
     # create result directory if not existent
-    result_dir = os.path.join('result', '{}-{}'.format(result_name, now))
+    result_dir = os.path.join(base_path, '{}-{}'.format(result_name, now))
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
@@ -46,7 +46,7 @@ def setup_solver(optim, logfile='solver.log'):
     return optim
 
 
-def run_scenario(input_files, year, Solver, timesteps, scenario, result_dir, 
+def run_scenario(input_files, year, Solver, timesteps, scenario, result_dir,
                  dt, objective, plot_tuples=None,  plot_sites_name=None,
                  plot_periods=None, report_tuples=None,
                  report_sites_name=None):
@@ -70,16 +70,48 @@ def run_scenario(input_files, year, Solver, timesteps, scenario, result_dir,
 
     # start time measurement
     t_start = time.time()
-
-    # scenario name, read and modify data for scenario
-    sce = scenario.__name__
-    data = read_input(input_files,year)
-    data = scenario(data)
-    validate_input(data)
-
+    data = read_input(input_files, year)
     # measure time to read file
     t_read = time.time() - t_start
     print("Time to read file: %.2f sec" % t_read)
+
+    return run_scenario(data, Solver, timesteps, scenario, result_dir,
+                        dt, objective, plot_tuples, plot_sites_name,
+                        plot_periods, report_tuples,
+                        report_sites_name)
+
+
+def run_scenario(data, Solver, timesteps, scenario, result_dir, 
+                 dt, objective, plot_tuples=None,  plot_sites_name=None,
+                 plot_periods=None, report_tuples=None,
+                 report_sites_name=None, t_read=None):
+    """ run an urbs model for given input, time steps and scenario
+
+    Args:
+        data: the data frames
+        Solver: which solver to use
+        timesteps: a list of timesteps, e.g. range(0,8761)
+        scenario: a scenario function that modifies the input data dict
+        result_dir: directory name for result spreadsheet and plots
+        dt: length of each time step (unit: hours)
+        plot_tuples: (optional) list of plot tuples (c.f. urbs.result_figures)
+        plot_sites_name: (optional) dict of names for sites in plot_tuples
+        plot_periods: (optional) dict of plot periods(c.f. urbs.result_figures)
+        report_tuples: (optional) list of (sit, com) tuples (c.f. urbs.report)
+        report_sites_name: (optional) dict of names for sites in report_tuples
+
+    Returns:
+        the urbs model instance
+    """
+
+    # start time measurement
+    t_start = time.time()
+
+    # scenario name, read and modify data for scenario
+    sce = scenario.__name__
+    #data = read_input(input_files,year)
+    data = scenario(data)
+    # validate_input(data)    
 
     t = time.time()
     # create model

@@ -81,11 +81,19 @@ class GlobalsView():
         self._glGrid.SetColSize(0, 120)
         self._glGrid.SetRowLabelSize(150)
         self._glGrid.SetRowLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTER)
+
+        label = wx.StaticText(self._parent, -1,
+                              "Result directory: \n%s" %
+                              config.DataConfig.RESULT_DIR)
+        label.SetForegroundColour(wx.WHITE)
+        label.SetFont(wx.Font(11, wx.DECORATIVE, wx.NORMAL, wx.BOLD))
+
         headerBox = wx.StaticBox(
             self._parent, wx.ID_ANY, u"Manage Global Parameters:")
         headerBox.SetForegroundColour('white')
-        layout = wx.StaticBoxSizer(headerBox, wx.HORIZONTAL)
+        layout = wx.StaticBoxSizer(headerBox, wx.VERTICAL)
         layout.Add(self._glGrid, 1, wx.ALL | wx.EXPAND, 5)
+        layout.Add(label, 0, wx.ALL, 5)
         return layout
 
     def CreateScenariosLayout(self):
@@ -141,6 +149,7 @@ class GlobalsView():
             return
 
         self._logCtrl.Clear()
+        wx.Yield()
         dlg = wx.ProgressDialog("Run",
                                 "Please wait, this could take few minutes...",
                                 maximum=10,
