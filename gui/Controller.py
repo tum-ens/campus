@@ -16,6 +16,7 @@ import DataConfig as config
 import Errors as ERR
 import copy as cpy
 import json
+import time
 import urbs
 import wx
 
@@ -408,7 +409,8 @@ class Controller():
 
         result_name = 'Campus'
         result_dir = urbs.prepare_result_directory(
-            result_name)  # name + time stamp
+            result_name,
+            config.DataConfig.RESULT_DIR)  # name + time stamp
 
         #  copy input file to result directory
         #  shutil.copyfile(input_file, os.path.join(result_dir, input_file))
@@ -462,6 +464,12 @@ class Controller():
                     urbs.COLORS[p['Name']] = color.Get(False)
 
         #  select scenarios to be run
+        t_start = time.time()
+        data = self._resModel.GetDataFrames()
+        t_read = time.time() - t_start
+        print("Time to build data frames: %.2f sec" % t_read)
+        wx.Yield()
+
         scenarios = []
         for k, v in config.DataConfig.SCENARIOS.items():
             if k in self._resModel._scenarios:
@@ -471,7 +479,7 @@ class Controller():
         for scenario in scenarios:
             # print(scenario)
             urbs.run_scenario(
-                self._resModel.GetDataFrames(),
+                data,
                 Solver,
                 timesteps,
                 scenario,
@@ -482,4 +490,5 @@ class Controller():
                 plot_sites_name=plot_sites_name,
                 plot_periods=plot_periods,
                 report_tuples=report_tuples,
-                report_sites_name=report_sites_name)
+                report_sites_name=report_sites_name,
+                t_read=t_read)

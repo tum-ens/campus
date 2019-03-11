@@ -95,8 +95,8 @@ def get_timeseries(instance, stf, com, sites, timesteps=None):
         # select relevant timesteps (=rows)
         # select commodity (xs), then the sites from remaining simple columns
         # and sum all together to form a Series
-        demand = (get_input(instance, 'demand').loc[stf].loc[timesteps].
-                  xs(com, axis=1, level=1)[sites].sum(axis=1))
+        demand = (pd.DataFrame.from_dict(get_input(instance, 'demand_dict')).loc[stf]
+                  .loc[timesteps].xs(com, axis=1, level=1)[sites].sum(axis=1))
     except KeyError:
         demand = pd.Series(0, index=timesteps)
     demand.name = 'Demand'
@@ -134,37 +134,41 @@ def get_timeseries(instance, stf, com, sites, timesteps=None):
                    .xs(stf, level='support_timeframe').index.difference(sites))
 
     # if commodity is transportable
-    df_transmission = get_input(instance, 'transmission')
-    if com in set(df_transmission.index.get_level_values('Commodity')):
-        imported = get_entity(instance, 'e_tra_out')
-        imported = imported.loc[timesteps].xs([stf, com], level=['stf', 'com'])
-        imported = imported.unstack(level='tra').sum(axis=1)
-        imported = imported.unstack(level='sit_')[sites].fillna(0).sum(axis=1)
-        imported = imported.unstack(level='sit')
+    try:
+        df_transmission = get_input(instance, 'transmission')
+        if com in set(df_transmission.index.get_level_values('Commodity')):
+            imported = get_entity(instance, 'e_tra_out')
+            imported = imported.loc[timesteps].xs([stf, com], level=['stf', 'com'])
+            imported = imported.unstack(level='tra').sum(axis=1)
+            imported = imported.unstack(level='sit_')[sites].fillna(0).sum(axis=1)
+            imported = imported.unstack(level='sit')
 
-        internal_import = imported[sites].sum(axis=1)  # ...from sites
-        imported = imported[other_sites]  # ...from other_sites
-        imported = drop_all_zero_columns(imported)
+            internal_import = imported[sites].sum(axis=1)  # ...from sites
+            imported = imported[other_sites]  # ...from other_sites
+            imported = drop_all_zero_columns(imported)
 
-        exported = get_entity(instance, 'e_tra_in')
-        exported = exported.loc[timesteps].xs([stf, com], level=['stf', 'com'])
-        exported = exported.unstack(level='tra').sum(axis=1)
-        exported = exported.unstack(level='sit')[sites].fillna(0).sum(axis=1)
-        exported = exported.unstack(level='sit_')
+            exported = get_entity(instance, 'e_tra_in')
+            exported = exported.loc[timesteps].xs([stf, com], level=['stf', 'com'])
+            exported = exported.unstack(level='tra').sum(axis=1)
+            exported = exported.unstack(level='sit')[sites].fillna(0).sum(axis=1)
+            exported = exported.unstack(level='sit_')
 
-        internal_export = exported[sites].sum(axis=1)  # ...to sites (internal)
-        exported = exported[other_sites]  # ...to other_sites
-        exported = drop_all_zero_columns(exported)
-    else:
-        imported = pd.DataFrame(index=timesteps)
-        exported = pd.DataFrame(index=timesteps)
-        internal_export = pd.Series(0, index=timesteps)
-        internal_import = pd.Series(0, index=timesteps)
+            internal_export = exported[sites].sum(axis=1)  # ...to sites (internal)
+            exported = exported[other_sites]  # ...to other_sites
+            exported = drop_all_zero_columns(exported)
+        else:
+            imported = pd.DataFrame(index=timesteps)
+            exported = pd.DataFrame(index=timesteps)
+            internal_export = pd.Series(0, index=timesteps)
+            internal_import = pd.Series(0, index=timesteps)
 
-    # to be discussed: increase demand by internal transmission losses
-    internal_transmission_losses = internal_export - internal_import
-    demand = demand + internal_transmission_losses
-
+        # to be discussed: increase demand by internal transmission losses
+        internal_transmission_losses = internal_export - internal_import
+        demand = demand + internal_transmission_losses
+    except KeyError:
+        # imported and exported are empty
+        imported = exported = pd.DataFrame(index=timesteps)
+    
     # STORAGE
     # group storage energies by commodity
     # select all entries with desired commodity co
@@ -176,7 +180,7 @@ def get_timeseries(instance, stf, com, sites, timesteps=None):
         stored.columns = ['Level', 'Stored', 'Retrieved']
     except (KeyError, ValueError):
         stored = pd.DataFrame(0, index=timesteps,
-                              columns=['Level', 'Stored', 'Retrieved'])
+                            columns=['Level', 'Stored', 'Retrieved'])
 
     # DEMAND SIDE MANAGEMENT (load shifting)
     dsmup = get_entity(instance, 'dsm_up')

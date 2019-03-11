@@ -375,7 +375,11 @@ class DataConfig():
 # ----------------------------------------------------------------------------#
     SCENARIOS = {
         'scenario_base': urbs.scenario_base,
-        'scenario_co2limit': urbs.sc_CO2limit(2020, 40000),
-        'scenario_oneProProp': urbs.sc_1proprop(
-            2020, 'Campus', 'PV S 30°', 'inv-cost', 600000)
+        'scenario_stock_prices': urbs.scenario_stock_prices,
+        'scenario_co2_limit': urbs.scenario_co2_limit,
+        'scenario_co2_tax_mid': urbs.scenario_co2_tax_mid,
+        'scenario_north_process_caps': urbs.scenario_north_process_caps,
+        'scenario_no_dsm': urbs.scenario_no_dsm,
     }
+# ----------------------------------------------------------------------------#
+    RESULT_DIR = os.path.expanduser('~/Documents/urbs/result')
