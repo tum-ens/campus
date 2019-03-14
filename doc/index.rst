@@ -28,7 +28,9 @@ User's manual
 
 These documents give a general overview and help you getting started from after
 the installation (which is covered in the `README.md`_ file on GitHub) to you
-first running model.
+first running model. They are split into two parts where the part 'Users guide'
+is for the standard way of providing an input, while 'Users guide GUI' explains
+the input generation with a graphical user interface. 
 
 .. toctree::
    :maxdepth: 1
@@ -57,6 +59,18 @@ implementation.
    
    implementation
    api
+
+Graphical user interface
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is possible to make the inputs in urbs with a stand alone graphical user
+interface. The interface itself as well as the module description are provided
+here.
+
+.. toctree::
+   :maxdepth: 1
+   
+   gui
 
 
 Features
