@@ -7,4 +7,4 @@ This is the entry point for our application, it is mainly:
     * The controller internally will instantiate the necessary model(s) and the main view.
 3. Start the event loop.
 
-.. literalinclude:: ../../gui/gui.py
+.. code-block:: ../../gui/gui.py
