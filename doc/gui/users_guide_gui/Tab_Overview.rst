@@ -130,6 +130,13 @@ listed already and can be chosen by checking the boxes next to their names.
     :width: 20%
     :align: center
 
+Adding a new scenario is currently not a simple task and more for expert users.
+To do so you have to do 2 things.
+
+1. Define a new scenario function in script 'urbs/scenarios'
+2. Make the function available for the GUI by adding it to the scenario list in
+   the end of file 'gui/Controller.py'.
+
 Model running and supervision
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The lower right hand part of the screen is dedicated to model running and
