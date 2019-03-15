@@ -261,7 +261,7 @@ Storages
 Storages are used by the system to store a single given commodity. In general
 the storage capacity and charging/discharging power can be sized independently
 by the system. The parameter input window that opens when double clicking on
-the rectangle with rounded edges representing an existing process or clicking
+the rectangle with rounded edges representing an existing storage or clicking
 the rightmost symbol in the RES header (battery) for a new storage looks like
 this:
 
