@@ -475,10 +475,13 @@ class Controller():
             if k in self._resModel._scenarios:
                 scenarios.append(v)
 
+        # save config file
+        self.OnSaveConfig(result_dir + "/config.json")
+
         # print(scenarios)
         for scenario in scenarios:
             # print(scenario)
-            urbs.run_scenario(
+            urbs.run_scenario_df(
                 data,
                 Solver,
                 timesteps,
@@ -490,5 +493,4 @@ class Controller():
                 plot_sites_name=plot_sites_name,
                 plot_periods=plot_periods,
                 report_tuples=report_tuples,
-                report_sites_name=report_sites_name,
-                t_read=t_read)
+                report_sites_name=report_sites_name)
