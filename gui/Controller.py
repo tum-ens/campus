@@ -407,7 +407,7 @@ class Controller():
 
     def Run(self):
 
-        result_name = 'Campus'
+        result_name = self._resModel.GetResultName()
         result_dir = urbs.prepare_result_directory(
             result_name,
             config.DataConfig.RESULT_DIR)  # name + time stamp

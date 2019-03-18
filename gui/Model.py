@@ -671,3 +671,7 @@ class RESModel():
             pp[k] = range(v['offset'], v['offset'] + v['length'])
 
         return pp
+# ----------------------------------------------------------------------------#
+
+    def GetResultName(self):
+        return self._gl['RsltName']['value']

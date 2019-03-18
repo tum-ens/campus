@@ -85,7 +85,11 @@ class DataConfig():
                      {PARAM_KEY: 'DT',
                       GRID_ROW_LABEL: 'Time step (in hours)',
                       GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING,
-                      PARAM_DEFVALUE: 1}]
+                      PARAM_DEFVALUE: 1},
+                     {PARAM_KEY: 'RsltName',
+                      GRID_ROW_LABEL: 'Result Name',
+                      GRID_ROW_DATATYPE: wx.grid.GRID_VALUE_STRING,
+                      PARAM_DEFVALUE: 'Campus'}]
 
     GLOBAL_COLS = [
         {PARAM_KEY: 'value',
