@@ -11,4 +11,6 @@ data yet you can just ignore it by clicking ok. The example configuration is
 already executable. You can run it clicking the play button.
 
 To understand what to look for and how to prepare your own model input with the
-GUI, proceed with the :ref:`tutorial_gui`.    
+GUI, proceed with the Tutorial for graphical user interface in the online
+documentation
+https://urbs.readthedocs.io/en/latest/ .
