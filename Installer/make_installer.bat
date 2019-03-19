@@ -14,6 +14,9 @@ XCOPY ..\gui\imgs\*.png /S /Y dist\urbs_gui\imgs
 echo Copy help
 mkdir dist\urbs_gui\help
 XCOPY ..\gui\help\*.* /S /Y dist\urbs_gui\help
+echo Copy samples
+mkdir dist\urbs_gui\samples
+XCOPY ..\*.json /Y dist\urbs_gui\samples
 echo Copy solvers
 XCOPY solvers\glpk\*.* /S /Y dist\urbs_gui
 echo Copy extra dlls

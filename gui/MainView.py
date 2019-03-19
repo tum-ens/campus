@@ -83,7 +83,7 @@ class MainView (wx.Frame):
 
     def OnOpen(self, event):
         # Create open file dialog
-        openFileDialog = wx.FileDialog(self, "Open", "", "",
+        openFileDialog = wx.FileDialog(self, "Open", "./samples", "",
                                        "urbs files (*.json)|*.json",
                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         openFileDialog.ShowModal()
@@ -95,7 +95,7 @@ class MainView (wx.Frame):
                 pub.sendMessage(EVENTS.LOAD_CONFIG, filename=fn)
 
     def OnSave(self, event):
-        openFileDialog = wx.FileDialog(self, "Save", "", "",
+        openFileDialog = wx.FileDialog(self, "Save", "./samples", "",
                                        "urbs files (*.json)|*.json",
                                        wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         openFileDialog.ShowModal()
